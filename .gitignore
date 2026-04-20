@@ -1,0 +1,32 @@
+# Dependencias
+node_modules/
+/back/node_modules/
+/front/node_modules/
+
+# Entornos virtuales / Variables de entorno
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Builds
+/back/dist/
+/front/dist/
+/front/build/
+
+# Logs y SO
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+.vscode/
+
+# Base de datos (asegurarnos de no subir la base en local si usamos sqlite)
+*.db
+*.sqlite
+*.sqlite3
+
+# uploads 
+/back/uploads/

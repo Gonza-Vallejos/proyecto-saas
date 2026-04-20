@@ -1,0 +1,204 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // Recuerda encriptar siempre en Back
+  name      String?  // Nombre real del usuario (ej: Raúl Ivanes)
+  role      String   @default("CUSTOMER") // SUPERADMIN, STORE_ADMIN, CUSTOMER
+  
+  // Relaciones
+  storeId   String?  // Opcional porque un superadmin no pertenece a 'una' tienda
+  store     Store?   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  orders    Order[]  // Relación con los pedidos tomados (si es mozo)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Store {
+  id           String   @id @default(uuid())
+  name         String
+  slug         String   @unique // URL de la tienda: miapp.com/store/slug
+  description  String?
+  primaryColor   String   @default("#0ea5e9") // Color principal de la marca
+  secondaryColor String   @default("#6366f1") // Color secundario
+  bgColor        String   @default("#F8F9FA") // Color de fondo (Surface)
+  textColor      String   @default("#1e293b") // Color de texto principal
+  iconColor      String   @default("#64748b") // Color de iconos generales
+  fontFamily     String   @default("Inter")   // Fuente por defecto
+  cardStyle      String   @default("classic") // Estilo de las cards: classic, modern, horizontal
+  heroStyle      String   @default("curve")   // Estilo de la cabecera: rect, curve
+  businessType   String   @default("retail")  // Kiosco, Cafetería, etc. (Privado para SuperAdmin)
+  hasStockControl Boolean @default(false)     // Habilita el módulo de inventario
+  hasPayments     Boolean @default(false)     // Habilita el módulo de pagos
+  hasCart         Boolean @default(false)     // Módulo: Carrito de compras
+  isCatalogOnly   Boolean @default(false)     // Módulo: Solo catálogo (sin venta)
+  hasModifiers    Boolean @default(false)     // Módulo: Personalización (extras/aderezos)
+  showObservations Boolean @default(false)    // Módulo: Observaciones en pedido
+  hasConnectivity Boolean @default(false)     // Módulo: WiFi y Conectividad
+  hasOrderManagement Boolean @default(false)  // Módulo: Gestión de Mesas y Pedidos
+  wifiSSID       String?                      // Nombre de la red WiFi
+  wifiPassword   String?                      // Contraseña de la red WiFi
+  logoUrl        String?                      // Opcional
+  heroImageUrl   String?                      // Fondo de pantalla (Hero image)
+  
+  // Contacto y Redes
+  phone        String?
+  instagram    String?
+  facebook     String?
+  whatsapp     String?
+  address      String?
+  businessHours String? // Almacena JSON con horarios semanales
+
+  // Relaciones
+  users        User[]
+  products     Product[]
+  categories   Category[]
+  modifierGroups ModifierGroup[]
+  tables       Table[]
+  orders       Order[]
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String
+  slug      String
+  
+  // Relacion con la tienda
+  storeId   String
+  store     Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  // Relacion con productos
+  products  Product[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([storeId, slug]) // El slug debe ser único POR TIENDA
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  imageUrl    String?
+  trackStock  Boolean  @default(false)    // Indica si este producto puntual controla stock
+  stock       Int      @default(0)        // Cantidad disponible
+  
+  // Relacion con categoria
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+
+  // Relacion con modificadores
+  modifierGroups ProductModifierGroup[]
+
+  // Relacion - Aislamiento del data por tienda
+  storeId     String
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  // Relación con ítems de pedido
+  orderItems  OrderItem[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ModifierGroup {
+  id          String   @id @default(uuid())
+  name        String   // Ej: "Elegí tu salsa", "Extras"
+  minSelected Int      @default(0)
+  maxSelected Int      @default(1)
+  isRequired  Boolean  @default(false)
+
+  // Relaciones
+  storeId     String
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  options     ModifierOption[]
+  products    ProductModifierGroup[]
+
+  createdAt   DateTime @default(now())
+}
+
+model ModifierOption {
+  id              String   @id @default(uuid())
+  name            String   // Ej: "Mayonesa", "Extra Queso"
+  price           Float    @default(0) // Costo adicional si aplica
+  
+  modifierGroupId String
+  modifierGroup   ModifierGroup @relation(fields: [modifierGroupId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+}
+
+// Tabla pivot para muchos a muchos entre productos y grupos de modificadores
+model ProductModifierGroup {
+  productId       String
+  modifierGroupId String
+
+  product         Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  modifierGroup   ModifierGroup @relation(fields: [modifierGroupId], references: [id], onDelete: Cascade)
+
+  @@id([productId, modifierGroupId])
+}
+
+model Table {
+  id        String   @id @default(uuid())
+  number    String   // Ej: "Mesa 1", "Barra", "VIP"
+  capacity  Int      @default(2)
+  isActive  Boolean  @default(true)
+  
+  // Relaciones
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  orders    Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id           String      @id @default(uuid())
+  status       String      @default("PENDING") // PENDING, PREPARING, READY, DELIVERED, PAID, CANCELLED
+  total        Float       @default(0)
+  observations String?
+  
+  // Relaciones
+  tableId      String?
+  table        Table?      @relation(fields: [tableId], references: [id])
+  waiterId     String?     // Usuario que tomó el pedido
+  waiter       User?       @relation(fields: [waiterId], references: [id])
+  storeId      String
+  store        Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  items        OrderItem[]
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model OrderItem {
+  id              String   @id @default(uuid())
+  productId       String
+  product         Product  @relation(fields: [productId], references: [id])
+  quantity        Int
+  priceAtTime     Float    // Precio al momento de la compra
+  observations    String?
+  selectedModifiers String? // Almacena JSON con los modificadores elegidos
+  
+  // Relaciones
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+}
