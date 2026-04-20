@@ -118,7 +118,7 @@ interface Store {
   categories: Category[];
 }
 
-const BASE_URL = 'http://192.168.100.26:3000';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 // Icon components replaced by PNG assets in Catalog.tsx
 

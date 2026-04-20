@@ -101,14 +101,14 @@ export default function QRGenerator() {
   if (!store) return <Text color="red">No se encontró información de tienda.</Text>;
 
   // Usamos la IP local en lugar de localhost para que el QR funcione al escanearlo con el celular
-  const domain = window.location.hostname === 'localhost' ? 'http://192.168.100.26:5173' : window.location.origin;
+  const domain = window.location.origin;
   const storeUrl = `${domain}/s/${store.slug}`;
 
   // Fix URL for the logo if it's relative
   const fixUrl = (url?: string) => {
     if (!url) return undefined;
     if (url.startsWith('http')) return url;
-    return `http://192.168.100.26:3000${url.startsWith('/') ? '' : '/'}${url}`;
+    return `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
   const qrLogoUrl = fixUrl(store.logoUrl);

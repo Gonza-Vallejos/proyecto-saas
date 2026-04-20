@@ -40,7 +40,7 @@ export default function FileUploader({ label, onUploadSuccess, defaultValue }: F
 
     try {
       // Usar la lógica de la API centralizada o al menos la misma URL base
-      const API_URL = 'http://192.168.100.26:3000';
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       const res = await fetch(`${API_URL}/uploads`, {
         method: 'POST',
         headers: {

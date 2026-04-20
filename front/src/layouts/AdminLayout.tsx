@@ -39,7 +39,7 @@ export default function AdminLayout() {
 
   const fetchProfile = async (token: string) => {
     try {
-      const res = await fetch('http://192.168.100.26:3000/auth/profile', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/auth/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -59,7 +59,7 @@ export default function AdminLayout() {
 
   const fetchStoreInfo = async (token: string) => {
     try {
-      const res = await fetch('http://192.168.100.26:3000/stores/my-store', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/stores/my-store`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
