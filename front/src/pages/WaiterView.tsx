@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Title, Text, Card, Group, Stack, Button, SimpleGrid, Badge, Box, ActionIcon, Modal, NumberInput, Divider, ScrollArea, Paper, Center, Loader, TextInput, SegmentedControl } from '@mantine/core';
-import { ShoppingCart, Utensils, Trash2, ArrowLeft, Send, CheckCircle2, User, LogOut, Package, Plus, MessageSquare, RefreshCw } from 'lucide-react';
+import { Title, Text, Card, Group, Stack, Button, SimpleGrid, Badge, Box, ActionIcon, Modal, Divider, ScrollArea, Paper, Center, Loader, TextInput, SegmentedControl } from '@mantine/core';
+import { ShoppingCart, Utensils, Trash2, ArrowLeft, Send, User, LogOut, Package, Plus, MessageSquare, RefreshCw } from 'lucide-react';
 import { api } from '../utils/api';
 import Swal from 'sweetalert2';
 import { socket } from '../utils/socket';
@@ -177,7 +177,7 @@ export default function WaiterView() {
     navigate('/login');
   };
 
-  const fetchMyOrders = useCallback(async (silent = false) => {
+  const fetchMyOrders = useCallback(async () => {
     try {
       const data = await api.get('/orders');
       // Filtramos por el mozo actual si tenemos sus datos (simplificado: mostramos activos de la tienda)
@@ -219,7 +219,7 @@ export default function WaiterView() {
       socket.emit('joinStore', store.id);
 
       const handleUpdate = () => {
-        fetchMyOrders(true);
+        fetchMyOrders();
       };
 
       socket.on('ordersUpdated', handleUpdate);
