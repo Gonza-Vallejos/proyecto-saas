@@ -249,7 +249,7 @@ export default function QRGenerator() {
                     </Stack>
                   </Box>
                 ) : (
-                  <Text size="xs" color="dimmed" ta="center" italic>Ingresa el nombre y la contraseña de tu red para generar el QR de conexión.</Text>
+                  <Text size="xs" color="dimmed" ta="center" fs="italic">Ingresa el nombre y la contraseña de tu red para generar el QR de conexión.</Text>
                 )}
               </Stack>
             </Card>

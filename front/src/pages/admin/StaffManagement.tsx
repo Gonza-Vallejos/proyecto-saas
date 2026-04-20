@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Title, Text, Button, Card, Group, Stack, Table, ActionIcon, Tooltip, Modal, TextInput, PasswordInput, Select, Badge, Box, SimpleGrid, Paper } from '@mantine/core';
-import { Plus, Trash2, UserCog, User, ShieldCheck } from 'lucide-react';
+import { Plus, Trash2, User, ShieldCheck } from 'lucide-react';
 import { api } from '../../utils/api';
 import Swal from 'sweetalert2';
 
