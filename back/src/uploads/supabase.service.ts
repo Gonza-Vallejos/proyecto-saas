@@ -6,8 +6,8 @@ export class SupabaseService {
   private supabase;
 
   constructor() {
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_KEY;
+    const supabaseUrl = process.env.SUPABASE_URL || '';
+    const supabaseKey = process.env.SUPABASE_KEY || '';
 
     if (!supabaseUrl || !supabaseKey) {
       console.error('❌ Supabase URL o Key no encontradas en el .env');
