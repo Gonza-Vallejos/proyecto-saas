@@ -17,7 +17,7 @@ export default function NotFound() {
         <Box style={{ textAlign: 'center', position: 'relative' }}>
           <Title 
             style={{ 
-              fontSize: '150px', 
+              fontSize: 'min(150px, 20vw)', 
               fontWeight: 900, 
               lineHeight: 1, 
               marginBottom: '-30px', 
@@ -27,7 +27,7 @@ export default function NotFound() {
           >
             404
           </Title>
-          <Title order={1} size="h1" style={{ fontSize: '2.5rem' }}>Página no encontrada</Title>
+          <Title order={1} size="h1" style={{ fontSize: 'min(2.5rem, 8vw)' }}>Página no encontrada</Title>
         </Box>
 
         <Text color="dimmed" size="lg" ta="center" maw={500}>

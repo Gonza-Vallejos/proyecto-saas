@@ -15,6 +15,7 @@ import { TablesModule } from './tables/tables.module';
 import { OrdersModule } from './orders/orders.module';
 import { UsersModule } from './users/users.module';
 import { UploadsController } from './uploads/uploads.controller';
+import { SupabaseService } from './uploads/supabase.service';
 import { EventsModule } from './events/events.module';
 
 @Module({
@@ -43,6 +44,7 @@ import { EventsModule } from './events/events.module';
   controllers: [AppController, UploadsController],
   providers: [
     AppService,
+    SupabaseService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

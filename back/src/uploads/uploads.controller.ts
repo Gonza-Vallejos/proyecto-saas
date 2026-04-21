@@ -1,23 +1,17 @@
-import { Controller, Post, UseInterceptors, UploadedFile, BadRequestException, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, UseInterceptors, UploadedFile, BadRequestException, UseGuards } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { memoryStorage } from 'multer';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { SupabaseService } from './supabase.service';
 
 @Controller('uploads')
 export class UploadsController {
+  constructor(private readonly supabaseService: SupabaseService) {}
   
   @Post()
-  @UseGuards(JwtAuthGuard) // Solo usuarios autenticados pueden subir archivos
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: './uploads',
-      filename: (req, file, callback) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        const ext = extname(file.originalname);
-        callback(null, `${uniqueSuffix}${ext}`);
-      },
-    }),
+    storage: memoryStorage(),
     fileFilter: (req, file, callback) => {
       if (!file.mimetype.match(/\/(jpg|jpeg|png|webp|gif)$/)) {
         return callback(new BadRequestException('Solo se permiten archivos de imagen (jpg, png, webp, gif)'), false);
@@ -28,16 +22,14 @@ export class UploadsController {
       fileSize: 5 * 1024 * 1024, // 5MB limit
     },
   }))
-  uploadFile(@UploadedFile() file: any, @Request() req: any) {
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('No se ha proporcionado ningún archivo');
     }
     
-    // Devolvemos la URL pública del archivo
-    // En un entorno real esto debería venir de una variable de entorno
-    const host = req.get('host');
-    // Forzamos http para evitar problemas de detección de protocolo en red local
-    const url = `http://${host}/uploads/${file.filename}`;
+    // Subir a Supabase Storage y obtener la URL pública
+    const url = await this.supabaseService.uploadImage(file);
+    
     return { url };
   }
 }

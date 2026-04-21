@@ -51,13 +51,13 @@ export default function Login() {
     }}>
       <div style={{
         background: 'white',
-        padding: '3rem',
+        padding: 'clamp(1.5rem, 5vw, 3rem)',
         borderRadius: '16px',
         boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
-        width: '100%',
+        width: '90%',
         maxWidth: '400px',
       }}>
-        <h2 style={{ textAlign: 'center', fontSize: '1.8rem', marginBottom: '2rem', color: '#0f172a' }}>
+        <h2 style={{ textAlign: 'center', fontSize: 'clamp(1.5rem, 5vw, 1.8rem)', marginBottom: '2rem', color: '#0f172a' }}>
           Portal Administrativo
         </h2>
         

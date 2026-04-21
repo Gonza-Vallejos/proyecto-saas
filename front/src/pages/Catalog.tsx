@@ -342,7 +342,7 @@ export default function Catalog() {
     <Center style={{ height: '100vh', background: '#fff' }}>
       <Stack align="center" gap="xl">
         <Box style={{ textAlign: 'center' }}>
-            <Title order={1} size={80} style={{ opacity: 0.1, marginBottom: '-40px' }}>404</Title>
+            <Title order={1} size={isMobile ? 40 : 80} style={{ opacity: 0.1, marginBottom: '-40px' }}>404</Title>
             <Title order={2}>Tienda no encontrada</Title>
         </Box>
         <Text color="dimmed" maw={400} ta="center">Lo sentimos, pero el catálogo que buscas no está disponible en este momento.</Text>
@@ -461,10 +461,10 @@ export default function Catalog() {
       {/* Stunning Hero Section */}
       <Box style={{ 
         position: 'relative', 
-        height: isMobile ? '350px' : '500px', 
+        height: isMobile ? '300px' : '450px', 
         display: 'flex', 
         alignItems: 'center', 
-        paddingTop: isMobile ? '60px' : '76px',
+        paddingTop: isMobile ? '40px' : '76px',
         background: store.heroImageUrl 
           ? `linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%)` 
           : '#f8fafc',
@@ -483,7 +483,7 @@ export default function Catalog() {
                     order={1} 
                     style={{ 
                       ...styles, 
-                      fontSize: isMobile ? '2.5rem' : '4rem', 
+                      fontSize: isMobile ? '2.2rem' : '4rem', 
                       fontWeight: 900, 
                       lineHeight: 1.1,
                       color: store.heroImageUrl ? 'white' : 'var(--text-color)'
@@ -563,7 +563,7 @@ export default function Catalog() {
                 </Title>
                 <SimpleGrid 
                   cols={store.cardStyle === 'horizontal' ? { base: 1, md: 2 } : { base: 1, sm: 2, lg: 3 }} 
-                  spacing="xl"
+                  spacing={isMobile ? "md" : "xl"}
                 >
                   {group.products.map((p) => (
                     <RenderProductCard 
@@ -1037,7 +1037,7 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart }: any
           <Button 
             fullWidth 
             radius="xl" 
-            size="md" 
+            size={isMobile ? "sm" : "md"} 
             color={isOut ? 'gray' : 'var(--primary-color)'}
             disabled={isOut}
             leftSection={isOut ? null : (hasCart ? <ShoppingCart size={18} /> : <Image src={WhatsAppPng} w={18} h={18} />)}
@@ -1238,7 +1238,7 @@ function ProductSelectionModal({ product, onClose, onAdd, isMobile, showObservat
         <Button 
           fullWidth 
           radius="xl" 
-          size="lg" 
+          size={isMobile ? "md" : "lg"} 
           disabled={!canConfirm()}
           onClick={handleAdd}
           mt="md"
