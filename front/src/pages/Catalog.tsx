@@ -304,6 +304,7 @@ export default function Catalog() {
     if (!store) return;
     const savedName = localStorage.getItem('siit_customer_name');
     if (!savedName && !customerName) {
+      setCartOpened(false); // Cerramos el carrito para que se vea bien el modal
       setShowNamePrompt(true);
       return;
     }
