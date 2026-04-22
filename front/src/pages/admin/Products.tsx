@@ -352,7 +352,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
             placeholder="Seleccionar..."
             data={categories.map((c: any) => ({ value: c.id, label: c.name }))} 
             value={categoryId} 
-            onChange={setCategoryId} 
+            onChange={(val) => setCategoryId(val)} 
             clearable 
             radius="md"
           />
@@ -376,7 +376,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
             placeholder="Seleccionar grupos"
             data={modifiers.map((m: any) => ({ value: m.id, label: m.name }))}
             value={modifierGroupIds}
-            onChange={setModifierGroupIds}
+            onChange={(val) => setModifierGroupIds(val)}
             searchable
             clearable
             radius="md"

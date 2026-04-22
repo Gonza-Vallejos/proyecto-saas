@@ -221,7 +221,7 @@ export default function TablesManager() {
             min={1}
             max={50}
             value={capacity}
-            onChange={setCapacity}
+            onChange={(val) => setCapacity(val)}
           />
           <Group justify="flex-end" mt="md">
             <Button variant="light" color="gray" onClick={() => setModalOpened(false)}>Cancelar</Button>
