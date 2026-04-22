@@ -178,16 +178,36 @@ export default function WhatsAppOrders() {
           )}
         </Group>
 
-        {order.status === 'PENDING' && (
-          <Button fullWidth color="blue" leftSection={<PlayCircle size={18} />} onClick={() => handleUpdateStatus(order.id, 'PREPARING')}>
-            Aceptar Pedido
-          </Button>
-        )}
-        {order.status === 'PREPARING' && (
-          <Button fullWidth color="green" leftSection={<CheckCircle2 size={18} />} onClick={() => handleUpdateStatus(order.id, 'READY')}>
-            Marcar como LISTO
-          </Button>
-        )}
+        <Stack gap="xs">
+          {order.status === 'PENDING' && (
+            <Group grow gap="xs">
+              <Button color="blue" leftSection={<PlayCircle size={18} />} onClick={() => handleUpdateStatus(order.id, 'PREPARING')}>
+                Aceptar
+              </Button>
+              <Button variant="light" color="red" onClick={async () => {
+                const result = await Swal.fire({
+                  title: '¿Rechazar pedido?',
+                  text: 'El pedido se cancelará y el stock será devuelto automáticamente.',
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonColor: '#ef4444',
+                  confirmButtonText: 'Sí, rechazar',
+                  cancelButtonText: 'No, volver'
+                });
+                if (result.isConfirmed) {
+                  handleUpdateStatus(order.id, 'CANCELLED');
+                }
+              }}>
+                Rechazar
+              </Button>
+            </Group>
+          )}
+          {order.status === 'PREPARING' && (
+            <Button fullWidth color="green" leftSection={<CheckCircle2 size={18} />} onClick={() => handleUpdateStatus(order.id, 'READY')}>
+              Marcar como LISTO
+            </Button>
+          )}
+        </Stack>
       </Box>
     </Card>
   );

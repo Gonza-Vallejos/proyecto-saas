@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Swal from 'sweetalert2';
 import { useParams } from 'react-router-dom';
 import { useMediaQuery } from '@mantine/hooks';
@@ -39,6 +39,7 @@ import {
   Paper,
   TextInput
 } from '@mantine/core';
+import { socket } from '../utils/socket';
 
 interface Category {
   id: string;
@@ -236,30 +237,54 @@ export default function Catalog() {
     }
   };
 
-  useEffect(() => {
-    fetch(`${BASE_URL}/stores/public/${slug}/catalog`)
-      .then(res => {
-        if (!res.ok) throw new Error('Tienda no encontrada');
-        return res.json();
-      })
-      .then((data: Store) => {
-        setStore(data);
-        // Cargar la fuente de Google Fonts dinámicamente
-        if (data.fontFamily && data.fontFamily !== 'Inter') {
-          const fontLink = document.createElement('link');
-          fontLink.href = `https://fonts.googleapis.com/css2?family=${data.fontFamily.replace(/\s/g, '+')}:wght@300;400;500;600;700;800;900&display=swap`;
-          fontLink.rel = 'stylesheet';
-          document.head.appendChild(fontLink);
-        }
-        // Inyectar fuente global en todo el DOM
-        document.body.style.fontFamily = `"${data.fontFamily || 'Inter'}", sans-serif`;
-        setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
-      });
+  const fetchCatalog = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
+    try {
+      const res = await fetch(`${BASE_URL}/stores/public/${slug}/catalog`);
+      if (!res.ok) throw new Error('Tienda no encontrada');
+      const data: Store = await res.json();
+      
+      setStore(data);
+      
+      // Cargar la fuente de Google Fonts dinámicamente
+      if (data.fontFamily && data.fontFamily !== 'Inter') {
+        const fontLink = document.createElement('link');
+        fontLink.href = `https://fonts.googleapis.com/css2?family=${data.fontFamily.replace(/\s/g, '+')}:wght@300;400;500;600;700;800;900&display=swap`;
+        fontLink.rel = 'stylesheet';
+        document.head.appendChild(fontLink);
+      }
+      // Inyectar fuente global en todo el DOM
+      document.body.style.fontFamily = `"${data.fontFamily || 'Inter'}", sans-serif`;
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }, [slug]);
+
+  useEffect(() => {
+    fetchCatalog();
+  }, [fetchCatalog]);
+
+  // Real-time updates via WebSocket
+  useEffect(() => {
+    if (store?.id) {
+      socket.connect();
+      socket.emit('joinStore', store.id);
+
+      const handleUpdate = () => {
+        // Refresco silencioso de stock y productos
+        fetchCatalog(true);
+      };
+
+      socket.on('ordersUpdated', handleUpdate);
+
+      return () => {
+        socket.off('ordersUpdated', handleUpdate);
+        socket.disconnect();
+      };
+    }
+  }, [store?.id, fetchCatalog]);
 
   const fixUrl = (url: string | null) => {
     if (!url) return null;

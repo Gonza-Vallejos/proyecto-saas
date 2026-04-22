@@ -25,42 +25,77 @@ export class OrdersService {
       };
     });
 
-    const order = await this.prisma.order.create({
-      data: {
-        storeId,
-        waiterId,
-        tableId,
-        observations,
-        customerName,
-        customerPhone,
-        origin: origin || 'TABLE',
-        total,
-        status: 'PENDING',
-        items: {
-          create: orderItems,
+    const result = await this.prisma.$transaction(async (tx) => {
+      // 1. Verificar stock si es pedido de WhatsApp
+      if (origin === 'WHATSAPP') {
+        for (const item of items) {
+          const product = await tx.product.findUnique({ where: { id: item.productId } });
+          if (product?.trackStock && product.stock < item.quantity) {
+            throw new BadRequestException(`Stock insuficiente para: ${product.name}. Disponible: ${product.stock}`);
+          }
+        }
+      }
+
+      // 2. Crear el pedido
+      const order = await tx.order.create({
+        data: {
+          storeId,
+          waiterId,
+          tableId,
+          observations,
+          customerName,
+          customerPhone,
+          origin: origin || 'TABLE',
+          total,
+          status: 'PENDING',
+          items: {
+            create: orderItems,
+          },
         },
-      },
-      include: {
-        items: true,
-        table: true,
-      },
+        include: {
+          items: true,
+          table: true,
+        },
+      });
+
+      // 3. Descontar stock inmediatamente si es WhatsApp
+      if (origin === 'WHATSAPP') {
+        for (const item of items) {
+          const product = await tx.product.findUnique({ where: { id: item.productId } });
+          if (product?.trackStock) {
+            await tx.product.update({
+              where: { id: item.productId },
+              data: { stock: { decrement: item.quantity } },
+            });
+          }
+        }
+      }
+
+      return order;
     });
 
     this.eventsGateway.notifyStoreOrdersUpdate(storeId);
-    return order;
+    return result;
   }
 
-  async findAllByStore(storeId: string, status?: string, origin?: string) {
+  async findAllByStore(storeId: string, status?: string, origin?: string, startDate?: string, endDate?: string) {
     const where: any = { storeId };
-    if (status) {
+    
+    if (status && status !== 'all') {
       where.status = status;
-    } else {
-      // Por defecto, traer pedidos no finalizados (no PAID/CANCELLED)
+    } else if (!status) {
+      // Por defecto (monitores), traer pedidos no finalizados
       where.status = { notIn: ['PAID', 'CANCELLED'] };
     }
 
     if (origin) {
       where.origin = origin;
+    }
+
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) where.createdAt.gte = new Date(startDate);
+      if (endDate) where.createdAt.lte = new Date(endDate);
     }
 
     return this.prisma.order.findMany({
@@ -97,17 +132,37 @@ export class OrdersService {
         include: { items: true, table: true },
       });
 
-      if (shouldDeductStock) {
+      if (shouldDeductStock && order.origin !== 'WHATSAPP') {
         for (const item of order.items) {
           if (item.product.trackStock) {
             await tx.product.update({
               where: { id: item.productId },
               data: {
-                stock: {
-                  decrement: item.quantity
-                }
+                stock: { decrement: item.quantity }
               }
             });
+          }
+        }
+      }
+
+      // Nueva Lógica: Reintegro de stock si se cancela un pedido que ya lo había descontado
+      const shouldRestoreStock = status === 'CANCELLED' && order.status !== 'CANCELLED';
+      if (shouldRestoreStock) {
+        // Se reintegra si:
+        // 1. Era WhatsApp (descontó al inicio)
+        // 2. Era Table pero ya estaba en estado READY (descontó al pasar a READY)
+        const wasAlreadyDeducted = order.origin === 'WHATSAPP' || order.status === 'READY';
+        
+        if (wasAlreadyDeducted) {
+          for (const item of order.items) {
+            if (item.product.trackStock) {
+              await tx.product.update({
+                where: { id: item.productId },
+                data: {
+                  stock: { increment: item.quantity }
+                }
+              });
+            }
           }
         }
       }
