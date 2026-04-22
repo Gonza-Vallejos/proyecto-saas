@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Plus, Trash2, Image as ImageIcon, Edit3, Boxes, AlertCircle } from 'lucide-react';
-import { Modal, Button, TextInput, NumberInput, Select, MultiSelect, Textarea, Group, ActionIcon, Tooltip, Switch, Badge, Text, Stack, Box, Title } from '@mantine/core';
+import { Plus, Trash2, Image as ImageIcon, Edit3, Boxes, AlertCircle, Search, Filter, X } from 'lucide-react';
+import { Modal, Button, TextInput, NumberInput, Select, MultiSelect, Textarea, Group, ActionIcon, Tooltip, Switch, Badge, Text, Stack, Box, Title, Card, Transition } from '@mantine/core';
 import FileUploader from '../../components/FileUploader';
 import { api } from '../../utils/api';
 import Swal from 'sweetalert2';
@@ -32,6 +31,17 @@ export default function Products() {
   // Modals
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+  // Filters
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<string | null>('all');
+
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          (p.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+    const matchesCategory = categoryFilter === 'all' || p.categoryId === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
 
   const fetchData = async () => {
     try {
@@ -105,19 +115,64 @@ export default function Products() {
 
   return (
     <div style={{ animation: 'fadeUp 0.5s ease-out' }}>
-      <Group justify="space-between" mb="2.5rem">
+      <Group justify="space-between" mb="2rem">
         <div>
-          <Title order={1}>Gestión de Productos</Title>
-          <Text color="dimmed" mt={4}>
+          <Title order={1} style={{ fontSize: '1.875rem', fontWeight: 800, color: '#1e293b' }}>Gestión de Productos</Title>
+          <Text color="dimmed" mt={4} size="sm">
             Administra tu catálogo {storeInfo?.hasStockControl ? 'con control de stock activo' : ''}.
           </Text>
         </div>
-        <Button leftSection={<Plus size={18} />} onClick={() => setShowAddForm(true)} size="md" radius="md">
+        <Button 
+          leftSection={<Plus size={18} />} 
+          onClick={() => setShowAddForm(true)} 
+          size="md" 
+          radius="md"
+          variant="filled"
+          color="blue"
+          style={{ boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)' }}
+        >
           Nuevo Producto
         </Button>
       </Group>
 
-      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+      <Card withBorder radius="md" p="md" mb="xl" style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(8px)' }}>
+        <Group align="flex-end" gap="md">
+          <TextInput
+            placeholder="Buscar por nombre o descripción..."
+            label="Buscar producto"
+            leftSection={<Search size={16} color="#94a3b8" />}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.currentTarget.value)}
+            style={{ flex: 1 }}
+            radius="md"
+            rightSection={searchQuery && (
+              <ActionIcon variant="transparent" onClick={() => setSearchQuery('')}>
+                <X size={14} color="#94a3b8" />
+              </ActionIcon>
+            )}
+          />
+          <Select
+            label="Categoría"
+            placeholder="Todas"
+            leftSection={<Filter size={16} color="#94a3b8" />}
+            data={[
+              { value: 'all', label: 'Todas las categorías' },
+              ...categories.map(c => ({ value: c.id, label: c.name }))
+            ]}
+            value={categoryFilter}
+            onChange={setCategoryFilter}
+            radius="md"
+            style={{ minWidth: '220px' }}
+          />
+          {(searchQuery || categoryFilter !== 'all') && (
+            <Button variant="light" color="gray" radius="md" onClick={() => { setSearchQuery(''); setCategoryFilter('all'); }}>
+              Limpiar
+            </Button>
+          )}
+        </Group>
+      </Card>
+
+      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
             <tr>
@@ -126,51 +181,66 @@ export default function Products() {
               {storeInfo?.hasStockControl && <th style={thStyle}>Stock</th>}
               <th style={thStyle}>Categoría</th>
               <th style={thStyle}>Precio</th>
-              <th style={{ ...thStyle, textAlign: 'center' }}>Acciones</th>
+              <th style={{ ...thStyle, textAlign: 'right' }}>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {products.map(p => (
-              <tr key={p.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                <td style={tdStyle}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: '#f8fafc', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #f1f5f9' }}>
-                    {p.imageUrl ? <img src={p.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <ImageIcon size={18} color="#94a3b8" />}
-                  </div>
-                </td>
-                <td style={tdStyle}>
-                  <Text fw={700}>{p.name}</Text>
-                </td>
-                {storeInfo?.hasStockControl && (
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map(p => (
+                <tr key={p.id} className="product-row" style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.2s' }}>
                   <td style={tdStyle}>
-                    {p.trackStock ? (
-                      <Badge 
-                        variant="light" 
-                        color={p.stock > 10 ? 'green' : p.stock > 0 ? 'orange' : 'red'}
-                        leftSection={p.stock > 0 ? <Boxes size={12} /> : <AlertCircle size={12} />}
-                      >
-                        {p.stock} Unid.
-                      </Badge>
-                    ) : (
-                      <Text size="xs" color="dimmed">Ilimitado</Text>
-                    )}
+                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#f1f5f9', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0' }}>
+                      {p.imageUrl ? <img src={p.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <ImageIcon size={20} color="#94a3b8" />}
+                    </div>
                   </td>
-                )}
-                <td style={tdStyle}>
-                  <Badge variant="outline" color="gray" radius="sm">{p.category?.name || 'Gral'}</Badge>
-                </td>
-                <td style={{ ...tdStyle, color: '#0ea5e9', fontWeight: 800 }}>${p.price.toFixed(2)}</td>
-                <td style={{ ...tdStyle, textAlign: 'center' }}>
-                  <Group justify="center" gap="xs">
-                    <Tooltip label="Editar">
-                      <ActionIcon variant="light" color="blue" onClick={() => setEditingProduct(p)}><Edit3 size={18} /></ActionIcon>
-                    </Tooltip>
-                    <Tooltip label="Borrar">
-                      <ActionIcon variant="light" color="red" onClick={() => handleDelete(p.id)}><Trash2 size={18} /></ActionIcon>
-                    </Tooltip>
-                  </Group>
+                  <td style={tdStyle}>
+                    <Stack gap={2}>
+                      <Text fw={700} size="sm" color="#1e293b">{p.name}</Text>
+                      {p.description && <Text size="xs" color="dimmed" lineClamp={1} style={{ maxWidth: '300px' }}>{p.description}</Text>}
+                    </Stack>
+                  </td>
+                  {storeInfo?.hasStockControl && (
+                    <td style={tdStyle}>
+                      {p.trackStock ? (
+                        <Badge 
+                          variant="dot" 
+                          color={p.stock > 10 ? 'green' : p.stock > 0 ? 'orange' : 'red'}
+                          size="md"
+                        >
+                          {p.stock} unidades
+                        </Badge>
+                      ) : (
+                        <Badge variant="dot" color="gray" size="md">Ilimitado</Badge>
+                      )}
+                    </td>
+                  )}
+                  <td style={tdStyle}>
+                    <Badge variant="light" color="blue" radius="md">{p.category?.name || 'Sin Categoría'}</Badge>
+                  </td>
+                  <td style={{ ...tdStyle, color: '#0f172a', fontWeight: 800, fontSize: '1rem' }}>${p.price.toFixed(2)}</td>
+                  <td style={{ ...tdStyle, textAlign: 'right' }}>
+                    <Group justify="flex-end" gap="xs">
+                      <Tooltip label="Editar">
+                        <ActionIcon variant="subtle" color="blue" radius="md" size="lg" onClick={() => setEditingProduct(p)}><Edit3 size={18} /></ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Eliminar">
+                        <ActionIcon variant="subtle" color="red" radius="md" size="lg" onClick={() => handleDelete(p.id)}><Trash2 size={18} /></ActionIcon>
+                      </Tooltip>
+                    </Group>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={6} style={{ padding: '4rem', textAlign: 'center' }}>
+                  <Stack align="center" gap="sm">
+                    <Boxes size={48} color="#cbd5e1" strokeWidth={1.5} />
+                    <Text fw={600} color="dimmed">No se encontraron productos</Text>
+                    <Text size="sm" color="dimmed">Prueba ajustando los filtros o creando uno nuevo.</Text>
+                  </Stack>
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
@@ -221,53 +291,124 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
   }, [product, opened]);
 
   return (
-    <Modal opened={opened} onClose={onClose} title={title} radius="md" size="lg">
-      <Stack gap="md">
-        <TextInput label="Nombre" value={name} onChange={e => setName(e.target.value)} required placeholder="Nombre del producto" />
+    <Modal 
+      opened={opened} 
+      onClose={onClose} 
+      title={<Text fw={800} size="xl">{title}</Text>} 
+      radius="lg" 
+      size="lg"
+      overlayProps={{
+        backgroundOpacity: 0.55,
+        blur: 3,
+      }}
+    >
+      <Stack gap="lg" p="xs">
+        <TextInput 
+          label="Nombre del Producto" 
+          description="Escribe un nombre llamativo para el menú"
+          value={name} 
+          onChange={e => setName(e.target.value)} 
+          required 
+          placeholder="Ej: Hamburguesa con Queso" 
+          radius="md"
+        />
         
-        <Group grow>
-          <NumberInput label="Precio" value={price} onChange={val => setPrice(val)} prefix="$" decimalScale={2} required />
-          <Select label="Categoría" data={categories.map((c: any) => ({ value: c.id, label: c.name }))} value={categoryId} onChange={setCategoryId} clearable />
+        <Group grow align="flex-start">
+          <NumberInput 
+            label="Precio de Venta" 
+            value={price} 
+            onChange={val => setPrice(val)} 
+            prefix="$" 
+            decimalScale={2} 
+            required 
+            radius="md"
+            hideControls
+          />
+          <Select 
+            label="Categoría" 
+            placeholder="Seleccionar..."
+            data={categories.map((c: any) => ({ value: c.id, label: c.name }))} 
+            value={categoryId} 
+            onChange={setCategoryId} 
+            clearable 
+            radius="md"
+          />
         </Group>
 
-        <Box p="md" style={{ background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-           <FileUploader 
-             label="Imagen del Producto" 
-             defaultValue={imageUrl} 
-             onUploadSuccess={setImageUrl} 
-           />
+        <Box>
+          <Text fw={500} size="sm" mb={4}>Imagen del Producto</Text>
+          <Box p="md" style={{ background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+             <FileUploader 
+               label="" 
+               defaultValue={imageUrl} 
+               onUploadSuccess={setImageUrl} 
+             />
+          </Box>
         </Box>
 
         {storeInfo?.hasModifiers && modifiers?.length > 0 && (
           <MultiSelect
             label="Aderezos y Personalizaciones"
-            placeholder="Seleccionar grupos (opcional)"
+            description="Grupos de opciones que el cliente puede elegir"
+            placeholder="Seleccionar grupos"
             data={modifiers.map((m: any) => ({ value: m.id, label: m.name }))}
             value={modifierGroupIds}
             onChange={setModifierGroupIds}
             searchable
             clearable
+            radius="md"
           />
         )}
         
         {storeInfo?.hasStockControl && (
           <Box p="md" style={{ background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
             <Group justify="space-between" mb="xs">
-              <Text fw={700} size="sm">Inventario</Text>
-              <Switch checked={trackStock} onChange={(e) => setTrackStock(e.currentTarget.checked)} label="Rastrear Stock" />
+              <Stack gap={0}>
+                <Text fw={700} size="sm">Control de Inventario</Text>
+                <Text size="xs" color="dimmed">Activa para gestionar unidades disponibles</Text>
+              </Stack>
+              <Switch 
+                checked={trackStock} 
+                onChange={(e) => setTrackStock(e.currentTarget.checked)} 
+                color="blue"
+              />
             </Group>
             {trackStock && (
-              <NumberInput label="Cantidad Disponible" value={stock} onChange={val => setStock(val)} min={0} />
+              <Transition mounted={trackStock} transition="fade" duration={200}>
+                {(styles) => (
+                  <div style={styles}>
+                    <NumberInput 
+                      label="Cantidad Inicial" 
+                      value={stock} 
+                      onChange={val => setStock(val)} 
+                      min={0} 
+                      radius="md"
+                    />
+                  </div>
+                )}
+              </Transition>
             )}
           </Box>
         )}
 
-        <Textarea label="Descripción" value={description} onChange={e => setDescription(e.target.value)} placeholder="..." minRows={3} />
+        <Textarea 
+          label="Descripción (Opcional)" 
+          value={description} 
+          onChange={e => setDescription(e.target.value)} 
+          placeholder="Ingredientes, detalles de preparación..." 
+          minRows={3} 
+          radius="md"
+        />
 
-        <Group justify="flex-end" mt="md">
-          <Button variant="light" color="gray" onClick={onClose}>Cancelar</Button>
-          <Button onClick={() => onSubmit({ name, price, description, imageUrl, categoryId, modifierGroupIds, trackStock, stock })}>
-            {product ? 'Actualizar' : 'Guardar Producto'}
+        <Group justify="flex-end" mt="xl" gap="sm">
+          <Button variant="subtle" color="gray" onClick={onClose} radius="md">Cancelar</Button>
+          <Button 
+            size="md" 
+            radius="md" 
+            onClick={() => onSubmit({ name, price, description, imageUrl, categoryId, modifierGroupIds, trackStock, stock })}
+            style={{ paddingLeft: '2rem', paddingRight: '2rem' }}
+          >
+            {product ? 'Guardar Cambios' : 'Crear Producto'}
           </Button>
         </Group>
       </Stack>
