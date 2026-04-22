@@ -86,6 +86,7 @@ interface CartItem {
 }
 
 interface Store {
+  id: string;
   name: string;
   slug: string;
   description?: string;
@@ -300,6 +301,7 @@ export default function Catalog() {
   };
 
   const handleSendOrder = async () => {
+    if (!store) return;
     const savedName = localStorage.getItem('siit_customer_name');
     if (!savedName && !customerName) {
       setShowNamePrompt(true);

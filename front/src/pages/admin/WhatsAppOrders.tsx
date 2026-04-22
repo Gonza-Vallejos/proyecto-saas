@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Title, Text, Card, Group, Stack, Badge, Button, SimpleGrid, Paper, Box, ScrollArea, Divider, ActionIcon } from '@mantine/core';
+import { Title, Text, Card, Group, Stack, Badge, Button, SimpleGrid, Paper, Box, ScrollArea, ActionIcon } from '@mantine/core';
 import { Clock, CheckCircle2, PlayCircle, MessageSquare, RefreshCw, ShoppingBag } from 'lucide-react';
 import { api } from '../../utils/api';
 import Swal from 'sweetalert2';
@@ -150,7 +150,7 @@ export default function WhatsAppOrders() {
                 )}
                 {item.observations && (
                   <Paper withBorder p="xs" mt="xs" bg="gray.0">
-                    <Text size="xs" color="dimmed" italic>
+                    <Text size="xs" color="dimmed" fs="italic">
                       "{item.observations}"
                     </Text>
                   </Paper>
