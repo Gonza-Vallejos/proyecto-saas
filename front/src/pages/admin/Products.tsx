@@ -36,12 +36,19 @@ export default function Products() {
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string | null>('all');
+  const [stockFilter, setStockFilter] = useState<string | null>('all');
 
   const filteredProducts = products.filter((p: Product) => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           (p.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
     const matchesCategory = categoryFilter === 'all' || p.categoryId === categoryFilter;
-    return matchesSearch && matchesCategory;
+    
+    let matchesStock = true;
+    if (stockFilter === 'in_stock') matchesStock = !p.trackStock || p.stock > 0;
+    if (stockFilter === 'out_of_stock') matchesStock = p.trackStock && p.stock <= 0;
+    if (stockFilter === 'low_stock') matchesStock = p.trackStock && p.stock > 0 && p.stock <= 10;
+
+    return matchesSearch && matchesCategory && matchesStock;
   });
 
   const fetchData = async () => {
@@ -161,12 +168,27 @@ export default function Products() {
               ...categories.map(c => ({ value: c.id, label: c.name }))
             ]}
             value={categoryFilter}
-            onChange={setCategoryFilter}
+            onChange={(val) => setCategoryFilter(val)}
             radius="md"
             style={{ minWidth: '220px' }}
           />
-          {(searchQuery || categoryFilter !== 'all') && (
-            <Button variant="light" color="gray" radius="md" onClick={() => { setSearchQuery(''); setCategoryFilter('all'); }}>
+          <Select
+            label="Disponibilidad"
+            placeholder="Todos"
+            leftSection={<Boxes size={16} color="#94a3b8" />}
+            data={[
+              { value: 'all', label: 'Todos' },
+              { value: 'in_stock', label: 'Con Stock' },
+              { value: 'out_of_stock', label: 'Sin Stock' },
+              { value: 'low_stock', label: 'Stock Bajo (≤10)' },
+            ]}
+            value={stockFilter}
+            onChange={(val) => setStockFilter(val)}
+            radius="md"
+            style={{ minWidth: '180px' }}
+          />
+          {(searchQuery || categoryFilter !== 'all' || stockFilter !== 'all') && (
+            <Button variant="light" color="gray" radius="md" onClick={() => { setSearchQuery(''); setCategoryFilter('all'); setStockFilter('all'); }}>
               Limpiar
             </Button>
           )}

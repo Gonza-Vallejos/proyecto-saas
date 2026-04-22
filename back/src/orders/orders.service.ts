@@ -94,8 +94,15 @@ export class OrdersService {
 
     if (startDate || endDate) {
       where.createdAt = {};
-      if (startDate) where.createdAt.gte = new Date(startDate);
-      if (endDate) where.createdAt.lte = new Date(endDate);
+      if (startDate && startDate.trim() !== '') {
+        const d = new Date(startDate);
+        if (!isNaN(d.getTime())) where.createdAt.gte = d;
+      }
+      if (endDate && endDate.trim() !== '') {
+        const d = new Date(endDate);
+        if (!isNaN(d.getTime())) where.createdAt.lte = d;
+      }
+      if (Object.keys(where.createdAt).length === 0) delete where.createdAt;
     }
 
     return this.prisma.order.findMany({

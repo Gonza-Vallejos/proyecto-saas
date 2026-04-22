@@ -9,6 +9,7 @@ import {
   ShoppingBag, Utensils
 } from 'lucide-react';
 import { api } from '../../utils/api';
+import { useOutletContext } from 'react-router-dom';
 
 interface OrderItem {
   id: string;
@@ -31,6 +32,7 @@ interface Order {
 }
 
 export default function OrderHistory() {
+  const { storeData } = useOutletContext<{ storeData: any }>();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -125,16 +127,18 @@ export default function OrderHistory() {
             value={statusFilter}
             onChange={(val) => setStatusFilter(val || 'all')}
           />
-          <Select 
-            label="Origen"
-            data={[
-              { value: 'all', label: 'Todos los canales' },
-              { value: 'WHATSAPP', label: 'Ventas WhatsApp' },
-              { value: 'TABLE', label: 'Ventas de Salón' },
-            ]}
-            value={originFilter}
-            onChange={(val) => setOriginFilter(val || 'all')}
-          />
+          {storeData?.hasOrderManagement && (
+            <Select 
+              label="Origen"
+              data={[
+                { value: 'all', label: 'Todos los canales' },
+                { value: 'WHATSAPP', label: 'Ventas WhatsApp' },
+                { value: 'TABLE', label: 'Ventas de Salón' },
+              ]}
+              value={originFilter}
+              onChange={(val) => setOriginFilter(val || 'all')}
+            />
+          )}
         </SimpleGrid>
       </Paper>
 

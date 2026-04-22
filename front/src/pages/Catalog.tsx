@@ -223,14 +223,13 @@ export default function Catalog() {
     } else {
       const element = document.getElementById(`section-${categoryId}`);
       if (element) {
-        const offset = 150; // Sticky header offset
-        const bodyRect = document.body.getBoundingClientRect().top;
-        const elementRect = element.getBoundingClientRect().top;
-        const elementPosition = elementRect - bodyRect;
-        const offsetPosition = elementPosition - offset;
-
+        // Obtenemos la posición del elemento y restamos el alto del header sticky
+        const rect = element.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const offset = isMobile ? 130 : 160; // Compensar header + nav de categorías
+        
         window.scrollTo({
-          top: offsetPosition,
+          top: rect.top + scrollTop - offset,
           behavior: 'smooth'
         });
       }
@@ -623,7 +622,7 @@ export default function Catalog() {
               }}
             >
               <CategoryButton 
-                active={(selectedCategory === 'all' ? activeTab : selectedCategory) === 'all'} 
+                active={activeTab === 'all'} 
                 onClick={() => scrollToCategory('all')}
               >
                 Todos
@@ -631,7 +630,7 @@ export default function Catalog() {
               {store.categories.map(cat => (
                 <CategoryButton 
                   key={cat.id}
-                  active={(selectedCategory === 'all' ? activeTab : selectedCategory) === cat.id} 
+                  active={activeTab === cat.id} 
                   onClick={() => scrollToCategory(cat.id)}
                 >
                   {cat.name}
@@ -652,7 +651,7 @@ export default function Catalog() {
           </Center>
         ) : (
           <Stack gap="4rem">
-            {(selectedCategory === 'all' ? groupedProducts : groupedProducts.filter(g => g.id === selectedCategory)).map(group => (
+            {groupedProducts.map(group => (
               <Box key={group.id} id={`section-${group.id}`} className="category-section" style={{ scrollMarginTop: '160px' }}>
                 <Title order={2} mb="xl" style={{ borderLeft: `4px solid var(--primary-color)`, paddingLeft: '1rem', color: 'var(--text-color)' }}>
                   {group.name}

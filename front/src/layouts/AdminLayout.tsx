@@ -337,7 +337,7 @@ export default function AdminLayout() {
         </header>
 
         <main style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
-          <Outlet context={{ user }} />
+          <Outlet context={{ user, storeData }} />
         </main>
       </div>
 

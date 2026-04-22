@@ -32,6 +32,7 @@ export class ProductsService {
     return this.prisma.product.findMany({
       where: { storeId },
       include: {
+        category: true,
         modifierGroups: {
           include: { modifierGroup: true }
         }
