@@ -6,18 +6,19 @@ export class SupabaseService {
   private supabase;
 
   constructor() {
-    const supabaseUrl = process.env.SUPABASE_URL || '';
-    const supabaseKey = process.env.SUPABASE_KEY || '';
+    // Sanitizar variables de entorno (quitar espacios o comillas accidentales)
+    const supabaseUrl = (process.env.SUPABASE_URL || '').trim().replace(/^"|"$/g, '');
+    const supabaseKey = (process.env.SUPABASE_KEY || '').trim().replace(/^"|"$/g, '');
 
     if (!supabaseUrl || !supabaseKey) {
-      console.error('❌ Supabase URL o Key no encontradas en el .env');
+      console.error('❌ Supabase URL o Key no encontradas en el entorno');
     }
 
     this.supabase = createClient(supabaseUrl, supabaseKey);
   }
 
   async uploadImage(file: Express.Multer.File) {
-    const bucket = process.env.SUPABASE_BUCKET || 'images';
+    const bucket = (process.env.SUPABASE_BUCKET || 'images').trim().replace(/^"|"$/g, '');
     const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${file.originalname.substring(file.originalname.lastIndexOf('.'))}`;
 
     const { data, error } = await this.supabase.storage
