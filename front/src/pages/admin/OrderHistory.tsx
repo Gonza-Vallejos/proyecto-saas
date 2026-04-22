@@ -1,13 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import { 
-  Title, Text, Card, Group, Stack, Badge, Button, 
-  SimpleGrid, Paper, Box, Table, ActionIcon, 
-  TextInput, Select, Divider, ScrollArea, Tooltip
+  Title, Text, Card, Group, Stack, Badge, 
+  SimpleGrid, Paper, Table, ActionIcon, 
+  TextInput, Select, ScrollArea, Tooltip
 } from '@mantine/core';
 import { 
-  History, Calendar, Filter, Search, Eye, 
-  Download, ShoppingBag, Utensils, CheckCircle2, 
-  XCircle, Clock
+  History, Calendar, Eye, 
+  ShoppingBag, Utensils
 } from 'lucide-react';
 import { api } from '../../utils/api';
 
