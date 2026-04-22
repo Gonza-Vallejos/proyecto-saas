@@ -102,6 +102,7 @@ interface Store {
   hasCart: boolean;
   isCatalogOnly: boolean;
   hasModifiers: boolean;
+  hasWhatsAppOrders: boolean;
   showObservations: boolean;
   heroImageUrl: string | null;
   fontFamily: string;
