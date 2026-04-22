@@ -299,6 +299,7 @@ export default function Catalog() {
     }));
   };
 
+  const handleSendOrder = async () => {
     const savedName = localStorage.getItem('siit_customer_name');
     if (!savedName && !customerName) {
       setShowNamePrompt(true);

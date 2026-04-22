@@ -138,7 +138,7 @@ export default function WhatsAppOrders() {
               <Box key={item.id}>
                 <Group justify="space-between" align="flex-start" wrap="nowrap">
                   <Text fw={700} size="sm">{item.quantity}x {item.product?.name || `Producto #${idx + 1}`}</Text>
-                </Stack>
+                </Group>
                 {modifiers.length > 0 && (
                   <Stack gap={2} mt="4px" pl="md">
                     {modifiers.map((mod: any, mIdx: number) => (
