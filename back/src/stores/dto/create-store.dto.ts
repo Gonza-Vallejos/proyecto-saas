@@ -67,4 +67,8 @@ export class CreateStoreDto {
   @IsBoolean()
   @IsOptional()
   hasOrderManagement?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  hasWhatsAppOrders?: boolean;
 }

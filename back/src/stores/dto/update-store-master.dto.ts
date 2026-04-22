@@ -57,4 +57,8 @@ export class UpdateStoreMasterDto {
   @IsBoolean()
   @IsOptional()
   hasOrderManagement?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  hasWhatsAppOrders?: boolean;
 }
