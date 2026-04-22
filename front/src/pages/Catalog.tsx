@@ -36,7 +36,8 @@ import {
   Textarea,
   Checkbox,
   Radio,
-  Paper
+  Paper,
+  TextInput
 } from '@mantine/core';
 
 interface Category {
@@ -143,6 +144,16 @@ export default function Catalog() {
   const [cartOpened, setCartOpened] = useState(false);
   const [addingProduct, setAddingProduct] = useState<Product | null>(null);
   const isMobile = useMediaQuery('(max-width: 768px)');
+  
+  // Customer Identity
+  const [customerName, setCustomerName] = useState<string>('');
+  const [showNamePrompt, setShowNamePrompt] = useState(false);
+  const [isOrdering, setIsOrdering] = useState(false);
+
+  useEffect(() => {
+    const savedName = localStorage.getItem('siit_customer_name');
+    if (savedName) setCustomerName(savedName);
+  }, []);
 
   // Historial para el botón atrás del celular
   useEffect(() => {
@@ -288,37 +299,79 @@ export default function Catalog() {
     }));
   };
 
-  const handleSendOrder = () => {
-    if (!store?.whatsapp || cart.length === 0) return;
+    const savedName = localStorage.getItem('siit_customer_name');
+    if (!savedName && !customerName) {
+      setShowNamePrompt(true);
+      return;
+    }
     
-    let message = `*Nuevo Pedido - ${store.name}*\n\n`;
-    let total = 0;
+    // Si ya tenemos el nombre, procedemos
+    const nameToUse = customerName || savedName || 'Cliente';
+    if (!savedName) localStorage.setItem('siit_customer_name', nameToUse);
+
+    setIsOrdering(true);
     
-    cart.forEach(item => {
-      let itemPrice = item.product.price;
-      let modifiersText = '';
-      
-      item.selectedModifiers.forEach(group => {
-        group.options.forEach(opt => {
-          itemPrice += opt.price;
-          modifiersText += `  + ${opt.name} ${opt.price > 0 ? `(+$${opt.price})` : ''}\n`;
-        });
+    try {
+      // 1. Guardar el pedido en la base de datos (Supabase) via API pública
+      const orderData = {
+        customerName: nameToUse,
+        items: cart.map(item => ({
+          productId: item.product.id,
+          quantity: item.quantity,
+          priceAtTime: item.product.price + item.selectedModifiers.reduce((acc, g) => acc + g.options.reduce((a, o) => a + o.price, 0), 0),
+          observations: item.observations,
+          selectedModifiers: item.selectedModifiers
+        })),
+        observations: "Pedido vía WhatsApp",
+        total: cart.reduce((acc, item) => {
+          const extras = item.selectedModifiers.reduce((sum, g) => sum + g.options.reduce((s, o) => s + o.price, 0), 0);
+          return acc + (item.product.price + extras) * item.quantity;
+        }, 0)
+      };
+
+      await fetch(`${BASE_URL}/orders/public/${store.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
       });
 
-      const lineTotal = itemPrice * item.quantity;
-      total += lineTotal;
+      // 2. Armar y enviar el mensaje de WhatsApp
+      let message = `*Nuevo Pedido - ${store.name}*\n`;
+      message += `Cliente: *${nameToUse}*\n\n`;
       
-      message += `• ${item.quantity}x *${item.product.name}* ($${formatPrice(item.product.price)})\n`;
-      if (modifiersText) message += modifiersText;
-      message += `  Subtotal: *$${formatPrice(lineTotal)}*\n`;
-      if (item.observations) message += `  _Petición: ${item.observations}_\n`;
-      message += `\n`;
-    });
-    
-    message += `\n*Total a pagar: $${formatPrice(total)}*`;
-    message += `\n\n_Pedido enviado desde el catálogo digital_`;
+      let total = 0;
+      cart.forEach(item => {
+        let itemPrice = item.product.price;
+        let modifiersText = '';
+        item.selectedModifiers.forEach(group => {
+          group.options.forEach(opt => {
+            itemPrice += opt.price;
+            modifiersText += `  + ${opt.name} ${opt.price > 0 ? `(+$${opt.price})` : ''}\n`;
+          });
+        });
+        const lineTotal = itemPrice * item.quantity;
+        total += lineTotal;
+        message += `• ${item.quantity}x *${item.product.name}*\n`;
+        if (modifiersText) message += modifiersText;
+        if (item.observations) message += `  _Petición: ${item.observations}_\n`;
+      });
+      
+      message += `\n*Total: $${formatPrice(total)}*\n`;
+      message += `\n_Pedido registrado en el sistema_`;
 
-    window.open(`https://wa.me/${store.whatsapp}?text=${encodeURIComponent(message)}`, '_blank');
+      window.open(`https://wa.me/${store.whatsapp}?text=${encodeURIComponent(message)}`, '_blank');
+      setCart([]);
+      setCartOpened(false);
+    } catch (e) {
+      console.error("Error al registrar pedido:", e);
+      Swal.fire('Error', 'No pudimos registrar tu pedido, pero puedes intentar enviarlo por WhatsApp igualmente.', 'warning')
+        .then(() => {
+          // Fallback a WhatsApp aunque falle la API
+          window.open(`https://wa.me/${store.whatsapp}?text=${encodeURIComponent("Hola, quiero hacer un pedido...")}`, '_blank');
+        });
+    } finally {
+      setIsOrdering(false);
+    }
   };
 
   const handleDirectOrder = (product: Product) => {
@@ -914,6 +967,7 @@ export default function Catalog() {
                 color="green" 
                 leftSection={<Image src={WhatsAppPng} w={18} h={18} />}
                 onClick={handleSendOrder}
+                loading={isOrdering}
                >
                  Enviar Pedido por WhatsApp
                </Button>
@@ -921,6 +975,44 @@ export default function Catalog() {
           </Box>
         )}
       </Drawer>
+
+      {/* Modal para pedir nombre la primera vez */}
+      <Modal 
+        opened={showNamePrompt} 
+        onClose={() => setShowNamePrompt(false)} 
+        title="¿Cómo te llamas?" 
+        centered
+        radius="lg"
+        padding="xl"
+      >
+        <Stack gap="md">
+          <Text size="sm" color="dimmed">Para que la tienda sepa quién hace el pedido, por favor ingresa tu nombre.</Text>
+          <TextInput 
+            label="Tu nombre" 
+            placeholder="Ej: Juan Pérez" 
+            size="md"
+            radius="md"
+            value={customerName}
+            onChange={(e) => setCustomerName(e.currentTarget.value)}
+            required
+            autoFocus
+          />
+          <Button 
+            fullWidth 
+            size="md" 
+            radius="md" 
+            onClick={() => {
+              if (customerName.trim()) {
+                localStorage.setItem('siit_customer_name', customerName);
+                setShowNamePrompt(false);
+                handleSendOrder();
+              }
+            }}
+          >
+            Confirmar y Enviar Pedido
+          </Button>
+        </Stack>
+      </Modal>
 
       {/* Product Selection Modal (SaaS Modifiers Placeholder) */}
       <ProductSelectionModal 

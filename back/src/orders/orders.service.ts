@@ -9,8 +9,8 @@ export class OrdersService {
     private eventsGateway: EventsGateway,
   ) {}
 
-  async create(storeId: string, waiterId: string, data: any) {
-    const { tableId, items, observations } = data;
+  async create(storeId: string, waiterId: string | null, data: any) {
+    const { tableId, items, observations, customerName, customerPhone, origin } = data;
 
     // Calcular total y preparar ítems
     let total = 0;
@@ -31,6 +31,9 @@ export class OrdersService {
         waiterId,
         tableId,
         observations,
+        customerName,
+        customerPhone,
+        origin: origin || 'TABLE',
         total,
         status: 'PENDING',
         items: {
@@ -47,13 +50,17 @@ export class OrdersService {
     return order;
   }
 
-  async findAllByStore(storeId: string, status?: string) {
+  async findAllByStore(storeId: string, status?: string, origin?: string) {
     const where: any = { storeId };
     if (status) {
       where.status = status;
     } else {
       // Por defecto, traer pedidos no finalizados (no PAID/CANCELLED)
       where.status = { notIn: ['PAID', 'CANCELLED'] };
+    }
+
+    if (origin) {
+      where.origin = origin;
     }
 
     return this.prisma.order.findMany({
@@ -74,16 +81,41 @@ export class OrdersService {
   }
 
   async updateStatus(id: string, storeId: string, status: string) {
-    const order = await this.prisma.order.findFirst({ where: { id, storeId } });
+    const order = await this.prisma.order.findFirst({ 
+      where: { id, storeId },
+      include: { items: { include: { product: true } } }
+    });
     if (!order) throw new BadRequestException('Pedido no encontrado');
 
-    const updatedOrder = await this.prisma.order.update({
-      where: { id },
-      data: { status },
-      include: { items: true, table: true },
+    // Si el pedido no estaba READY y ahora cambia a READY, descontamos stock
+    const shouldDeductStock = status === 'READY' && order.status !== 'READY';
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      const updatedOrder = await tx.order.update({
+        where: { id },
+        data: { status },
+        include: { items: true, table: true },
+      });
+
+      if (shouldDeductStock) {
+        for (const item of order.items) {
+          if (item.product.trackStock) {
+            await tx.product.update({
+              where: { id: item.productId },
+              data: {
+                stock: {
+                  decrement: item.quantity
+                }
+              }
+            });
+          }
+        }
+      }
+
+      return updatedOrder;
     });
 
     this.eventsGateway.notifyStoreOrdersUpdate(storeId);
-    return updatedOrder;
+    return result;
   }
 }

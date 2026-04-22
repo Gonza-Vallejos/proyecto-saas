@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Navigate, useNavigate, Link, useLocation } from 'react-router-dom';
-import { Store, Package, LogOut, Settings, ExternalLink, LayoutGrid, Palette, Bell, User, KeyRound, Menu as MenuIcon, QrCode, Sandwich, Utensils, ChefHat, UserCog } from 'lucide-react';
+import { Store, Package, LogOut, Settings, ExternalLink, LayoutGrid, Palette, Bell, User, KeyRound, Menu as MenuIcon, QrCode, Sandwich, Utensils, ChefHat, UserCog, MessageSquare } from 'lucide-react';
 import { Avatar, Text, Group, Badge, Indicator, Tooltip, Stack, ActionIcon, Menu, Modal, TextInput, PasswordInput, Button, Drawer, Divider } from '@mantine/core';
 import { api } from '../utils/api';
 import Swal from 'sweetalert2';
@@ -160,6 +160,9 @@ export default function AdminLayout() {
           </Link>
           <Link to="/admin/staff" style={{ ...navLinkStyle, ...(isActive('/admin/staff') ? activeNavLinkStyle : {}) }}>
             <UserCog size={18} /> Gestión de Personal
+          </Link>
+          <Link to="/admin/orders-online" style={{ ...navLinkStyle, ...(isActive('/admin/orders-online') ? activeNavLinkStyle : {}) }}>
+            <MessageSquare size={18} /> Pedidos WhatsApp
           </Link>
         </>
       )}

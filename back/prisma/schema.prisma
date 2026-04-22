@@ -181,6 +181,11 @@ model Order {
   waiterId     String?     // Usuario que tomó el pedido
   waiter       User?       @relation(fields: [waiterId], references: [id])
   storeId      String
+  
+  // Datos del Cliente (para pedidos externos/WhatsApp)
+  customerName  String?
+  customerPhone String?
+  origin        String      @default("TABLE") // TABLE, WHATSAPP
   store        Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
   items        OrderItem[]
 

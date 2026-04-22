@@ -11,6 +11,7 @@ import QRGenerator from './pages/admin/QRGenerator';
 import Modifiers from './pages/admin/Modifiers';
 import TablesManager from './pages/admin/TablesManager';
 import KitchenDashboard from './pages/admin/KitchenDashboard';
+import WhatsAppOrders from './pages/admin/WhatsAppOrders';
 import StaffManagement from './pages/admin/StaffManagement';
 import WaiterView from './pages/WaiterView';
 import Register from './pages/Register';
@@ -53,6 +54,7 @@ function App() {
           <Route path="modifiers" element={<Modifiers />} />
           <Route path="tables" element={<TablesManager />} />
           <Route path="kitchen" element={<KitchenDashboard />} />
+          <Route path="orders-online" element={<WhatsAppOrders />} />
           <Route path="staff" element={<StaffManagement />} />
         </Route>
 
