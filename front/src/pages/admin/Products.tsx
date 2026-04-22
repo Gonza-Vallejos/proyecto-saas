@@ -1,4 +1,5 @@
-import { Plus, Trash2, Image as ImageIcon, Edit3, Boxes, AlertCircle, Search, Filter, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Plus, Trash2, Image as ImageIcon, Edit3, Boxes, Search, Filter, X } from 'lucide-react';
 import { Modal, Button, TextInput, NumberInput, Select, MultiSelect, Textarea, Group, ActionIcon, Tooltip, Switch, Badge, Text, Stack, Box, Title, Card, Transition } from '@mantine/core';
 import FileUploader from '../../components/FileUploader';
 import { api } from '../../utils/api';
@@ -36,7 +37,7 @@ export default function Products() {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string | null>('all');
 
-  const filteredProducts = products.filter(p => {
+  const filteredProducts = products.filter((p: Product) => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           (p.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
     const matchesCategory = categoryFilter === 'all' || p.categoryId === categoryFilter;

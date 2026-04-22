@@ -573,6 +573,7 @@ export default function Catalog() {
                       onOrder={(prod: any) => store.hasCart ? setAddingProduct(prod) : handleDirectOrder(prod)} 
                       fixUrl={fixUrl}
                       hasCart={store.hasCart}
+                      isMobile={isMobile}
                     />
                   ))}
                 </SimpleGrid>
@@ -978,7 +979,7 @@ function CategoryButton({ children, active, onClick }: any) {
   );
 }
 
-function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart }: any) {
+function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMobile }: any) {
   const isOut = product.trackStock && product.stock <= 0;
   
   return (
