@@ -81,7 +81,7 @@ export default function OrderHistory() {
 
   // Stats
   const stats = {
-    total: orders.reduce((acc, o) => acc + o.total, 0),
+    total: orders.filter(o => o.status !== 'CANCELLED').reduce((acc, o) => acc + o.total, 0),
     count: orders.length,
     paid: orders.filter(o => o.status === 'PAID').length,
     cancelled: orders.filter(o => o.status === 'CANCELLED').length

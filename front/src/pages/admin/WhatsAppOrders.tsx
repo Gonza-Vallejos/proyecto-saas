@@ -14,6 +14,7 @@ interface OrderItem {
   selectedModifiers?: string;
   product?: {
     name: string;
+    imageUrl?: string;
   };
 }
 
@@ -136,11 +137,34 @@ export default function WhatsAppOrders() {
             const modifiers = item.selectedModifiers ? JSON.parse(item.selectedModifiers) : [];
             return (
               <Box key={item.id}>
-                <Group justify="space-between" align="flex-start" wrap="nowrap">
-                  <Text fw={700} size="sm">{item.quantity}x {item.product?.name || `Producto #${idx + 1}`}</Text>
+                <Group justify="space-between" align="center" wrap="nowrap" gap="sm">
+                  <Group gap="sm" style={{ flex: 1 }}>
+                    <Box style={{ 
+                      width: '40px', 
+                      height: '40px', 
+                      borderRadius: '8px', 
+                      backgroundColor: '#f1f5f9',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      {item.product?.imageUrl ? (
+                        <img 
+                          src={item.product.imageUrl} 
+                          alt="" 
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <ShoppingBag size={16} color="#94a3b8" />
+                      )}
+                    </Box>
+                    <Text fw={700} size="sm" lineClamp={2}>{item.quantity}x {item.product?.name || `Producto #${idx + 1}`}</Text>
+                  </Group>
                 </Group>
                 {modifiers.length > 0 && (
-                  <Stack gap={2} mt="4px" pl="md">
+                  <Stack gap={2} mt="4px" pl="52px">
                     {modifiers.map((mod: any, mIdx: number) => (
                       <Text key={mIdx} size="xs" color="dimmed">
                         • {mod.options.map((o: any) => o.name).join(', ')}
@@ -149,7 +173,7 @@ export default function WhatsAppOrders() {
                   </Stack>
                 )}
                 {item.observations && (
-                  <Paper withBorder p="xs" mt="xs" bg="gray.0">
+                  <Paper withBorder p="xs" mt="xs" ml="52px" bg="gray.0">
                     <Text size="xs" color="dimmed" fs="italic">
                       "{item.observations}"
                     </Text>
