@@ -21,6 +21,7 @@ interface StoreItem {
   showObservations: boolean;
   hasConnectivity: boolean;
   hasOrderManagement: boolean;
+  hasWhatsAppOrders: boolean;
   users: { email: string; name: string }[];
   _count: { products: number; categories: number; users: number };
 }
@@ -181,6 +182,7 @@ export default function StoreManagement() {
                     {store.isCatalogOnly && <Badge color="violet" size="xs" variant="outline">Sólo Catálogo</Badge>}
                     {store.hasConnectivity && <Badge color="cyan" size="xs" variant="outline">WiFi</Badge>}
                     {store.hasOrderManagement && <Badge color="pink" size="xs" variant="outline">Gastro Pro</Badge>}
+                    {store.hasWhatsAppOrders && <Badge color="teal" size="xs" variant="outline">Pedidos WA</Badge>}
                   </Group>
                 </Table.Td>
                 <Table.Td>
@@ -243,6 +245,7 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
   const [showObservations, setShowObservations] = useState(false);
   const [hasConnectivity, setHasConnectivity] = useState(false);
   const [hasOrderManagement, setHasOrderManagement] = useState(false);
+  const [hasWhatsAppOrders, setHasWhatsAppOrders] = useState(false);
 
   useEffect(() => {
     if (store) {
@@ -259,6 +262,7 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
       setShowObservations(store.showObservations || false);
       setHasConnectivity(store.hasConnectivity || false);
       setHasOrderManagement(store.hasOrderManagement || false);
+      setHasWhatsAppOrders(store.hasWhatsAppOrders || false);
       setOwnerPassword('');
     } else {
       setName('');
@@ -275,6 +279,7 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
       setShowObservations(false);
       setHasConnectivity(false);
       setHasOrderManagement(false);
+      setHasWhatsAppOrders(false);
     }
   }, [store, opened]);
 
@@ -407,6 +412,14 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
               description="Mesas, Mozos y Cocina"
             />
           </Paper>
+          <Paper withBorder p="sm" radius="md">
+            <Switch 
+              label="Pedidos por WhatsApp" 
+              checked={hasWhatsAppOrders} 
+              onChange={(e) => setHasWhatsAppOrders(e.currentTarget.checked)} 
+              description="Habilita monitor de pedidos online"
+            />
+          </Paper>
         </SimpleGrid>
 
         <Group justify="flex-end" mt="md">
@@ -416,7 +429,7 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
               name, slug, ownerName, ownerEmail,
               businessType, hasStockControl, hasPayments, hasCart, 
               isCatalogOnly, hasModifiers, showObservations,
-              hasConnectivity, hasOrderManagement
+              hasConnectivity, hasOrderManagement, hasWhatsAppOrders
             };
             // Solo enviar la contraseña si tiene contenido
             if (ownerPassword && ownerPassword.trim().length > 0) {

@@ -149,6 +149,12 @@ export default function AdminLayout() {
         <Settings size={18} /> Mi Tienda
       </Link>
 
+      {storeData?.hasWhatsAppOrders && (
+        <Link to="/admin/orders-online" style={{ ...navLinkStyle, ...(isActive('/admin/orders-online') ? activeNavLinkStyle : {}) }}>
+          <MessageSquare size={18} /> Pedidos WhatsApp
+        </Link>
+      )}
+
       {storeData?.hasOrderManagement && (
         <>
           <Divider label="Gastro Pro" labelPosition="center" my="sm" />
@@ -160,9 +166,6 @@ export default function AdminLayout() {
           </Link>
           <Link to="/admin/staff" style={{ ...navLinkStyle, ...(isActive('/admin/staff') ? activeNavLinkStyle : {}) }}>
             <UserCog size={18} /> Gestión de Personal
-          </Link>
-          <Link to="/admin/orders-online" style={{ ...navLinkStyle, ...(isActive('/admin/orders-online') ? activeNavLinkStyle : {}) }}>
-            <MessageSquare size={18} /> Pedidos WhatsApp
           </Link>
         </>
       )}

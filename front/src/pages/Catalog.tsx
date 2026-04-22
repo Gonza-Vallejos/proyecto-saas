@@ -309,6 +309,19 @@ export default function Catalog() {
       return;
     }
     
+    // Si el módulo de pedidos no está activo, enviamos directamente a WhatsApp sin guardar en BD
+    if (!store.hasWhatsAppOrders) {
+      let message = `*Nuevo Pedido - ${store.name}*\n\n`;
+      cart.forEach(item => {
+        message += `• ${item.quantity}x *${item.product.name}*\n`;
+      });
+      message += `\n*Por favor, confírmame el total y el tiempo de entrega.*`;
+      window.open(`https://wa.me/${store.whatsapp}?text=${encodeURIComponent(message)}`, '_blank');
+      setCart([]);
+      setCartOpened(false);
+      return;
+    }
+
     // Si ya tenemos el nombre, procedemos
     const nameToUse = customerName || savedName || 'Cliente';
     if (!savedName) localStorage.setItem('siit_customer_name', nameToUse);

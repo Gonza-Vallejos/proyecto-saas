@@ -46,6 +46,7 @@ model Store {
   showObservations Boolean @default(false)    // Módulo: Observaciones en pedido
   hasConnectivity Boolean @default(false)     // Módulo: WiFi y Conectividad
   hasOrderManagement Boolean @default(false)  // Módulo: Gestión de Mesas y Pedidos
+  hasWhatsAppOrders Boolean @default(false)   // Módulo: Pedidos por WhatsApp (Configuración SuperAdmin)
   wifiSSID       String?                      // Nombre de la red WiFi
   wifiPassword   String?                      // Contraseña de la red WiFi
   logoUrl        String?                      // Opcional
