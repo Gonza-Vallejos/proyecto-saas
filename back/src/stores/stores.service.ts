@@ -31,6 +31,7 @@ export class StoresService {
         showObservations: data.showObservations || false,
         hasConnectivity: data.hasConnectivity || false,
         hasOrderManagement: data.hasOrderManagement || false,
+        hasWhatsAppOrders: data.hasWhatsAppOrders || false,
         primaryColor: data.primaryColor || '#0ea5e9',
         textColor: data.textColor || '#1e293b',
         iconColor: data.iconColor || '#64748b',
@@ -133,6 +134,7 @@ export class StoresService {
       showObservations: data.showObservations,
       hasConnectivity: data.hasConnectivity,
       hasOrderManagement: data.hasOrderManagement,
+      hasWhatsAppOrders: data.hasWhatsAppOrders,
     };
 
     // Validación crítica: No permitir cambiar control de stock si ya hay productos
