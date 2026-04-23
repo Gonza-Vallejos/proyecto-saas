@@ -162,6 +162,8 @@ export default function Catalog() {
   const [scrolled, setScrolled] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const navRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState<string>('all');
+
   
   // Cart State
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -237,7 +239,7 @@ export default function Catalog() {
     })).filter(cat => cat.products.length > 0);
   }, [store]);
 
-  const [activeTab, setActiveTab] = useState('all');
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -1148,25 +1150,7 @@ export default function Catalog() {
   );
 }
 
-function CategoryButton({ children, active, onClick }: any) {
-  return (
-    <Button 
-      variant={active ? 'filled' : 'subtle'} 
-      onClick={onClick}
-      radius="xl"
-      size="sm"
-      style={{
-        transition: 'all 0.3s ease',
-        fontWeight: active ? 700 : 500,
-        flexShrink: 0,
-        backgroundColor: active ? 'var(--primary-color)' : 'transparent',
-        color: active ? '#fff' : 'var(--text-color)'
-      }}
-    >
-      {children}
-    </Button>
-  );
-}
+
 
 function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMobile }: any) {
   const isOut = product.trackStock && product.stock <= 0;
