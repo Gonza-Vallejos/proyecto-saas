@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Outlet, Navigate, useNavigate, Link, useLocation } from 'react-router-dom';
+import { Outlet, Navigate, useNavigate, Link, useLocation, useParams } from 'react-router-dom';
 import { Store, Package, LogOut, Settings, ExternalLink, LayoutGrid, Palette, Bell, User, KeyRound, Menu as MenuIcon, QrCode, Sandwich, Utensils, ChefHat, UserCog, MessageSquare, History } from 'lucide-react';
 import { Avatar, Text, Group, Badge, Indicator, Tooltip, Stack, ActionIcon, Menu, Modal, TextInput, PasswordInput, Button, Drawer, Divider } from '@mantine/core';
 import { api } from '../utils/api';
@@ -9,11 +9,12 @@ interface UserProfile {
   id: string;
   email: string;
   name?: string;
-  role: 'SUPERADMIN' | 'STORE_ADMIN';
+  role: 'SUPERADMIN' | 'STORE_ADMIN' | 'WAITER';
   storeId?: string;
 }
 
 export default function AdminLayout() {
+  const { storeSlug } = useParams();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [storeData, setStoreData] = useState<{ slug: string, logoUrl?: string, name: string, hasModifiers?: boolean, hasOrderManagement?: boolean, hasWhatsAppOrders?: boolean } | null>(null);
@@ -28,14 +29,20 @@ export default function AdminLayout() {
   const [profilePassword, setProfilePassword] = useState('');
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    // Configurar el contexto de la API para esta tienda específica
+    const activeSlug = storeSlug || 'master';
+    api.setStoreContext(activeSlug);
+
+    const tokenKey = storeSlug ? `token_${storeSlug}` : 'token';
+    const token = localStorage.getItem(tokenKey);
+
     if (token) {
       setIsAuthenticated(true);
       fetchProfile(token);
     } else {
       setIsAuthenticated(false);
     }
-  }, []);
+  }, [storeSlug]);
 
   const fetchProfile = async (token: string) => {
     try {
@@ -45,8 +52,11 @@ export default function AdminLayout() {
       if (res.ok) {
         const data = await res.json();
         setUser(data);
-        if (data.role === 'STORE_ADMIN' && data.storeId) {
-          fetchStoreInfo(token);
+        
+        // Validación de seguridad: el token debe pertenecer a la tienda de la URL
+        // (A menos que seas SUPERADMIN que puede ver todo)
+        if (data.role === 'STORE_ADMIN' && storeSlug) {
+           fetchStoreInfo(token);
         }
       } else {
         setIsAuthenticated(false);
@@ -65,6 +75,12 @@ export default function AdminLayout() {
       if (res.ok) {
         const data = await res.json();
         setStoreData(data);
+        
+        // Si el slug de la tienda no coincide con la URL, redirigir a la correcta
+        if (storeSlug && data.slug !== storeSlug) {
+           console.warn('Slug mismatch. Redirecting to correct store dashboard.');
+           navigate(`/admin/${data.slug}`, { replace: true });
+        }
       }
     } catch (e) {
       console.error('Error fetching store info', e);
@@ -72,7 +88,9 @@ export default function AdminLayout() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    const tokenKey = storeSlug ? `token_${storeSlug}` : 'token';
+    localStorage.removeItem(tokenKey);
+    api.setStoreContext(null);
     navigate('/login');
   };
 
@@ -120,55 +138,57 @@ export default function AdminLayout() {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const adminPrefix = storeSlug ? `/admin/${storeSlug}` : '/admin/master';
+
   const navLinks = user.role === 'SUPERADMIN' ? (
     <>
-      <Link to="/admin" style={{ ...navLinkStyle, ...(isActive('/admin') ? activeNavLinkStyle : {}) }}>
+      <Link to="/admin/master" style={{ ...navLinkStyle, ...(isActive('/admin/master') ? activeNavLinkStyle : {}) }}>
         <Store size={18} /> Gestión de Tiendas
       </Link>
     </>
   ) : (
     <>
-      <Link to="/admin" style={{ ...navLinkStyle, ...(isActive('/admin') ? activeNavLinkStyle : {}) }}>
+      <Link to={adminPrefix} style={{ ...navLinkStyle, ...(isActive(adminPrefix) ? activeNavLinkStyle : {}) }}>
         <Package size={18} /> Mis Productos
       </Link>
-      <Link to="/admin/categories" style={{ ...navLinkStyle, ...(isActive('/admin/categories') ? activeNavLinkStyle : {}) }}>
+      <Link to={`${adminPrefix}/categories`} style={{ ...navLinkStyle, ...(isActive(`${adminPrefix}/categories`) ? activeNavLinkStyle : {}) }}>
         <LayoutGrid size={18} /> Categorías
       </Link>
-      <Link to="/admin/appearance" style={{ ...navLinkStyle, ...(isActive('/admin/appearance') ? activeNavLinkStyle : {}) }}>
+      <Link to={`${adminPrefix}/appearance`} style={{ ...navLinkStyle, ...(isActive(`${adminPrefix}/appearance`) ? activeNavLinkStyle : {}) }}>
         <Palette size={18} /> Aspecto
       </Link>
       {storeData?.hasModifiers && (
-        <Link to="/admin/modifiers" style={{ ...navLinkStyle, ...(isActive('/admin/modifiers') ? activeNavLinkStyle : {}) }}>
+        <Link to={`${adminPrefix}/modifiers`} style={{ ...navLinkStyle, ...(isActive(`${adminPrefix}/modifiers`) ? activeNavLinkStyle : {}) }}>
           <Sandwich size={18} /> Modificadores
         </Link>
       )}
-      <Link to="/admin/qr" style={{ ...navLinkStyle, ...(isActive('/admin/qr') ? activeNavLinkStyle : {}) }}>
+      <Link to={`${adminPrefix}/qr`} style={{ ...navLinkStyle, ...(isActive(`${adminPrefix}/qr`) ? activeNavLinkStyle : {}) }}>
         <QrCode size={18} /> Código QR
       </Link>
-      <Link to="/admin/settings" style={{ ...navLinkStyle, ...(isActive('/admin/settings') ? activeNavLinkStyle : {}) }}>
+      <Link to={`${adminPrefix}/settings`} style={{ ...navLinkStyle, ...(isActive(`${adminPrefix}/settings`) ? activeNavLinkStyle : {}) }}>
         <Settings size={18} /> Mi Tienda
       </Link>
 
       {storeData?.hasWhatsAppOrders && (
-        <Link to="/admin/orders-online" style={{ ...navLinkStyle, ...(isActive('/admin/orders-online') ? activeNavLinkStyle : {}) }}>
+        <Link to={`${adminPrefix}/orders-online`} style={{ ...navLinkStyle, ...(isActive(`${adminPrefix}/orders-online`) ? activeNavLinkStyle : {}) }}>
           <MessageSquare size={18} /> Pedidos WhatsApp
         </Link>
       )}
 
-      <Link to="/admin/orders-history" style={{ ...navLinkStyle, ...(isActive('/admin/orders-history') ? activeNavLinkStyle : {}) }}>
+      <Link to={`${adminPrefix}/orders-history`} style={{ ...navLinkStyle, ...(isActive(`${adminPrefix}/orders-history`) ? activeNavLinkStyle : {}) }}>
         <History size={18} /> Historial de Pedidos
       </Link>
 
       {storeData?.hasOrderManagement && (
         <>
           <Divider label="Gastro Pro" labelPosition="center" my="sm" />
-          <Link to="/admin/tables" style={{ ...navLinkStyle, ...(isActive('/admin/tables') ? activeNavLinkStyle : {}) }}>
+          <Link to={`${adminPrefix}/tables`} style={{ ...navLinkStyle, ...(isActive(`${adminPrefix}/tables`) ? activeNavLinkStyle : {}) }}>
             <Utensils size={18} /> Gestión de Mesas
           </Link>
-          <Link to="/admin/kitchen" style={{ ...navLinkStyle, ...(isActive('/admin/kitchen') ? activeNavLinkStyle : {}) }}>
+          <Link to={`${adminPrefix}/kitchen`} style={{ ...navLinkStyle, ...(isActive(`${adminPrefix}/kitchen`) ? activeNavLinkStyle : {}) }}>
             <ChefHat size={18} /> Monitor de Cocina
           </Link>
-          <Link to="/admin/staff" style={{ ...navLinkStyle, ...(isActive('/admin/staff') ? activeNavLinkStyle : {}) }}>
+          <Link to={`${adminPrefix}/staff`} style={{ ...navLinkStyle, ...(isActive(`${adminPrefix}/staff`) ? activeNavLinkStyle : {}) }}>
             <UserCog size={18} /> Gestión de Personal
           </Link>
         </>

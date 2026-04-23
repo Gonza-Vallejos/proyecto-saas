@@ -45,8 +45,14 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Panel Privado Protegido */}
-        <Route path="/admin" element={<AdminLayout />}>
+        {/* Panel Maestro para SuperAdmin */}
+        <Route path="/admin/master" element={<AdminLayout />}>
+           <Route index element={<StoreManagement />} />
+           <Route path="staff" element={<StaffManagement />} />
+        </Route>
+
+        {/* Panel de Tienda Específica */}
+        <Route path="/admin/:storeSlug" element={<AdminLayout />}>
           <Route index element={<AdminIndex />} />
           <Route path="categories" element={<Categories />} />
           <Route path="appearance" element={<Appearance />} />
@@ -59,6 +65,9 @@ function App() {
           <Route path="orders-history" element={<OrderHistory />} />
           <Route path="staff" element={<StaffManagement />} />
         </Route>
+
+        {/* Redirección inteligente de /admin */}
+        <Route path="/admin" element={<Navigate to={`/admin/${localStorage.getItem('last_active_slug') || 'login'}`} replace />} />
 
         <Route path="/waiter" element={<WaiterView />} />
 

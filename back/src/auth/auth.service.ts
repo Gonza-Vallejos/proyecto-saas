@@ -34,7 +34,10 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    const user = await this.prisma.user.findUnique({ 
+      where: { email: dto.email },
+      include: { store: true }
+    });
     if (!user) throw new UnauthorizedException('Credenciales inválidas');
 
     const isValid = await bcrypt.compare(dto.password, user.password);
@@ -50,6 +53,7 @@ export class AuthService {
     };
     return {
       access_token: this.jwtService.sign(payload),
+      slug: user.store?.slug || (user.role === 'SUPERADMIN' ? 'admin' : null)
     };
   }
 

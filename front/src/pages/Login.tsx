@@ -19,7 +19,16 @@ export default function Login() {
     try {
       const data = await api.post('/auth/login', { email, password });
       
-      // Guardamos el token
+      const slug = data.slug;
+      
+      // Guardamos el token (con clave específica para permitir multi-tienda)
+      if (slug) {
+        localStorage.setItem(`token_${slug}`, data.access_token);
+        // También guardamos el último slug activo para redirecciones rápidas si hace falta
+        localStorage.setItem('last_active_slug', slug);
+      }
+      
+      // Fallback para procesos que aún usen 'token' a secas
       localStorage.setItem('token', data.access_token);
       
       // Decodificar token para saber el rol (JWT payload es base64)
@@ -30,9 +39,11 @@ export default function Login() {
       if (payload.role === 'WAITER') {
         navigate('/waiter');
       } else if (payload.role === 'KITCHEN') {
-        navigate('/admin/kitchen');
+        navigate(`/admin/${slug}/kitchen`);
+      } else if (payload.role === 'SUPERADMIN') {
+        navigate('/admin/master');
       } else {
-        navigate('/admin');
+        navigate(`/admin/${slug}`);
       }
     } catch (err: any) {
       setError(err.message);

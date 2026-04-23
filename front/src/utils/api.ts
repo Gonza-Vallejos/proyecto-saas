@@ -4,9 +4,17 @@ interface RequestOptions extends RequestInit {
   body?: any;
 }
 
+let activeStoreSlug: string | null = null;
+
 export const api = {
+  setStoreContext(slug: string | null) {
+    activeStoreSlug = slug;
+  },
+
   async request(endpoint: string, options: RequestOptions = {}) {
-    const token = localStorage.getItem('token');
+    // Intentar obtener el token específico de la tienda, o el genérico como fallback
+    let token = activeStoreSlug ? localStorage.getItem(`token_${activeStoreSlug}`) : null;
+    if (!token) token = localStorage.getItem('token');
     
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
