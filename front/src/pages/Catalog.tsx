@@ -221,24 +221,81 @@ export default function Catalog() {
   }, [cartOpened, !!addingProduct]);
 
 
-  // Group products by category
+  // Group products by category with hierarchical filtering
   const groupedProducts = useMemo(() => {
     if (!store) return [];
     
-    // Organizar categorías: padres seguido de sus respectivos hijos
-    const orderedCats = store.categories
-      .filter(c => !c.parentId)
-      .flatMap(parent => [
-        parent,
-        ...store.categories.filter(child => child.parentId === parent.id)
-      ]);
-
-    return orderedCats.map(cat => ({
+    // Base de categorías con sus productos
+    const catsWithProducts = store.categories.map(cat => ({
       ...cat,
       products: store.products.filter(p => p.categoryId === cat.id)
     })).filter(cat => cat.products.length > 0);
+
+    if (selectedCategory === 'all') {
+      // Vista de "Todos": Orden jerárquico tradicional
+      const orderedCats = store.categories
+        .filter(c => !c.parentId)
+        .flatMap(parent => [
+          parent,
+          ...store.categories.filter(child => child.parentId === parent.id)
+        ]);
+
+      return orderedCats
+        .map(cat => catsWithProducts.find(cp => cp.id === cat.id))
+        .filter(Boolean) as any[];
+    }
+
+    // Vista filtrada: Determinar qué mostrar
+    const selectedCat = store.categories.find(c => c.id === selectedCategory);
+    if (!selectedCat) return [];
+
+    let targetIds: string[] = [];
+    if (!selectedCat.parentId) {
+      // Si seleccionó un PADRE, mostramos el padre + sus hijos
+      targetIds = [
+        selectedCat.id,
+        ...store.categories.filter(child => child.parentId === selectedCat.id).map(child => child.id)
+      ];
+    } else {
+      // Si seleccionó un HIJO, solo mostramos ese hijo
+      targetIds = [selectedCat.id];
+    }
+
+    // Devolver solo los grupos que coincidan con la selección, manteniendo el orden jerárquico
+    return catsWithProducts.filter(group => targetIds.includes(group.id));
+  }, [store, selectedCategory]);
+
+
+
+  // Categorías principales (Padres) que tienen contenido
+  const parentCategories = useMemo(() => {
+    if (!store) return [];
+    return store.categories.filter(c => !c.parentId && (
+      store.products.some(p => p.categoryId === c.id) ||
+      store.categories.some(child => child.parentId === c.id && store.products.some(p => p.categoryId === child.id))
+    ));
   }, [store]);
 
+  // Subcategorías de la categoría actualmente activa (si es padre) o de su padre (si es hijo)
+  const currentSubCategories = useMemo(() => {
+    if (!store || activeTab === 'all') return [];
+    
+    const activeCat = store.categories.find(c => c.id === activeTab);
+    const parentId = activeCat?.parentId || activeCat?.id;
+    
+    if (!parentId) return [];
+    
+    return store.categories.filter(c => c.parentId === parentId && store.products.some(p => p.categoryId === c.id));
+  }, [store, activeTab]);
+
+
+  const scrollToCategory = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    setActiveTab(categoryId);
+    
+    // Siempre scrolleamos arriba al cambiar el filtro para que se vea el inicio
+    window.scrollTo({ top: isMobile ? 300 : 450, behavior: 'smooth' });
+  };
 
 
   useEffect(() => {
@@ -247,6 +304,7 @@ export default function Catalog() {
       setScrollY(currentScrollY);
       setScrolled(currentScrollY > 50);
 
+      // Solo actualizar activeTab por scroll si estamos en vista "Todos"
       if (selectedCategory !== 'all') return;
 
       const sections = document.querySelectorAll('.category-section');
@@ -265,25 +323,7 @@ export default function Catalog() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [selectedCategory, store]);
 
-  const scrollToCategory = (categoryId: string) => {
-    setSelectedCategory(categoryId);
-    if (categoryId === 'all') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      const element = document.getElementById(`section-${categoryId}`);
-      if (element) {
-        // Obtenemos la posición del elemento y restamos el alto del header sticky
-        const rect = element.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const offset = isMobile ? 130 : 160; // Compensar header + nav de categorías
-        
-        window.scrollTo({
-          top: rect.top + scrollTop - offset,
-          behavior: 'smooth'
-        });
-      }
-    }
-  };
+
 
   const fetchCatalog = useCallback(async (isSilent = false) => {
     if (!isSilent) setLoading(true);
@@ -651,44 +691,85 @@ export default function Catalog() {
         position: 'sticky', 
         top: isMobile ? '60px' : '76px', 
         zIndex: 900, 
-        backgroundColor: 'rgba(255,255,255,0.95)', 
+        backgroundColor: 'rgba(255,255,255,0.98)', 
         backdropFilter: 'blur(10px)',
         borderBottom: '1px solid rgba(0,0,0,0.05)',
-        transition: 'all 0.3s ease'
+        transition: 'all 0.3s ease',
+        boxShadow: scrolled ? '0 4px 12px rgba(0,0,0,0.05)' : 'none'
       }}>
-        <Container size="xl" py="md">
-          <Box style={{ position: 'relative' }}>
+        <Container size="xl">
+          <Stack gap={0}>
+            {/* Fila 1: Categorías Principales */}
             <Group 
               ref={navRef}
               justify={isMobile ? 'flex-start' : 'center'} 
               gap="xs" 
+              py="sm"
               style={{ 
                 flexWrap: 'nowrap', 
                 overflowX: 'auto', 
-                paddingBottom: '5px',
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 paddingLeft: isMobile ? '5px' : '0'
               }}
             >
               <CategoryButton 
-                active={activeTab === 'all'} 
+                active={selectedCategory === 'all'} 
                 onClick={() => scrollToCategory('all')}
               >
                 Todos
               </CategoryButton>
-              {groupedProducts.map(cat => (
+              {parentCategories.map(cat => (
                 <CategoryButton 
                   key={cat.id}
-                  active={activeTab === cat.id} 
+                  active={selectedCategory === cat.id || store.categories.find(c => c.id === selectedCategory)?.parentId === cat.id} 
                   onClick={() => scrollToCategory(cat.id)}
                 >
                   {cat.name}
                 </CategoryButton>
               ))}
             </Group>
-            {/* Fade effect indicators removed for solid design */}
-          </Box>
+
+            {/* Fila 2: Subcategorías (Solo si hay una categoría padre seleccionada y tiene hijos) */}
+            {currentSubCategories.length > 0 && (
+              <Box style={{ 
+                borderTop: '1px solid rgba(0,0,0,0.03)',
+                backgroundColor: 'rgba(0,0,0,0.01)'
+              }}>
+                <Group 
+                  justify={isMobile ? 'flex-start' : 'center'} 
+                  gap="md" 
+                  py="xs"
+                  style={{ 
+                    flexWrap: 'nowrap', 
+                    overflowX: 'auto', 
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none'
+                  }}
+                >
+                  {currentSubCategories.map(sub => (
+                    <Text
+                      key={sub.id}
+                      size="sm"
+                      fw={selectedCategory === sub.id ? 700 : 500}
+                      onClick={() => scrollToCategory(sub.id)}
+                      style={{
+                        cursor: 'pointer',
+                        color: selectedCategory === sub.id ? 'var(--primary-color)' : '#64748b',
+                        padding: '4px 12px',
+                        borderRadius: '20px',
+                        backgroundColor: selectedCategory === sub.id ? 'rgba(14, 165, 233, 0.1)' : 'transparent',
+                        whiteSpace: 'nowrap',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      {sub.name}
+                    </Text>
+                  ))}
+                </Group>
+              </Box>
+            )}
+          </Stack>
         </Container>
       </Box>
 
