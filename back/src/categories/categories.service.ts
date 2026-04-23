@@ -7,12 +7,48 @@ export class CategoriesService {
 
   async create(storeId: string, name: string, parentId?: string) {
     const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+    
+    // Verificar si ya existe en esta tienda
+    const existing = await this.prisma.category.findFirst({
+      where: { storeId, slug }
+    });
+    
+    if (existing) {
+      throw new Error(`La categoría "${name}" ya existe.`);
+    }
+
     return this.prisma.category.create({
       data: {
         name,
         slug,
         storeId,
         parentId,
+      },
+    });
+  }
+
+  async update(storeId: string, id: string, name: string, parentId?: string | null) {
+    const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+    
+    const category = await this.prisma.category.findFirst({
+      where: { id, storeId },
+    });
+    if (!category) throw new NotFoundException('Categoría no encontrada');
+
+    // Verificar si el nuevo nombre choca con otra categoría
+    if (category.name !== name) {
+      const existing = await this.prisma.category.findFirst({
+        where: { storeId, slug }
+      });
+      if (existing) throw new Error(`Ya existe otra categoría llamada "${name}".`);
+    }
+
+    return this.prisma.category.update({
+      where: { id },
+      data: {
+        name,
+        slug,
+        parentId: parentId === 'none' ? null : parentId,
       },
     });
   }

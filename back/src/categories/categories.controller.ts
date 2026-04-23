@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards, Request, SetMetadata } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Request, SetMetadata, Patch } from '@nestjs/common';
 import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 import { CategoriesService } from './categories.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -28,6 +28,11 @@ export class CategoriesController {
   @Get()
   findAll(@Request() req: any) {
     return this.categoriesService.findAll(req.user.storeId);
+  }
+
+  @Patch(':id')
+  update(@Request() req: any, @Param('id') id: string, @Body() body: CreateCategoryDto) {
+    return this.categoriesService.update(req.user.storeId, id, body.name, body.parentId);
   }
 
   @Delete(':id')

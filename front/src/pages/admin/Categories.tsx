@@ -1,13 +1,13 @@
 import { useEffect, useState, Fragment } from 'react';
 import { Title, Text, TextInput, Button, Group, Stack, Card, ActionIcon, Center, Loader, Box, Select, Badge } from '@mantine/core';
-import { Plus, Trash2, LayoutGrid, AlertCircle, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, LayoutGrid, AlertCircle, ChevronRight, Pencil, X } from 'lucide-react';
 import { api } from '../../utils/api';
 import Swal from 'sweetalert2';
 
 interface Category {
   id: string;
   name: string;
-  parentId?: string;
+  parentId?: string | null;
   parent?: { name: string };
 }
 
@@ -17,6 +17,7 @@ export default function Categories() {
   const [parentId, setParentId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const loadData = async () => {
     try {
@@ -33,27 +34,43 @@ export default function Categories() {
     loadData();
   }, []);
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
     
     setCreating(true);
     try {
-      await api.post('/admin/categories', { name, parentId });
+      if (editingId) {
+        await api.patch(`/admin/categories/${editingId}`, { name, parentId: parentId || 'none' });
+        Swal.fire({ title: 'Categoría Actualizada', icon: 'success', timer: 1500, showConfirmButton: false });
+      } else {
+        await api.post('/admin/categories', { name, parentId });
+        Swal.fire({ title: 'Categoría Creada', icon: 'success', timer: 1500, showConfirmButton: false });
+      }
+      
       setName('');
       setParentId(null);
+      setEditingId(null);
       loadData();
-      Swal.fire({
-        title: 'Categoría Creada',
-        icon: 'success',
-        timer: 1500,
-        showConfirmButton: false
-      });
     } catch (e: any) {
+      // Si el error es manejado por el back (con mensaje legible), mostramos ese
       Swal.fire('Error', e.message, 'error');
     } finally {
       setCreating(false);
     }
+  };
+
+  const handleEdit = (cat: Category) => {
+    setEditingId(cat.id);
+    setName(cat.name);
+    setParentId(cat.parentId || null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setName('');
+    setParentId(null);
   };
 
   const handleDelete = async (id: string, catName: string) => {
@@ -94,7 +111,10 @@ export default function Categories() {
   );
 
   // Solo permitir asignar como padre a categorías que NO son subcategorías ellas mismas (máximo 1 nivel)
-  const potentialParents = categories.filter(c => !c.parentId).map(c => ({ value: c.id, label: c.name }));
+  // Y evitar que una categoría sea su propio padre durante la edición
+  const potentialParents = categories
+    .filter(c => !c.parentId && c.id !== editingId)
+    .map(c => ({ value: c.id, label: c.name }));
 
   return (
     <Box style={{ maxWidth: '800px', animation: 'fadeUp 0.5s ease-out' }}>
@@ -111,13 +131,19 @@ export default function Categories() {
         </div>
       </Group>
 
-      {/* Formulario de Creación */}
-      <Card withBorder radius="md" p="xl" shadow="sm" mb="2.5rem">
-        <form onSubmit={handleCreate}>
+      {/* Formulario de Creación/Edición */}
+      <Card withBorder radius="md" p="xl" shadow="sm" mb="2.5rem" style={{ 
+        borderColor: editingId ? 'var(--mantine-color-blue-4)' : undefined,
+        backgroundColor: editingId ? '#f0f9ff' : undefined
+      }}>
+        <form onSubmit={handleSubmit}>
           <Stack gap="md">
+            <Text fw={700} color={editingId ? 'blue' : 'dark'}>
+              {editingId ? 'Editando Categoría' : 'Crear Nueva Categoría'}
+            </Text>
             <Group align="flex-end">
               <TextInput 
-                label="Nombre de la nueva categoría"
+                label="Nombre de la categoría"
                 placeholder="Ej. Hamburguesas, Cervezas, Entradas..."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -139,17 +165,31 @@ export default function Categories() {
                 searchable
               />
             </Group>
-            <Button 
-                type="submit" 
-                leftSection={<Plus size={18} />} 
-                loading={creating}
-                disabled={!name.trim()}
-                size="md"
-                radius="md"
-                fullWidth
-              >
-                Crear Categoría
+            <Group grow>
+              {editingId && (
+                <Button 
+                  variant="light" 
+                  color="gray" 
+                  onClick={cancelEdit}
+                  leftSection={<X size={18} />}
+                  size="md"
+                  radius="md"
+                >
+                  Cancelar
+                </Button>
+              )}
+              <Button 
+                  type="submit" 
+                  leftSection={editingId ? <Pencil size={18} /> : <Plus size={18} />} 
+                  loading={creating}
+                  disabled={!name.trim()}
+                  color={editingId ? 'blue' : undefined}
+                  size="md"
+                  radius="md"
+                >
+                  {editingId ? 'Guardar Cambios' : 'Crear Categoría'}
               </Button>
+            </Group>
           </Stack>
         </form>
       </Card>
@@ -178,7 +218,7 @@ export default function Categories() {
               // Mostrar primero padres, luego sus hijos
               [...categories.filter(c => !c.parentId)].map(parent => (
                 <Fragment key={parent.id}>
-                  <tr style={{ borderBottom: '1px solid #f1f5f9', background: '#fcfcfc' }}>
+                  <tr style={{ borderBottom: '1px solid #f1f5f9', background: editingId === parent.id ? '#f0f9ff' : '#fcfcfc' }}>
                     <td style={tdStyle}>
                       <Text fw={700} color="#0f172a">{parent.name}</Text>
                     </td>
@@ -186,18 +226,28 @@ export default function Categories() {
                        <Badge color="blue" variant="light" radius="sm">Principal</Badge>
                     </td>
                     <td style={{ ...tdStyle, textAlign: 'center' }}>
-                      <ActionIcon 
-                        variant="subtle" 
-                        color="red" 
-                        onClick={() => handleDelete(parent.id, parent.name)}
-                        size="lg"
-                      >
-                        <Trash2 size={18} />
-                      </ActionIcon>
+                      <Group gap="xs" justify="center">
+                        <ActionIcon 
+                          variant="subtle" 
+                          color="blue" 
+                          onClick={() => handleEdit(parent)}
+                          size="lg"
+                        >
+                          <Pencil size={18} />
+                        </ActionIcon>
+                        <ActionIcon 
+                          variant="subtle" 
+                          color="red" 
+                          onClick={() => handleDelete(parent.id, parent.name)}
+                          size="lg"
+                        >
+                          <Trash2 size={18} />
+                        </ActionIcon>
+                      </Group>
                     </td>
                   </tr>
                   {categories.filter(c => c.parentId === parent.id).map(child => (
-                    <tr key={child.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <tr key={child.id} style={{ borderBottom: '1px solid #f1f5f9', background: editingId === child.id ? '#f0f9ff' : undefined }}>
                       <td style={{ ...tdStyle, paddingLeft: '3rem' }}>
                         <Group gap="xs">
                           <ChevronRight size={14} color="#94a3b8" />
@@ -208,14 +258,24 @@ export default function Categories() {
                          <Badge color="gray" variant="outline" radius="sm">Subcategoría</Badge>
                       </td>
                       <td style={{ ...tdStyle, textAlign: 'center' }}>
-                        <ActionIcon 
-                          variant="subtle" 
-                          color="red" 
-                          onClick={() => handleDelete(child.id, child.name)}
-                          size="lg"
-                        >
-                          <Trash2 size={18} />
-                        </ActionIcon>
+                        <Group gap="xs" justify="center">
+                          <ActionIcon 
+                            variant="subtle" 
+                            color="blue" 
+                            onClick={() => handleEdit(child)}
+                            size="lg"
+                          >
+                            <Pencil size={18} />
+                          </ActionIcon>
+                          <ActionIcon 
+                            variant="subtle" 
+                            color="red" 
+                            onClick={() => handleDelete(child.id, child.name)}
+                            size="lg"
+                          >
+                            <Trash2 size={18} />
+                          </ActionIcon>
+                        </Group>
                       </td>
                     </tr>
                   ))}
