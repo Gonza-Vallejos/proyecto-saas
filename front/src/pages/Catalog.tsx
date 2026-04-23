@@ -798,7 +798,7 @@ export default function Catalog() {
                   cols={store.cardStyle === 'horizontal' ? { base: 1, md: 2 } : { base: 1, sm: 2, lg: 3 }} 
                   spacing={isMobile ? "md" : "xl"}
                 >
-                  {group.products.map((p) => (
+                  {group.products.map((p: any) => (
                     <RenderProductCard 
                       key={p.id} 
                       product={p} 
