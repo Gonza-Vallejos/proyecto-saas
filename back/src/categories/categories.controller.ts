@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Param, Delete, UseGuards, Request, SetMetadata } from '@nestjs/common';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 import { CategoriesService } from './categories.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -8,6 +8,10 @@ export class CreateCategoryDto {
   @IsString()
   @IsNotEmpty({ message: 'El nombre de la categoría es requerido' })
   name!: string;
+
+  @IsString()
+  @IsOptional()
+  parentId?: string;
 }
 
 @Controller('admin/categories')
@@ -18,7 +22,7 @@ export class CategoriesController {
 
   @Post()
   create(@Request() req: any, @Body() body: CreateCategoryDto) {
-    return this.categoriesService.create(req.user.storeId, body.name);
+    return this.categoriesService.create(req.user.storeId, body.name, body.parentId);
   }
 
   @Get()

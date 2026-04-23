@@ -5,13 +5,14 @@ import { PrismaService } from '../prisma/prisma.service';
 export class CategoriesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(storeId: string, name: string) {
+  async create(storeId: string, name: string, parentId?: string) {
     const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
     return this.prisma.category.create({
       data: {
         name,
         slug,
         storeId,
+        parentId,
       },
     });
   }
@@ -19,6 +20,7 @@ export class CategoriesService {
   async findAll(storeId: string) {
     return this.prisma.category.findMany({
       where: { storeId },
+      include: { parent: true },
       orderBy: { name: 'asc' },
     });
   }

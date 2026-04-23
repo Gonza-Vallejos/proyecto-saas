@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import Swal from 'sweetalert2';
 import { useParams } from 'react-router-dom';
 import { useMediaQuery } from '@mantine/hooks';
@@ -44,6 +44,7 @@ import { socket } from '../utils/socket';
 interface Category {
   id: string;
   name: string;
+  parentId?: string | null;
 }
 
 interface ModifierOption {
@@ -185,10 +186,22 @@ export default function Catalog() {
 
 
   // Group products by category
-  const groupedProducts = store ? store.categories.map(cat => ({
-    ...cat,
-    products: store.products.filter(p => p.categoryId === cat.id)
-  })).filter(cat => cat.products.length > 0) : [];
+  const groupedProducts = useMemo(() => {
+    if (!store) return [];
+    
+    // Organizar categorías: padres seguido de sus respectivos hijos
+    const orderedCats = store.categories
+      .filter(c => !c.parentId)
+      .flatMap(parent => [
+        parent,
+        ...store.categories.filter(child => child.parentId === parent.id)
+      ]);
+
+    return orderedCats.map(cat => ({
+      ...cat,
+      products: store.products.filter(p => p.categoryId === cat.id)
+    })).filter(cat => cat.products.length > 0);
+  }, [store]);
 
   const [activeTab, setActiveTab] = useState('all');
 
@@ -653,9 +666,16 @@ export default function Catalog() {
           <Stack gap="4rem">
             {groupedProducts.map(group => (
               <Box key={group.id} id={`section-${group.id}`} className="category-section" style={{ scrollMarginTop: '160px' }}>
-                <Title order={2} mb="xl" style={{ borderLeft: `4px solid var(--primary-color)`, paddingLeft: '1rem', color: 'var(--text-color)' }}>
-                  {group.name}
-                </Title>
+                <Group gap="xs" mb="xl" style={{ borderLeft: `4px solid var(--primary-color)`, paddingLeft: '1rem' }}>
+                   {group.parentId && (
+                     <Text color="dimmed" fw={500} size="sm" tt="uppercase" style={{ letterSpacing: '1px' }}>
+                       {store?.categories.find(c => c.id === group.parentId)?.name} › 
+                     </Text>
+                   )}
+                   <Title order={2} style={{ color: 'var(--text-color)' }}>
+                     {group.name}
+                   </Title>
+                </Group>
                 <SimpleGrid 
                   cols={store.cardStyle === 'horizontal' ? { base: 1, md: 2 } : { base: 1, sm: 2, lg: 3 }} 
                   spacing={isMobile ? "md" : "xl"}

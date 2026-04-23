@@ -84,6 +84,11 @@ model Category {
   // Relacion con productos
   products  Product[]
 
+  // Relación para subcategorías
+  parentId  String?
+  parent    Category?  @relation("SubCategories", fields: [parentId], references: [id])
+  children  Category[] @relation("SubCategories")
+  
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 

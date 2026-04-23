@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 interface Category {
   id: string;
   name: string;
+  parentId?: string | null;
 }
 
 interface Product {
@@ -165,12 +166,20 @@ export default function Products() {
             leftSection={<Filter size={16} color="#94a3b8" />}
             data={[
               { value: 'all', label: 'Todas las categorías' },
-              ...categories.map(c => ({ value: c.id, label: c.name }))
+              ...categories
+                .filter(c => !c.parentId)
+                .flatMap(parent => [
+                  { value: parent.id, label: parent.name },
+                  ...categories
+                    .filter(child => child.parentId === parent.id)
+                    .map(child => ({ value: child.id, label: `↳ ${child.name}` }))
+                ])
             ]}
             value={categoryFilter}
             onChange={(val) => setCategoryFilter(val)}
             radius="md"
             style={{ minWidth: '220px' }}
+            searchable
           />
           <Select
             label="Disponibilidad"
@@ -350,11 +359,20 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
           <Select 
             label="Categoría" 
             placeholder="Seleccionar..."
-            data={categories.map((c: any) => ({ value: c.id, label: c.name }))} 
+            data={categories
+              .filter((c: any) => !c.parentId)
+              .flatMap((parent: any) => [
+                { value: parent.id, label: parent.name },
+                ...categories
+                  .filter((child: any) => child.parentId === parent.id)
+                  .map((child: any) => ({ value: child.id, label: `↳ ${child.name}` }))
+              ])
+            } 
             value={categoryId} 
             onChange={(val) => setCategoryId(val)} 
             clearable 
             radius="md"
+            searchable
           />
         </Group>
 
