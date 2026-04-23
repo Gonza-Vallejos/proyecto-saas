@@ -702,7 +702,7 @@ export default function Catalog() {
             {/* Fila 1: Categorías Principales */}
             <Group 
               ref={navRef}
-              justify={isMobile ? 'flex-start' : 'center'} 
+              justify="flex-start" 
               gap="xs" 
               py="sm"
               style={{ 
@@ -710,7 +710,8 @@ export default function Catalog() {
                 overflowX: 'auto', 
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
-                paddingLeft: isMobile ? '5px' : '0'
+                paddingLeft: '1rem',
+                paddingRight: '1rem'
               }}
             >
               <CategoryButton 
@@ -734,12 +735,13 @@ export default function Catalog() {
             {currentSubCategories.length > 0 && (
               <Box style={{ 
                 borderTop: '1px solid rgba(0,0,0,0.03)',
-                backgroundColor: 'rgba(0,0,0,0.01)'
+                backgroundColor: 'rgba(0,0,0,0.02)',
+                padding: '8px 0'
               }}>
                 <Group 
-                  justify={isMobile ? 'flex-start' : 'center'} 
-                  gap="md" 
-                  py="xs"
+                  justify="flex-start" 
+                  gap="sm" 
+                  px="md"
                   style={{ 
                     flexWrap: 'nowrap', 
                     overflowX: 'auto', 
@@ -748,23 +750,23 @@ export default function Catalog() {
                   }}
                 >
                   {currentSubCategories.map(sub => (
-                    <Text
+                    <Button
                       key={sub.id}
-                      size="sm"
-                      fw={selectedCategory === sub.id ? 700 : 500}
+                      variant={selectedCategory === sub.id ? 'filled' : 'subtle'}
+                      size="compact-xs"
+                      radius="xl"
+                      color={selectedCategory === sub.id ? 'var(--primary-color)' : 'gray'}
                       onClick={() => scrollToCategory(sub.id)}
                       style={{
-                        cursor: 'pointer',
-                        color: selectedCategory === sub.id ? 'var(--primary-color)' : '#64748b',
-                        padding: '4px 12px',
-                        borderRadius: '20px',
-                        backgroundColor: selectedCategory === sub.id ? 'rgba(14, 165, 233, 0.1)' : 'transparent',
+                        height: '28px',
+                        fontSize: '0.75rem',
+                        fontWeight: selectedCategory === sub.id ? 700 : 500,
                         whiteSpace: 'nowrap',
                         transition: 'all 0.2s'
                       }}
                     >
                       {sub.name}
-                    </Text>
+                    </Button>
                   ))}
                 </Group>
               </Box>
