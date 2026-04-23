@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import Swal from 'sweetalert2';
 import { useParams } from 'react-router-dom';
 import { useMediaQuery } from '@mantine/hooks';
@@ -134,6 +134,25 @@ const formatPrice = (value: number) => {
   }).format(value);
 };
 
+const CategoryButton = ({ active, children, onClick, id }: any) => (
+  <Button 
+    id={id}
+    data-active={active}
+    variant={active ? 'filled' : 'light'} 
+    color={active ? 'var(--primary-color)' : 'gray'}
+    radius="xl"
+    onClick={onClick}
+    style={{ 
+      transition: 'all 0.3s ease',
+      transform: active ? 'scale(1.05)' : 'scale(1)',
+      flexShrink: 0,
+      boxShadow: active ? '0 4px 12px rgba(0,0,0,0.1)' : 'none'
+    }}
+  >
+    {children}
+  </Button>
+);
+
 export default function Catalog() {
   const { slug } = useParams();
   const [store, setStore] = useState<Store | null>(null);
@@ -142,6 +161,7 @@ export default function Catalog() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [scrolled, setScrolled] = useState(false);
   const [scrollY, setScrollY] = useState(0);
+  const navRef = useRef<HTMLDivElement>(null);
   
   // Cart State
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -158,6 +178,20 @@ export default function Catalog() {
     const savedName = localStorage.getItem('siit_customer_name');
     if (savedName) setCustomerName(savedName);
   }, []);
+
+  // Auto scroll el navbar para mostrar la categoria activa
+  useEffect(() => {
+    if (navRef.current) {
+      const activeButton = navRef.current.querySelector('[data-active="true"]');
+      if (activeButton) {
+        activeButton.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'center'
+        });
+      }
+    }
+  }, [activeTab]);
 
   // Historial para el botón atrás del celular
   useEffect(() => {
@@ -623,6 +657,7 @@ export default function Catalog() {
         <Container size="xl" py="md">
           <Box style={{ position: 'relative' }}>
             <Group 
+              ref={navRef}
               justify={isMobile ? 'flex-start' : 'center'} 
               gap="xs" 
               style={{ 
@@ -640,7 +675,7 @@ export default function Catalog() {
               >
                 Todos
               </CategoryButton>
-              {store.categories.map(cat => (
+              {groupedProducts.map(cat => (
                 <CategoryButton 
                   key={cat.id}
                   active={activeTab === cat.id} 
