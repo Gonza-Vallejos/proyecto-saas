@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Title, Text, Button, Card, Group, Stack, Table, ActionIcon, Tooltip, Modal, TextInput, PasswordInput, Select, Badge, Box, SimpleGrid, Paper } from '@mantine/core';
 import { Plus, Trash2, User, ShieldCheck } from 'lucide-react';
 import { api } from '../../utils/api';
+import { useOutletContext } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 interface StaffUser {
@@ -12,6 +13,7 @@ interface StaffUser {
 }
 
 export default function StaffManagement() {
+  const { storeData } = useOutletContext<{ storeData: any }>();
   const [staff, setStaff] = useState<StaffUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpened, setModalOpened] = useState(false);
@@ -21,6 +23,12 @@ export default function StaffManagement() {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'WAITER' | 'KITCHEN' | 'CASHIER'>('WAITER');
+
+  useEffect(() => {
+    if (storeData && !storeData.hasOrderManagement) {
+      setRole('CASHIER');
+    }
+  }, [storeData]);
 
   useEffect(() => {
     fetchStaff();
@@ -92,7 +100,7 @@ export default function StaffManagement() {
       <Group justify="space-between" mb="2.5rem">
         <div>
           <Title order={2}>Gestión de Personal</Title>
-          <Text color="dimmed" size="sm">Administra los accesos para tus mozos y cocineros.</Text>
+          <Text color="dimmed" size="sm">Administra los accesos para tus mozos, cocineros y cajeros.</Text>
         </div>
         <Button 
           leftSection={<Plus size={18} />} 
@@ -105,26 +113,41 @@ export default function StaffManagement() {
         </Button>
       </Group>
 
-      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg" mb="xl">
+      <SimpleGrid cols={{ base: 1, sm: storeData?.hasOrderManagement ? 3 : 1 }} spacing="lg" mb="xl">
+        {storeData?.hasOrderManagement && (
+          <>
+            <Paper withBorder p="md" radius="md">
+              <Group>
+                <Box bg="violet.0" p="xs" style={{ borderRadius: '8px' }}>
+                  <User size={24} color="#8b5cf6" />
+                </Box>
+                <div>
+                  <Text size="xs" color="dimmed" fw={700} tt="uppercase">Mozos Activos</Text>
+                  <Text fw={700} size="xl">{staff.filter(u => u.role === 'WAITER').length}</Text>
+                </div>
+              </Group>
+            </Paper>
+            <Paper withBorder p="md" radius="md">
+              <Group>
+                <Box bg="orange.0" p="xs" style={{ borderRadius: '8px' }}>
+                  <ShieldCheck size={24} color="#f59e0b" />
+                </Box>
+                <div>
+                  <Text size="xs" color="dimmed" fw={700} tt="uppercase">Equipo de Cocina</Text>
+                  <Text fw={700} size="xl">{staff.filter(u => u.role === 'KITCHEN').length}</Text>
+                </div>
+              </Group>
+            </Paper>
+          </>
+        )}
         <Paper withBorder p="md" radius="md">
           <Group>
-            <Box bg="violet.0" p="xs" style={{ borderRadius: '8px' }}>
-              <User size={24} color="#8b5cf6" />
+            <Box bg="blue.0" p="xs" style={{ borderRadius: '8px' }}>
+              <Plus size={24} color="#3b82f6" />
             </Box>
             <div>
-              <Text size="xs" color="dimmed" fw={700} tt="uppercase">Mozos Activos</Text>
-              <Text fw={700} size="xl">{staff.filter(u => u.role === 'WAITER').length}</Text>
-            </div>
-          </Group>
-        </Paper>
-        <Paper withBorder p="md" radius="md">
-          <Group>
-            <Box bg="orange.0" p="xs" style={{ borderRadius: '8px' }}>
-              <ShieldCheck size={24} color="#f59e0b" />
-            </Box>
-            <div>
-              <Text size="xs" color="dimmed" fw={700} tt="uppercase">Equipo de Cocina</Text>
-              <Text fw={700} size="xl">{staff.filter(u => u.role === 'KITCHEN').length}</Text>
+              <Text size="xs" color="dimmed" fw={700} tt="uppercase">Cajeros / POS</Text>
+              <Text fw={700} size="xl">{staff.filter(u => u.role === 'CASHIER').length}</Text>
             </div>
           </Group>
         </Paper>
@@ -176,9 +199,11 @@ export default function StaffManagement() {
           <PasswordInput label="Contraseña" value={password} onChange={e => setPassword(e.target.value)} required />
           <Select 
             label="Asignar Rol" 
-            data={[
+            data={storeData?.hasOrderManagement ? [
               { value: 'WAITER', label: 'Mozo / Mesero' },
               { value: 'KITCHEN', label: 'Personal de Cocina' },
+              { value: 'CASHIER', label: 'Cajero / Vendedor' }
+            ] : [
               { value: 'CASHIER', label: 'Cajero / Vendedor' }
             ]} 
             value={role} 

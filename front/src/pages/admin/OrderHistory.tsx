@@ -89,7 +89,10 @@ export default function OrderHistory() {
     total: orders.filter(o => o.status !== 'CANCELLED').reduce((acc, o) => acc + o.total, 0),
     count: orders.length,
     paid: orders.filter(o => o.status === 'PAID').length,
-    cancelled: orders.filter(o => o.status === 'CANCELLED').length
+    cancelled: orders.filter(o => o.status === 'CANCELLED').length,
+    whatsappSales: orders.filter(o => o.status === 'PAID' && o.origin === 'WHATSAPP').reduce((acc, o) => acc + o.total, 0),
+    posSales: orders.filter(o => o.status === 'PAID' && o.origin === 'POS').reduce((acc, o) => acc + o.total, 0),
+    tableSales: orders.filter(o => o.status === 'PAID' && o.origin === 'TABLE').reduce((acc, o) => acc + o.total, 0),
   };
 
   return (
@@ -170,7 +173,7 @@ export default function OrderHistory() {
       </Paper>
 
       {/* Stats Summary */}
-      <SimpleGrid cols={{ base: 1, sm: 4 }} mb="xl">
+      <SimpleGrid cols={{ base: 1, sm: 4 }} mb="md">
         <Paper withBorder p="sm" radius="md">
           <Text size="xs" color="dimmed" fw={700} tt="uppercase">Facturación Total</Text>
           <Text fw={700} size="xl" color="blue.7">$ {stats.total.toLocaleString()}</Text>
@@ -186,6 +189,22 @@ export default function OrderHistory() {
         <Paper withBorder p="sm" radius="md">
           <Text size="xs" color="dimmed" fw={700} tt="uppercase">Cancelados</Text>
           <Text fw={700} size="xl" color="red.7">{stats.cancelled}</Text>
+        </Paper>
+      </SimpleGrid>
+
+      {/* Breakdown by Channel (Row 2) */}
+      <SimpleGrid cols={{ base: 1, sm: 3 }} mb="xl">
+        <Paper withBorder p="sm" radius="md" bg="green.0">
+          <Text size="xs" color="green.9" fw={700} tt="uppercase">Ventas WhatsApp / Tienda</Text>
+          <Text fw={700} size="lg" color="green.9">$ {stats.whatsappSales.toLocaleString()}</Text>
+        </Paper>
+        <Paper withBorder p="sm" radius="md" bg="indigo.0">
+          <Text size="xs" color="indigo.9" fw={700} tt="uppercase">Ventas Caja (POS)</Text>
+          <Text fw={700} size="lg" color="indigo.9">$ {stats.posSales.toLocaleString()}</Text>
+        </Paper>
+        <Paper withBorder p="sm" radius="md" bg="blue.0">
+          <Text size="xs" color="blue.9" fw={700} tt="uppercase">Ventas de Salón (Mesas)</Text>
+          <Text fw={700} size="lg" color="blue.9">$ {stats.tableSales.toLocaleString()}</Text>
         </Paper>
       </SimpleGrid>
 
