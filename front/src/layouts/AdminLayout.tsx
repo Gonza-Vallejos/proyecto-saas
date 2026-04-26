@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Navigate, useNavigate, Link, useLocation, useParams } from 'react-router-dom';
-import { Store, Package, LogOut, Settings, ExternalLink, LayoutGrid, Palette, Bell, User, KeyRound, Menu as MenuIcon, QrCode, Sandwich, Utensils, ChefHat, UserCog, MessageSquare, History } from 'lucide-react';
+import { Store, Package, LogOut, Settings, ExternalLink, LayoutGrid, Palette, Bell, User, KeyRound, Menu as MenuIcon, QrCode, Sandwich, Utensils, ChefHat, UserCog, MessageSquare, History, MonitorSmartphone } from 'lucide-react';
 import { Avatar, Text, Group, Badge, Indicator, Tooltip, Stack, ActionIcon, Menu, Modal, TextInput, PasswordInput, Button, Drawer, Divider } from '@mantine/core';
 import { api } from '../utils/api';
 import Swal from 'sweetalert2';
@@ -9,7 +9,7 @@ interface UserProfile {
   id: string;
   email: string;
   name?: string;
-  role: 'SUPERADMIN' | 'STORE_ADMIN' | 'WAITER';
+  role: 'SUPERADMIN' | 'STORE_ADMIN' | 'WAITER' | 'CASHIER';
   storeId?: string;
 }
 
@@ -17,7 +17,7 @@ export default function AdminLayout() {
   const { storeSlug } = useParams();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [storeData, setStoreData] = useState<{ slug: string, logoUrl?: string, name: string, hasModifiers?: boolean, hasOrderManagement?: boolean, hasWhatsAppOrders?: boolean } | null>(null);
+  const [storeData, setStoreData] = useState<{ slug: string, logoUrl?: string, name: string, hasModifiers?: boolean, hasOrderManagement?: boolean, hasWhatsAppOrders?: boolean, hasPOS?: boolean } | null>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const navigate = useNavigate();
@@ -146,8 +146,27 @@ export default function AdminLayout() {
         <Store size={18} /> Gestión de Tiendas
       </Link>
     </>
+  ) : user.role === 'CASHIER' ? (
+    <>
+      <Link to={`${adminPrefix}/pos`} style={{ ...navLinkStyle, ...(isActive(`${adminPrefix}/pos`) ? activeNavLinkStyle : {}) }}>
+        <MonitorSmartphone size={18} /> Punto de Venta
+      </Link>
+      <Link to={`${adminPrefix}/orders-history`} style={{ ...navLinkStyle, ...(isActive(`${adminPrefix}/orders-history`) ? activeNavLinkStyle : {}) }}>
+        <History size={18} /> Historial de Pedidos
+      </Link>
+      {storeData?.hasWhatsAppOrders && (
+        <Link to={`${adminPrefix}/orders-online`} style={{ ...navLinkStyle, ...(isActive(`${adminPrefix}/orders-online`) ? activeNavLinkStyle : {}) }}>
+          <MessageSquare size={18} /> Pedidos WhatsApp
+        </Link>
+      )}
+    </>
   ) : (
     <>
+      {storeData?.hasPOS && (
+        <Link to={`${adminPrefix}/pos`} style={{ ...navLinkStyle, ...(isActive(`${adminPrefix}/pos`) ? activeNavLinkStyle : {}) }}>
+          <MonitorSmartphone size={18} /> Punto de Venta
+        </Link>
+      )}
       <Link to={adminPrefix} style={{ ...navLinkStyle, ...(isActive(adminPrefix) ? activeNavLinkStyle : {}) }}>
         <Package size={18} /> Mis Productos
       </Link>

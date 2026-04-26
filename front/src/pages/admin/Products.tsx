@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, Image as ImageIcon, Edit3, Boxes, Search, Filter, X } from 'lucide-react';
+import { Plus, Trash2, Image as ImageIcon, Edit3, Boxes, Search, Filter, X, Barcode } from 'lucide-react';
 import { Modal, Button, TextInput, NumberInput, Select, MultiSelect, Textarea, Group, ActionIcon, Tooltip, Switch, Badge, Text, Stack, Box, Title, Card, Transition } from '@mantine/core';
 import FileUploader from '../../components/FileUploader';
 import { api } from '../../utils/api';
@@ -21,6 +21,7 @@ interface Product {
   category?: Category;
   trackStock: boolean;
   stock: number;
+  barcode?: string;
 }
 
 export default function Products() {
@@ -229,6 +230,7 @@ export default function Products() {
                     <Stack gap={2}>
                       <Text fw={700} size="sm" color="#1e293b">{p.name}</Text>
                       {p.description && <Text size="xs" color="dimmed" lineClamp={1} style={{ maxWidth: '300px' }}>{p.description}</Text>}
+                      {p.barcode && <Group gap="xs"><Barcode size={12} color="#94a3b8" /><Text size="xs" color="dimmed">{p.barcode}</Text></Group>}
                     </Stack>
                   </td>
                   {storeInfo?.hasStockControl && (
@@ -299,6 +301,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
   const [modifierGroupIds, setModifierGroupIds] = useState<string[]>([]);
   const [trackStock, setTrackStock] = useState(false);
   const [stock, setStock] = useState<number | string>(0);
+  const [barcode, setBarcode] = useState('');
 
   useEffect(() => {
     if (product) {
@@ -310,6 +313,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
       setModifierGroupIds(product.modifierGroups ? product.modifierGroups.map((mg: any) => mg.modifierGroupId) : []);
       setTrackStock(product.trackStock || false);
       setStock(product.stock || 0);
+      setBarcode(product.barcode || '');
     } else {
       setName('');
       setPrice(0);
@@ -319,6 +323,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
       setModifierGroupIds([]);
       setTrackStock(false);
       setStock(0);
+      setBarcode('');
     }
   }, [product, opened]);
 
@@ -335,15 +340,26 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
       }}
     >
       <Stack gap="lg" p="xs">
-        <TextInput 
-          label="Nombre del Producto" 
-          description="Escribe un nombre llamativo para el menú"
-          value={name} 
-          onChange={e => setName(e.target.value)} 
-          required 
-          placeholder="Ej: Hamburguesa con Queso" 
-          radius="md"
-        />
+        <Group grow align="flex-start">
+          <TextInput 
+            label="Nombre del Producto" 
+            description="Escribe un nombre llamativo para el menú"
+            value={name} 
+            onChange={e => setName(e.target.value)} 
+            required 
+            placeholder="Ej: Hamburguesa con Queso" 
+            radius="md"
+          />
+          <TextInput 
+            label="Código de Barras" 
+            description="Opcional. Para el escáner del mostrador"
+            value={barcode} 
+            onChange={e => setBarcode(e.target.value)} 
+            placeholder="Ej: 7791234567890" 
+            radius="md"
+            leftSection={<Barcode size={16} />}
+          />
+        </Group>
         
         <Group grow align="flex-start">
           <NumberInput 
@@ -446,7 +462,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
           <Button 
             size="md" 
             radius="md" 
-            onClick={() => onSubmit({ name, price, description, imageUrl, categoryId, modifierGroupIds, trackStock, stock })}
+            onClick={() => onSubmit({ name, price, description, imageUrl, categoryId, modifierGroupIds, trackStock, stock, barcode })}
             style={{ paddingLeft: '2rem', paddingRight: '2rem' }}
           >
             {product ? 'Guardar Cambios' : 'Crear Producto'}

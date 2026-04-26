@@ -8,7 +8,7 @@ interface StaffUser {
   id: string;
   email: string;
   name: string;
-  role: 'WAITER' | 'KITCHEN';
+  role: 'WAITER' | 'KITCHEN' | 'CASHIER';
 }
 
 export default function StaffManagement() {
@@ -20,7 +20,7 @@ export default function StaffManagement() {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'WAITER' | 'KITCHEN'>('WAITER');
+  const [role, setRole] = useState<'WAITER' | 'KITCHEN' | 'CASHIER'>('WAITER');
 
   useEffect(() => {
     fetchStaff();
@@ -79,9 +79,10 @@ export default function StaffManagement() {
   };
 
   const getRoleBadge = (role: string) => {
-    return role === 'WAITER' 
-      ? <Badge color="violet" variant="light">Mozo / Mesero</Badge>
-      : <Badge color="orange" variant="light">Cocinero</Badge>;
+    if (role === 'WAITER') return <Badge color="violet" variant="light">Mozo / Mesero</Badge>;
+    if (role === 'KITCHEN') return <Badge color="orange" variant="light">Cocinero</Badge>;
+    if (role === 'CASHIER') return <Badge color="indigo" variant="light">Cajero / Vendedor</Badge>;
+    return <Badge color="gray" variant="light">{role}</Badge>;
   };
 
   if (loading) return <div className="loader-container">Convocando al equipo...</div>;
@@ -177,7 +178,8 @@ export default function StaffManagement() {
             label="Asignar Rol" 
             data={[
               { value: 'WAITER', label: 'Mozo / Mesero' },
-              { value: 'KITCHEN', label: 'Personal de Cocina' }
+              { value: 'KITCHEN', label: 'Personal de Cocina' },
+              { value: 'CASHIER', label: 'Cajero / Vendedor' }
             ]} 
             value={role} 
             onChange={(val) => setRole(val as any)} 

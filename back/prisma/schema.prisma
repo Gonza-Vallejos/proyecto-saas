@@ -47,6 +47,13 @@ model Store {
   hasConnectivity Boolean @default(false)     // Módulo: WiFi y Conectividad
   hasOrderManagement Boolean @default(false)  // Módulo: Gestión de Mesas y Pedidos
   hasWhatsAppOrders Boolean @default(false)   // Módulo: Pedidos por WhatsApp (Configuración SuperAdmin)
+  hasPOS           Boolean @default(false)    // Módulo: Punto de Venta en mostrador
+  hasMercadoPago   Boolean @default(false)    // Módulo: Integración con Mercado Pago
+  
+  // Integraciones
+  mercadoPagoAccessToken String?
+  mercadoPagoPublicKey   String?
+
   wifiSSID       String?                      // Nombre de la red WiFi
   wifiPassword   String?                      // Contraseña de la red WiFi
   logoUrl        String?                      // Opcional
@@ -103,6 +110,7 @@ model Product {
   imageUrl    String?
   trackStock  Boolean  @default(false)    // Indica si este producto puntual controla stock
   stock       Int      @default(0)        // Cantidad disponible
+  barcode     String?                     // Código de barras para Punto de Venta
   
   // Relacion con categoria
   categoryId  String?
@@ -120,6 +128,8 @@ model Product {
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, barcode]) // Código de barras único por tienda
 }
 
 model ModifierGroup {

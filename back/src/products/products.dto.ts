@@ -31,6 +31,10 @@ export class CreateProductDto {
   @IsString({ each: true, message: 'Cada ID de modificador debe ser un texto.' })
   @IsOptional()
   modifierGroupIds?: string[];
+
+  @IsString({ message: 'El código de barras debe ser un texto.' })
+  @IsOptional()
+  barcode?: string;
 }
 
 export class UpdateProductDto {
@@ -66,4 +70,8 @@ export class UpdateProductDto {
   @IsString({ each: true, message: 'Cada ID de modificador debe ser un texto.' })
   @IsOptional()
   modifierGroupIds?: string[];
+
+  @IsString({ message: 'El código de barras debe ser un texto.' })
+  @IsOptional()
+  barcode?: string;
 }

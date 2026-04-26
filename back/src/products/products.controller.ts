@@ -30,4 +30,10 @@ export class ProductsController {
   update(@Request() req: any, @Param('id') id: string, @Body() data: any) {
     return this.productsService.update(req.user.storeId, id, data);
   }
+
+  @Get('barcode/:code')
+  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN', 'CASHIER'])
+  findByBarcode(@Request() req: any, @Param('code') code: string) {
+    return this.productsService.findByBarcode(req.user.storeId, code);
+  }
 }

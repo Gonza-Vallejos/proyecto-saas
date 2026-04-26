@@ -14,6 +14,7 @@ import KitchenDashboard from './pages/admin/KitchenDashboard';
 import WhatsAppOrders from './pages/admin/WhatsAppOrders';
 import OrderHistory from './pages/admin/OrderHistory';
 import StaffManagement from './pages/admin/StaffManagement';
+import PointOfSale from './pages/admin/PointOfSale';
 import WaiterView from './pages/WaiterView';
 import Register from './pages/Register';
 import NotFound from './pages/NotFound';
@@ -26,6 +27,10 @@ const AdminIndex = () => {
   
   if (user.role === 'SUPERADMIN') {
     return <StoreManagement />;
+  }
+  
+  if (user.role === 'CASHIER') {
+    return <Navigate to="pos" replace />;
   }
   
   return <Products />;
@@ -64,6 +69,7 @@ function App() {
           <Route path="orders-online" element={<WhatsAppOrders />} />
           <Route path="orders-history" element={<OrderHistory />} />
           <Route path="staff" element={<StaffManagement />} />
+          <Route path="pos" element={<PointOfSale />} />
         </Route>
 
         {/* Redirección inteligente de /admin */}

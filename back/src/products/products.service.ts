@@ -18,6 +18,7 @@ export class ProductsService {
         categoryId: data.categoryId,
         trackStock: data.trackStock || false,
         stock: data.stock || 0,
+        barcode: data.barcode || null,
         storeId,
         modifierGroups: data.modifierGroupIds && data.modifierGroupIds.length > 0 
           ? {
@@ -67,6 +68,7 @@ export class ProductsService {
         categoryId: data.categoryId,
         trackStock: data.trackStock,
         stock: data.stock,
+        barcode: data.barcode,
       }
     });
     
@@ -90,5 +92,19 @@ export class ProductsService {
     }
 
     return updatedProduct;
+  }
+
+  async findByBarcode(storeId: string, barcode: string) {
+    const product = await this.prisma.product.findUnique({
+      where: {
+        storeId_barcode: {
+          storeId,
+          barcode
+        }
+      }
+    });
+
+    if (!product) throw new NotFoundException('Producto no encontrado con ese código');
+    return product;
   }
 }

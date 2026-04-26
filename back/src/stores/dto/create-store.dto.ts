@@ -71,4 +71,20 @@ export class CreateStoreDto {
   @IsBoolean()
   @IsOptional()
   hasWhatsAppOrders?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  hasPOS?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  hasMercadoPago?: boolean;
+
+  @IsString()
+  @IsOptional()
+  mercadoPagoAccessToken?: string;
+
+  @IsString()
+  @IsOptional()
+  mercadoPagoPublicKey?: string;
 }

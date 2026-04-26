@@ -22,6 +22,8 @@ interface StoreItem {
   hasConnectivity: boolean;
   hasOrderManagement: boolean;
   hasWhatsAppOrders: boolean;
+  hasPOS: boolean;
+  hasMercadoPago: boolean;
   users: { email: string; name: string }[];
   _count: { products: number; categories: number; users: number };
 }
@@ -183,6 +185,8 @@ export default function StoreManagement() {
                     {store.hasConnectivity && <Badge color="cyan" size="xs" variant="outline">WiFi</Badge>}
                     {store.hasOrderManagement && <Badge color="pink" size="xs" variant="outline">Gastro Pro</Badge>}
                     {store.hasWhatsAppOrders && <Badge color="teal" size="xs" variant="outline">Pedidos WA</Badge>}
+                    {store.hasPOS && <Badge color="indigo" size="xs" variant="outline">Punto Venta</Badge>}
+                    {store.hasMercadoPago && <Badge color="blue" size="xs" variant="outline">MP Online</Badge>}
                   </Group>
                 </Table.Td>
                 <Table.Td>
@@ -246,6 +250,8 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
   const [hasConnectivity, setHasConnectivity] = useState(false);
   const [hasOrderManagement, setHasOrderManagement] = useState(false);
   const [hasWhatsAppOrders, setHasWhatsAppOrders] = useState(false);
+  const [hasPOS, setHasPOS] = useState(false);
+  const [hasMercadoPago, setHasMercadoPago] = useState(false);
 
   useEffect(() => {
     if (store) {
@@ -263,6 +269,8 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
       setHasConnectivity(store.hasConnectivity || false);
       setHasOrderManagement(store.hasOrderManagement || false);
       setHasWhatsAppOrders(store.hasWhatsAppOrders || false);
+      setHasPOS(store.hasPOS || false);
+      setHasMercadoPago(store.hasMercadoPago || false);
       setOwnerPassword('');
     } else {
       setName('');
@@ -280,6 +288,8 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
       setHasConnectivity(false);
       setHasOrderManagement(false);
       setHasWhatsAppOrders(false);
+      setHasPOS(false);
+      setHasMercadoPago(false);
     }
   }, [store, opened]);
 
@@ -420,6 +430,22 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
               description="Habilita monitor de pedidos online"
             />
           </Paper>
+          <Paper withBorder p="sm" radius="md">
+            <Switch 
+              label="Punto de Venta (POS)" 
+              checked={hasPOS} 
+              onChange={(e) => setHasPOS(e.currentTarget.checked)} 
+              description="Terminal de cobro en mostrador"
+            />
+          </Paper>
+          <Paper withBorder p="sm" radius="md">
+            <Switch 
+              label="Mercado Pago Online" 
+              checked={hasMercadoPago} 
+              onChange={(e) => setHasMercadoPago(e.currentTarget.checked)} 
+              description="Cobros online automatizados"
+            />
+          </Paper>
         </SimpleGrid>
 
         <Group justify="flex-end" mt="md">
@@ -429,7 +455,8 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
               name, slug, ownerName, ownerEmail,
               businessType, hasStockControl, hasPayments, hasCart, 
               isCatalogOnly, hasModifiers, showObservations,
-              hasConnectivity, hasOrderManagement, hasWhatsAppOrders
+              hasConnectivity, hasOrderManagement, hasWhatsAppOrders,
+              hasPOS, hasMercadoPago
             };
             // Solo enviar la contraseña si tiene contenido
             if (ownerPassword && ownerPassword.trim().length > 0) {

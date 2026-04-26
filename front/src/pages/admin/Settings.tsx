@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Settings as SettingsIcon, Phone, MapPin, User as UserIcon, Lock, Mail, Clock, Copy } from 'lucide-react';
+import { Settings as SettingsIcon, Phone, MapPin, User as UserIcon, Lock, Mail, Clock, Copy, CreditCard } from 'lucide-react';
 import { 
   TextInput, Textarea, Button, Group, Stack, Card, Title, Text, 
   SimpleGrid, Divider, Box, Paper, PasswordInput, Autocomplete, Loader, Switch
@@ -20,6 +20,7 @@ export default function Settings() {
   const [facebook, setFacebook] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [address, setAddress] = useState('');
+  const [hasMercadoPago, setHasMercadoPago] = useState(false);
 
   // Profile states
   const [userName, setUserName] = useState('');
@@ -79,6 +80,7 @@ export default function Settings() {
       setFacebook(storeData.facebook || '');
       setWhatsapp(storeData.whatsapp || '');
       setAddress(storeData.address || '');
+      setHasMercadoPago(storeData.hasMercadoPago || false);
       
       if (storeData.businessHours) {
         try {
@@ -320,6 +322,34 @@ export default function Settings() {
               </Paper>
             </Stack>
           </Card>
+
+          {/* SECCION: INTEGRACIONES */}
+          {hasMercadoPago && (
+            <Card withBorder radius="md" p="xl" shadow="sm">
+              <Group mb="lg" justify="space-between">
+                <Group>
+                  <Box bg="blue.0" p="xs" style={{ borderRadius: '8px' }}>
+                    <CreditCard size={20} color="#3b82f6" />
+                  </Box>
+                  <Title order={4}>Integración Mercado Pago</Title>
+                </Group>
+              </Group>
+              
+              <Stack gap="md">
+                <Text size="sm" color="dimmed">
+                  Vincula tu cuenta de Mercado Pago de forma segura (OAuth) para recibir el dinero de tus ventas online y en mostrador directamente en tu cuenta.
+                </Text>
+                
+                <Paper withBorder p="md" radius="md" style={{ background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <Text fw={700}>Estado de Vinculación</Text>
+                    <Text size="xs" color="dimmed">Actualmente no hay ninguna cuenta vinculada.</Text>
+                  </div>
+                  <Button color="blue">Vincular Cuenta MP</Button>
+                </Paper>
+              </Stack>
+            </Card>
+          )}
         </Stack>
       </SimpleGrid>
     </div>
