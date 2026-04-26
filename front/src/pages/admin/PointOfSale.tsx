@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Title, Text, Card, Group, Stack, TextInput, Button, Table, ActionIcon, Divider, Badge, Modal, Loader } from '@mantine/core';
-import { ShoppingCart, Barcode, Trash2, CreditCard, Banknote, QrCode } from 'lucide-react';
+import { ShoppingCart, Barcode, Trash2, CreditCard, Banknote } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { QRCodeSVG } from 'qrcode.react';
 import { api } from '../../utils/api';
@@ -55,7 +55,7 @@ export default function PointOfSale() {
     setTotal(prev => prev - removed.price);
   };
 
-  const processOrder = async (method: 'CASH' | 'MP') => {
+  const processOrder = async () => {
     try {
       await api.post('/orders', {
         customerName: 'Cliente Mostrador',
@@ -136,7 +136,7 @@ export default function PointOfSale() {
 
       if (!secondConfirmed) return;
       
-      processOrder('CASH');
+      processOrder();
     }
   };
 
@@ -274,8 +274,8 @@ export default function PointOfSale() {
                 fullWidth 
                 color="green" 
                 size="md" 
-                mt="md"
-                onClick={() => processOrder('MP')}
+                onClick={() => processOrder()}
+                loading={loadingQr}
               >
                 Confirmar Pago Recibido
               </Button>
