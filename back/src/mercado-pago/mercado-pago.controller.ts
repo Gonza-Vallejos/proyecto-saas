@@ -12,15 +12,15 @@ export class MercadoPagoController {
   @Get('callback')
   async handleOAuthCallback(@Query('code') code: string, @Query('state') state: string, @Res() res: any) {
     if (!code || !state) {
-      return res.redirect(`${process.env.FRONTEND_URL}/admin/settings?error=NoCodeOrState`);
+      return res.redirect(`${process.env.FRONTEND_URL}/admin?error=NoCodeOrState`);
     }
 
     try {
       // state contiene el storeId
-      await this.mpService.handleOAuthCallback(code, state);
-      return res.redirect(`${process.env.FRONTEND_URL}/admin/settings?mp_success=true`);
+      const storeSlug = await this.mpService.handleOAuthCallback(code, state);
+      return res.redirect(`${process.env.FRONTEND_URL}/admin/${storeSlug}/settings?mp_success=true`);
     } catch (error) {
-      return res.redirect(`${process.env.FRONTEND_URL}/admin/settings?error=OAuthFailed`);
+      return res.redirect(`${process.env.FRONTEND_URL}/admin?error=OAuthFailed`);
     }
   }
 

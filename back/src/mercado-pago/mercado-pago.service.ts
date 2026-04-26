@@ -31,7 +31,7 @@ export class MercadoPagoService {
         throw new BadRequestException('Error en respuesta de Mercado Pago');
       }
 
-      await this.prisma.store.update({
+      const store = await this.prisma.store.update({
         where: { id: storeId },
         data: {
           mercadoPagoAccessToken: data.access_token,
@@ -39,7 +39,7 @@ export class MercadoPagoService {
         }
       });
       
-      return true;
+      return store.slug;
     } catch (e: any) {
       this.logger.error('Error linking MP account', e.message);
       throw new BadRequestException('Error vinculando cuenta de Mercado Pago');
