@@ -22,8 +22,10 @@ export class MercadoPagoController {
       // state contiene el storeId
       const storeSlug = await this.mpService.handleOAuthCallback(code, state);
       return res.redirect(`${frontendUrl}/admin/${storeSlug}/settings?mp_success=true`);
-    } catch (error) {
-      return res.redirect(`${frontendUrl}/admin?error=OAuthFailed`);
+    } catch (error: any) {
+      const store = await this.mpService.getStoreById(state);
+      const slug = store ? store.slug : 'login';
+      return res.redirect(`${frontendUrl}/admin/${slug}/settings?error=OAuthFailed`);
     }
   }
 

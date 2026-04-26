@@ -48,6 +48,10 @@ export class MercadoPagoService {
     }
   }
 
+  async getStoreById(storeId: string) {
+    return this.prisma.store.findUnique({ where: { id: storeId } });
+  }
+
   async createPreference(storeId: string, items: any[], returnUrl: string, orderId?: string) {
     const store = await this.prisma.store.findUnique({ where: { id: storeId }});
     if (!store?.mercadoPagoAccessToken) {
