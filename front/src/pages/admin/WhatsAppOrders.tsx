@@ -26,6 +26,7 @@ interface Order {
   createdAt: string;
   customerName?: string;
   customerPhone?: string;
+  origin?: string;
   items: OrderItem[];
 }
 
@@ -38,9 +39,10 @@ export default function WhatsAppOrders() {
   const fetchOrders = useCallback(async (isAuto = false) => {
     if (!isAuto) setIsRefreshing(true);
     try {
-      // Filtrar por origen WHATSAPP
-      const data = await api.get('/orders?origin=WHATSAPP');
-      setOrders(data);
+      // Obtener todos y filtrar en frontend por origen WHATSAPP y CATALOG
+      const data = await api.get('/orders');
+      const filtered = data.filter((o: any) => o.origin === 'WHATSAPP' || o.origin === 'CATALOG');
+      setOrders(filtered);
     } catch (e) {
       console.error(e);
     } finally {
@@ -128,6 +130,18 @@ export default function WhatsAppOrders() {
                {order.customerPhone}
             </Text>
           )}
+
+          <Group gap="xs" mt="xs">
+            {order.observations && order.observations.includes('CON ENVÍO') && (
+              <Badge color="teal" variant="light" size="xs">🚚 Envío</Badge>
+            )}
+            {order.observations && order.observations.includes('RETIRO EN LOCAL') && (
+              <Badge color="violet" variant="light" size="xs">🏪 Retiro</Badge>
+            )}
+            {order.origin === 'CATALOG' && (
+              <Badge color="pink" variant="light" size="xs">💳 Pago Online</Badge>
+            )}
+          </Group>
         </Stack>
       </Box>
 

@@ -23,6 +23,7 @@ export default function Settings() {
   const [address, setAddress] = useState('');
   const [hasMercadoPago, setHasMercadoPago] = useState(false);
   const [isMercadoPagoLinked, setIsMercadoPagoLinked] = useState(false);
+  const [allowCatalogPayments, setAllowCatalogPayments] = useState(true);
 
   // Profile states
   const [userName, setUserName] = useState('');
@@ -96,6 +97,7 @@ export default function Settings() {
       setAddress(storeData.address || '');
       setHasMercadoPago(storeData.hasMercadoPago || false);
       setIsMercadoPagoLinked(!!storeData.mercadoPagoAccessToken);
+      setAllowCatalogPayments(storeData.allowCatalogPayments !== false);
       
       if (storeData.businessHours) {
         try {
@@ -126,7 +128,8 @@ export default function Settings() {
         facebook, 
         whatsapp, 
         address,
-        businessHours: JSON.stringify(businessHours)
+        businessHours: JSON.stringify(businessHours),
+        allowCatalogPayments
       });
       
       Swal.fire({
@@ -382,6 +385,33 @@ export default function Settings() {
                     {isMercadoPagoLinked ? 'Re-vincular Cuenta' : 'Vincular Cuenta MP'}
                   </Button>
                 </Paper>
+
+                {isMercadoPagoLinked && (
+                  <Paper withBorder p="md" radius="md" style={{ background: '#f8fafc' }}>
+                    <Switch
+                      label="Permitir cobrar online en el catálogo"
+                      description="Si se desactiva, los clientes podrán ver tus productos y enviar pedidos por WhatsApp, pero no podrán pagarlos online directamente desde la web."
+                      checked={allowCatalogPayments}
+                      onChange={async (event) => {
+                        const checked = event.currentTarget.checked;
+                        setAllowCatalogPayments(checked);
+                        try {
+                          await api.patch('/stores/my-store', { allowCatalogPayments: checked });
+                          Swal.fire({
+                            title: 'Preferencia guardada',
+                            text: checked ? 'Los pagos online en catálogo están ACTIVADOS.' : 'Los pagos online en catálogo están DESACTIVADOS.',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false
+                          });
+                        } catch (err: any) {
+                          Swal.fire('Error', err.message, 'error');
+                          setAllowCatalogPayments(!checked);
+                        }
+                      }}
+                    />
+                  </Paper>
+                )}
               </Stack>
             </Card>
           )}

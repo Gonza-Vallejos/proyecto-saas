@@ -49,6 +49,7 @@ model Store {
   hasWhatsAppOrders Boolean @default(false)   // Módulo: Pedidos por WhatsApp (Configuración SuperAdmin)
   hasPOS           Boolean @default(false)    // Módulo: Punto de Venta en mostrador
   hasMercadoPago   Boolean @default(false)    // Módulo: Integración con Mercado Pago
+  allowCatalogPayments Boolean @default(true)     // Permitir cobrar en catálogo web
   
   // Integraciones
   mercadoPagoAccessToken String?

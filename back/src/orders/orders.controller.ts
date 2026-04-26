@@ -9,7 +9,7 @@ export class OrdersController {
 
   @Post('public/:storeId')
   async createPublic(@Param('storeId') storeId: string, @Body() body: any) {
-    return this.ordersService.create(storeId, null, { ...body, origin: 'WHATSAPP' });
+    return this.ordersService.create(storeId, null, { ...body, origin: body.origin || 'WHATSAPP' });
   }
 
   @Post()

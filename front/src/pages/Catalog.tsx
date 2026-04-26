@@ -121,6 +121,7 @@ interface Store {
   wifiSSID?: string | null;
   wifiPassword?: string | null;
   mercadoPagoAccessToken?: string | null;
+  allowCatalogPayments?: boolean;
   products: Product[];
   categories: Category[];
 }
@@ -532,6 +533,7 @@ export default function Catalog() {
       const orderData = {
         customerName: nameToUse,
         customerPhone: customerPhone,
+        origin: 'CATALOG',
         items: cart.map(item => ({
           productId: item.product.id,
           quantity: item.quantity,
@@ -1232,7 +1234,7 @@ export default function Catalog() {
                >
                  Enviar Pedido por WhatsApp
                </Button>
-               {store.mercadoPagoAccessToken && (
+               {store.mercadoPagoAccessToken && store.allowCatalogPayments !== false && (
                  <Button 
                   fullWidth 
                   size="lg" 

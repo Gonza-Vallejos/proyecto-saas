@@ -61,7 +61,7 @@ export default function OrderHistory() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, originFilter, startDate, endDate]);
+  }, [statusFilter, originFilter, startDate, endDate, activeTab]);
 
   useEffect(() => {
     fetchHistory();
@@ -79,8 +79,9 @@ export default function OrderHistory() {
   };
 
   const getOriginIcon = (origin: string) => {
-    if (origin === 'WHATSAPP') return <Tooltip label="WhatsApp"><ShoppingBag size={14} color="#25D366" /></Tooltip>;
-    if (origin === 'POS') return <Tooltip label="Punto de Venta"><MonitorSmartphone size={14} color="#3b82f6" /></Tooltip>;
+    if (origin === 'WHATSAPP') return <Tooltip label="Pedido WhatsApp"><ShoppingBag size={14} color="#25D366" /></Tooltip>;
+    if (origin === 'CATALOG') return <Tooltip label="Tienda Virtual / Mercado Pago"><CreditCard size={14} color="#ec4899" /></Tooltip>;
+    if (origin === 'POS') return <Tooltip label="Punto de Venta (Caja)"><MonitorSmartphone size={14} color="#3b82f6" /></Tooltip>;
     return <Tooltip label="Mesa"><Utensils size={14} color="#0ea5e9" /></Tooltip>;
   };
 
@@ -91,6 +92,7 @@ export default function OrderHistory() {
     paid: orders.filter(o => o.status === 'PAID').length,
     cancelled: orders.filter(o => o.status === 'CANCELLED').length,
     whatsappSales: orders.filter(o => o.status === 'PAID' && o.origin === 'WHATSAPP').reduce((acc, o) => acc + o.total, 0),
+    catalogSales: orders.filter(o => o.status === 'PAID' && o.origin === 'CATALOG').reduce((acc, o) => acc + o.total, 0),
     posSales: orders.filter(o => o.status === 'PAID' && o.origin === 'POS').reduce((acc, o) => acc + o.total, 0),
     tableSales: orders.filter(o => o.status === 'PAID' && o.origin === 'TABLE').reduce((acc, o) => acc + o.total, 0),
   };
@@ -193,18 +195,22 @@ export default function OrderHistory() {
       </SimpleGrid>
 
       {/* Breakdown by Channel (Row 2) */}
-      <SimpleGrid cols={{ base: 1, sm: 3 }} mb="xl">
+      <SimpleGrid cols={{ base: 1, sm: 4 }} mb="xl">
         <Paper withBorder p="sm" radius="md" bg="green.0">
-          <Text size="xs" color="green.9" fw={700} tt="uppercase">Ventas WhatsApp / Tienda</Text>
-          <Text fw={700} size="lg" color="green.9">$ {stats.whatsappSales.toLocaleString()}</Text>
+          <Text size="xs" color="green.9" fw={700} tt="uppercase">Ventas WhatsApp</Text>
+          <Text fw={700} size="md" color="green.9">$ {stats.whatsappSales.toLocaleString()}</Text>
+        </Paper>
+        <Paper withBorder p="sm" radius="md" bg="pink.0">
+          <Text size="xs" color="pink.9" fw={700} tt="uppercase">Tienda Virtual (MP)</Text>
+          <Text fw={700} size="md" color="pink.9">$ {stats.catalogSales.toLocaleString()}</Text>
         </Paper>
         <Paper withBorder p="sm" radius="md" bg="indigo.0">
           <Text size="xs" color="indigo.9" fw={700} tt="uppercase">Ventas Caja (POS)</Text>
-          <Text fw={700} size="lg" color="indigo.9">$ {stats.posSales.toLocaleString()}</Text>
+          <Text fw={700} size="md" color="indigo.9">$ {stats.posSales.toLocaleString()}</Text>
         </Paper>
         <Paper withBorder p="sm" radius="md" bg="blue.0">
-          <Text size="xs" color="blue.9" fw={700} tt="uppercase">Ventas de Salón (Mesas)</Text>
-          <Text fw={700} size="lg" color="blue.9">$ {stats.tableSales.toLocaleString()}</Text>
+          <Text size="xs" color="blue.9" fw={700} tt="uppercase">Ventas de Salón</Text>
+          <Text fw={700} size="md" color="blue.9">$ {stats.tableSales.toLocaleString()}</Text>
         </Paper>
       </SimpleGrid>
 
