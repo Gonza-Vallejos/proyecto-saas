@@ -168,9 +168,10 @@ export default function Settings() {
   const handleLinkMercadoPago = () => {
     // Usar variable de entorno, si no existe usamos un hardcoded por el momento (sólo pruebas)
     const clientId = import.meta.env.VITE_MP_CLIENT_ID || '6472016692830263';
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    let backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    if (backendUrl.endsWith('/')) backendUrl = backendUrl.slice(0, -1);
     const redirectUri = `${backendUrl}/mercado-pago/callback`;
-    const url = `https://auth.mercadopago.com/authorization?client_id=${clientId}&response_type=code&platform_id=mp&state=${storeId}&redirect_uri=${redirectUri}`;
+    const url = `https://auth.mercadopago.com/authorization?client_id=${clientId}&response_type=code&platform_id=mp&state=${storeId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
     window.location.href = url;
   };
 

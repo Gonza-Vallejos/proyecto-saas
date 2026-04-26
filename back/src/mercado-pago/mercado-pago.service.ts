@@ -10,7 +10,9 @@ export class MercadoPagoService {
 
   async handleOAuthCallback(code: string, storeId: string) {
     try {
-      const redirectUri = `${process.env.BACKEND_URL || 'http://localhost:3000'}/mercado-pago/callback`;
+      let backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+      if (backendUrl.endsWith('/')) backendUrl = backendUrl.slice(0, -1);
+      const redirectUri = `${backendUrl}/mercado-pago/callback`;
       
       const response = await fetch('https://api.mercadopago.com/oauth/token', {
         method: 'POST',

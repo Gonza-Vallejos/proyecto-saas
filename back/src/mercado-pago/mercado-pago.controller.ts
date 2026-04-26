@@ -11,16 +11,19 @@ export class MercadoPagoController {
   // Endpoint para recibir el código de autorización de Mercado Pago
   @Get('callback')
   async handleOAuthCallback(@Query('code') code: string, @Query('state') state: string, @Res() res: any) {
+    let frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    if (frontendUrl.endsWith('/')) frontendUrl = frontendUrl.slice(0, -1);
+
     if (!code || !state) {
-      return res.redirect(`${process.env.FRONTEND_URL}/admin?error=NoCodeOrState`);
+      return res.redirect(`${frontendUrl}/admin?error=NoCodeOrState`);
     }
 
     try {
       // state contiene el storeId
       const storeSlug = await this.mpService.handleOAuthCallback(code, state);
-      return res.redirect(`${process.env.FRONTEND_URL}/admin/${storeSlug}/settings?mp_success=true`);
+      return res.redirect(`${frontendUrl}/admin/${storeSlug}/settings?mp_success=true`);
     } catch (error) {
-      return res.redirect(`${process.env.FRONTEND_URL}/admin?error=OAuthFailed`);
+      return res.redirect(`${frontendUrl}/admin?error=OAuthFailed`);
     }
   }
 
