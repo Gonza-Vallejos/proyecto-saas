@@ -7,7 +7,8 @@ import {
   Package, 
   Trash2, 
   Clock,
-  Wifi
+  Wifi,
+  CreditCard
 } from 'lucide-react';
 import InstagramPng from '../assets/instagram.png';
 import WhatsAppPng from '../assets/whatsapp.png';
@@ -119,6 +120,7 @@ interface Store {
   hasOrderManagement: boolean;
   wifiSSID?: string | null;
   wifiPassword?: string | null;
+  mercadoPagoAccessToken?: string | null;
   products: Product[];
   categories: Category[];
 }
@@ -500,6 +502,75 @@ export default function Catalog() {
           // Fallback a WhatsApp aunque falle la API
           window.open(`https://wa.me/${store.whatsapp}?text=${encodeURIComponent("Hola, quiero hacer un pedido...")}`, '_blank');
         });
+    } finally {
+      setIsOrdering(false);
+    }
+  };
+
+  const handleMercadoPagoOrder = async () => {
+    if (!store) return;
+    const savedName = localStorage.getItem('siit_customer_name');
+    if (!savedName && !customerName) {
+      setCartOpened(false);
+      setShowNamePrompt(true);
+      return;
+    }
+
+    const nameToUse = customerName || savedName || 'Cliente';
+    if (!savedName) localStorage.setItem('siit_customer_name', nameToUse);
+
+    setIsOrdering(true);
+    try {
+      // Registrar pedido primero (pendiente de pago)
+      const orderData = {
+        customerName: nameToUse,
+        items: cart.map(item => ({
+          productId: item.product.id,
+          quantity: item.quantity,
+          priceAtTime: item.product.price + item.selectedModifiers.reduce((acc, g) => acc + g.options.reduce((a, o) => a + o.price, 0), 0),
+          observations: item.observations,
+          selectedModifiers: item.selectedModifiers
+        })),
+        observations: "Pago Online (Mercado Pago)",
+        total: cart.reduce((acc, item) => {
+          const extras = item.selectedModifiers.reduce((sum, g) => sum + g.options.reduce((s, o) => s + o.price, 0), 0);
+          return acc + (item.product.price + extras) * item.quantity;
+        }, 0)
+      };
+
+      const orderRes = await fetch(`${BASE_URL}/orders/public/${store.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...orderData, status: 'PENDING' }) // Importante: estado PENDING
+      });
+
+      if (!orderRes.ok) throw new Error('Error al registrar pedido');
+      const createdOrder = await orderRes.json();
+
+      // Crear preferencia en MP
+      const res = await fetch(`${BASE_URL}/mercado-pago/preference/public`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          storeId: store.id,
+          orderId: createdOrder.id,
+          items: cart.map(item => ({
+            productId: item.product.id,
+            name: item.product.name,
+            quantity: item.quantity,
+            price: item.product.price + item.selectedModifiers.reduce((acc, g) => acc + g.options.reduce((a, o) => a + o.price, 0), 0)
+          })),
+          returnUrl: window.location.href
+        })
+      });
+
+      if (!res.ok) throw new Error('Error al generar link de pago');
+      
+      const mpData = await res.json();
+      window.location.href = mpData.init_point;
+
+    } catch (e) {
+      Swal.fire('Error', 'No pudimos generar el cobro con Mercado Pago en este momento.', 'error');
     } finally {
       setIsOrdering(false);
     }
@@ -1153,6 +1224,21 @@ export default function Catalog() {
                >
                  Enviar Pedido por WhatsApp
                </Button>
+               {store.mercadoPagoAccessToken && (
+                 <Button 
+                  fullWidth 
+                  size="lg" 
+                  radius="xl" 
+                  color="blue" 
+                  mt="sm"
+                  variant="light"
+                  leftSection={<CreditCard size={18} />}
+                  onClick={handleMercadoPagoOrder}
+                  loading={isOrdering}
+                 >
+                   Pagar online con Mercado Pago
+                 </Button>
+               )}
             </Box>
           </Box>
         )}

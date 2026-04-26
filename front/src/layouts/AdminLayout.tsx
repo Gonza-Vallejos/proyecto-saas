@@ -88,8 +88,12 @@ export default function AdminLayout() {
   };
 
   const handleLogout = () => {
-    const tokenKey = storeSlug ? `token_${storeSlug}` : 'token';
-    localStorage.removeItem(tokenKey);
+    if (storeSlug) {
+      localStorage.removeItem(`token_${storeSlug}`);
+    }
+    // Siempre limpiamos el genérico por seguridad
+    localStorage.removeItem('token');
+    
     api.setStoreContext(null);
     navigate('/login');
   };

@@ -10,7 +10,7 @@ export class OrdersService {
   ) {}
 
   async create(storeId: string, waiterId: string | null, data: any) {
-    const { tableId, items, observations, customerName, customerPhone, origin } = data;
+    const { tableId, items, observations, customerName, customerPhone, origin, status } = data;
 
     // Calcular total y preparar ítems
     let total = 0;
@@ -26,8 +26,8 @@ export class OrdersService {
     });
 
     const result = await this.prisma.$transaction(async (tx) => {
-      // 1. Verificar stock si es pedido de WhatsApp
-      if (origin === 'WHATSAPP') {
+      // 1. Verificar stock si es pedido de WhatsApp o POS
+      if (origin === 'WHATSAPP' || origin === 'POS') {
         for (const item of items) {
           const product = await tx.product.findUnique({ where: { id: item.productId } });
           if (product?.trackStock && product.stock < item.quantity) {
@@ -47,7 +47,7 @@ export class OrdersService {
           customerPhone,
           origin: origin || 'TABLE',
           total,
-          status: 'PENDING',
+          status: status || 'PENDING',
           items: {
             create: orderItems,
           },
@@ -58,8 +58,8 @@ export class OrdersService {
         },
       });
 
-      // 3. Descontar stock inmediatamente si es WhatsApp
-      if (origin === 'WHATSAPP') {
+      // 3. Descontar stock inmediatamente si es WhatsApp o POS
+      if (origin === 'WHATSAPP' || origin === 'POS') {
         for (const item of items) {
           const product = await tx.product.findUnique({ where: { id: item.productId } });
           if (product?.trackStock) {
@@ -156,9 +156,9 @@ export class OrdersService {
       const shouldRestoreStock = status === 'CANCELLED' && order.status !== 'CANCELLED';
       if (shouldRestoreStock) {
         // Se reintegra si:
-        // 1. Era WhatsApp (descontó al inicio)
+        // 1. Era WhatsApp o POS (descontó al inicio)
         // 2. Era Table pero ya estaba en estado READY (descontó al pasar a READY)
-        const wasAlreadyDeducted = order.origin === 'WHATSAPP' || order.status === 'READY';
+        const wasAlreadyDeducted = origin === 'WHATSAPP' || order.origin === 'POS' || order.status === 'READY';
         
         if (wasAlreadyDeducted) {
           for (const item of order.items) {

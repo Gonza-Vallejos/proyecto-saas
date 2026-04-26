@@ -11,10 +11,22 @@ export const api = {
     activeStoreSlug = slug;
   },
 
-  async request(endpoint: string, options: RequestOptions = {}) {
-    // Intentar obtener el token específico de la tienda, o el genérico como fallback
-    let token = activeStoreSlug ? localStorage.getItem(`token_${activeStoreSlug}`) : null;
-    if (!token) token = localStorage.getItem('token');
+    // Obtener slug de la URL directamente para evitar condiciones de carrera con useEffect
+    let contextSlug = activeStoreSlug;
+    if (!contextSlug) {
+      const match = window.location.pathname.match(/\/(admin|s)\/([^\/]+)/);
+      if (match && match[2] !== 'master') {
+        contextSlug = match[2];
+      }
+    }
+
+    let token = contextSlug ? localStorage.getItem(`token_${contextSlug}`) : null;
+    
+    // Solo hacer fallback al token genérico si NO estamos dentro de un contexto de tienda específico
+    // o si es la vista de SUPERADMIN (master)
+    if (!token && (!contextSlug || contextSlug === 'master')) {
+      token = localStorage.getItem('token');
+    }
     
     const headers: HeadersInit = {
       'Content-Type': 'application/json',

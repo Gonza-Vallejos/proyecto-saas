@@ -18,6 +18,8 @@ import { UploadsController } from './uploads/uploads.controller';
 import { SupabaseService } from './uploads/supabase.service';
 import { EventsModule } from './events/events.module';
 
+import { MercadoPagoModule } from './mercado-pago/mercado-pago.module';
+
 @Module({
   imports: [
     // Servir archivos estáticos de la carpeta uploads usando la ruta absoluta del proceso
@@ -39,7 +41,8 @@ import { EventsModule } from './events/events.module';
     TablesModule,
     OrdersModule,
     UsersModule,
-    EventsModule
+    EventsModule,
+    MercadoPagoModule
   ],
   controllers: [AppController, UploadsController],
   providers: [

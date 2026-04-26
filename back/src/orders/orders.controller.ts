@@ -14,9 +14,13 @@ export class OrdersController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN', 'WAITER'])
+  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN', 'WAITER', 'CASHIER'])
   async create(@Request() req: any, @Body() body: any) {
-    return this.ordersService.create(req.user.storeId, req.user.id, { ...body, origin: 'TABLE' });
+    return this.ordersService.create(req.user.storeId, req.user.id, { 
+      ...body, 
+      origin: body.origin || 'TABLE',
+      status: body.status || 'PENDING'
+    });
   }
 
   @Get()

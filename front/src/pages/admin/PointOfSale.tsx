@@ -1,13 +1,19 @@
 import { useState } from 'react';
-import { Title, Text, Card, Group, Stack, TextInput, Button, Table, ActionIcon, Divider, Badge } from '@mantine/core';
-import { ShoppingCart, Barcode, Trash2, CreditCard, Banknote } from 'lucide-react';
+import { Title, Text, Card, Group, Stack, TextInput, Button, Table, ActionIcon, Divider, Badge, Modal, Loader } from '@mantine/core';
+import { ShoppingCart, Barcode, Trash2, CreditCard, Banknote, QrCode } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { QRCodeSVG } from 'qrcode.react';
 import { api } from '../../utils/api';
 
 export default function PointOfSale() {
   const [barcodeInput, setBarcodeInput] = useState('');
   const [cart, setCart] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
+
+  // Mercado Pago QR State
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [qrUrl, setQrUrl] = useState<string | null>(null);
+  const [loadingQr, setLoadingQr] = useState(false);
 
   const handleScan = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,38 +55,88 @@ export default function PointOfSale() {
     setTotal(prev => prev - removed.price);
   };
 
-  const handleCheckout = async (method: 'Efectivo' | 'Mercado Pago') => {
-    if (cart.length === 0) return;
-    
-    if (method === 'Mercado Pago') {
-      Swal.fire('Próximamente', 'La integración con Mercado Pago está en desarrollo.', 'info');
-      return;
-    }
-
+  const processOrder = async (method: 'CASH' | 'MP') => {
     try {
       await api.post('/orders', {
         customerName: 'Cliente Mostrador',
         origin: 'POS',
-        status: 'PAID',
+        status: 'PAID', // In real life, MP should be PENDING until webhook confirms, but for UX simplicity in POS without WebSockets yet we can assume paid or wait.
         orderItems: cart.map(item => ({
           productId: item.id,
           quantity: item.quantity,
-          price: item.price,
+          priceAtTime: item.price,
           options: []
         }))
       });
 
       setCart([]);
       setTotal(0);
+      setQrModalOpen(false);
       Swal.fire({
-        title: '¡Pagado!',
-        text: 'El ticket se ha registrado correctamente.',
+        title: '¡Venta Registrada!',
         icon: 'success',
-        timer: 2000,
+        timer: 1500,
         showConfirmButton: false
       });
     } catch (e: any) {
       Swal.fire('Error', 'No se pudo procesar la venta.', 'error');
+    }
+  };
+
+  const handleCheckout = async (method: 'Efectivo' | 'Mercado Pago') => {
+    if (cart.length === 0) return;
+    
+    if (method === 'Mercado Pago') {
+      setLoadingQr(true);
+      setQrModalOpen(true);
+      try {
+        const res = await api.post('/mercado-pago/preference', {
+          items: cart,
+          returnUrl: window.location.href // No importa mucho en POS, pero es obligatorio
+        });
+        
+        setQrUrl(res.init_point);
+      } catch (e: any) {
+        setQrModalOpen(false);
+        Swal.fire('Error', 'No se pudo generar el QR de Mercado Pago. Verifica si tienes la cuenta vinculada en Ajustes.', 'error');
+      } finally {
+        setLoadingQr(false);
+      }
+      return;
+    }
+
+    if (method === 'Efectivo') {
+      const { value: amountReceived, isConfirmed: firstConfirmed } = await Swal.fire({
+        title: 'Cobro en Efectivo',
+        input: 'number',
+        inputLabel: `Total a cobrar: $${total}`,
+        inputPlaceholder: 'Monto que entrega el cliente',
+        showCancelButton: true,
+        confirmButtonText: 'Calcular',
+        cancelButtonText: 'Cancelar',
+        inputValidator: (value) => {
+          if (!value) return 'Debes ingresar el monto';
+          if (Number(value) < total) return 'El monto no alcanza para cubrir el total';
+          return null;
+        }
+      });
+
+      if (!firstConfirmed || !amountReceived) return;
+
+      const vuelto = Number(amountReceived) - total;
+
+      const { isConfirmed: secondConfirmed } = await Swal.fire({
+        title: `Vuelto: $${vuelto}`,
+        text: 'Presiona Enter o haz clic para confirmar la venta.',
+        icon: 'success',
+        showCancelButton: true,
+        confirmButtonText: 'Confirmar Venta',
+        cancelButtonText: 'Cancelar'
+      });
+
+      if (!secondConfirmed) return;
+      
+      processOrder('CASH');
     }
   };
 
@@ -186,6 +242,47 @@ export default function PointOfSale() {
           </Stack>
         </Card>
       </div>
+
+      {/* Modal para Código QR de Mercado Pago */}
+      <Modal 
+        opened={qrModalOpen} 
+        onClose={() => setQrModalOpen(false)}
+        title={
+          <Group gap="xs">
+            <CreditCard size={20} color="#0ea5e9" />
+            <Text fw={700}>Cobro con Mercado Pago</Text>
+          </Group>
+        }
+        centered
+        size="sm"
+      >
+        <Stack align="center" gap="lg" py="md">
+          {loadingQr ? (
+            <>
+              <Loader color="blue" size="xl" />
+              <Text>Generando QR de pago...</Text>
+            </>
+          ) : qrUrl ? (
+            <>
+              <div style={{ padding: '1rem', background: 'white', borderRadius: '12px', border: '2px solid #e2e8f0' }}>
+                <QRCodeSVG value={qrUrl} size={200} />
+              </div>
+              <Text ta="center" size="sm" color="dimmed">
+                Pídele al cliente que escanee este código desde la app de Mercado Pago o con su cámara.
+              </Text>
+              <Button 
+                fullWidth 
+                color="green" 
+                size="md" 
+                mt="md"
+                onClick={() => processOrder('MP')}
+              >
+                Confirmar Pago Recibido
+              </Button>
+            </>
+          ) : null}
+        </Stack>
+      </Modal>
     </div>
   );
 }

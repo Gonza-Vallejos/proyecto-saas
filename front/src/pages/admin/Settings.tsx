@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Settings as SettingsIcon, Phone, MapPin, User as UserIcon, Lock, Mail, Clock, Copy, CreditCard } from 'lucide-react';
+import { Settings as SettingsIcon, Phone, MapPin, User as UserIcon, Lock, Mail, Clock, Copy, CreditCard, CheckCircle } from 'lucide-react';
 import { 
   TextInput, Textarea, Button, Group, Stack, Card, Title, Text, 
-  SimpleGrid, Divider, Box, Paper, PasswordInput, Autocomplete, Loader, Switch
+  SimpleGrid, Divider, Box, Paper, PasswordInput, Autocomplete, Loader, Switch, Badge
 } from '@mantine/core';
 import { api } from '../../utils/api';
 import Swal from 'sweetalert2';
@@ -13,6 +13,7 @@ export default function Settings() {
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
   // Store states
+  const [storeId, setStoreId] = useState('');
   const [storeName, setStoreName] = useState('');
   const [description, setDescription] = useState('');
   const [phone, setPhone] = useState('');
@@ -21,6 +22,7 @@ export default function Settings() {
   const [whatsapp, setWhatsapp] = useState('');
   const [address, setAddress] = useState('');
   const [hasMercadoPago, setHasMercadoPago] = useState(false);
+  const [isMercadoPagoLinked, setIsMercadoPagoLinked] = useState(false);
 
   // Profile states
   const [userName, setUserName] = useState('');
@@ -42,6 +44,17 @@ export default function Settings() {
 
   useEffect(() => {
     fetchData();
+
+    // Comprobar parámetros de la URL para mostrar mensajes de éxito/error de OAuth
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mp_success') === 'true') {
+      Swal.fire('¡Éxito!', 'Tu cuenta de Mercado Pago fue vinculada correctamente.', 'success');
+      // Limpiar URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (urlParams.get('error')) {
+      Swal.fire('Error', 'No se pudo vincular la cuenta de Mercado Pago.', 'error');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, []);
 
   const handleAddressSearch = async (query: string) => {
@@ -73,6 +86,7 @@ export default function Settings() {
       ]);
 
       // Store info
+      setStoreId(storeData.id);
       setStoreName(storeData.name || '');
       setDescription(storeData.description || '');
       setPhone(storeData.phone || '');
@@ -81,6 +95,7 @@ export default function Settings() {
       setWhatsapp(storeData.whatsapp || '');
       setAddress(storeData.address || '');
       setHasMercadoPago(storeData.hasMercadoPago || false);
+      setIsMercadoPagoLinked(!!storeData.mercadoPagoAccessToken);
       
       if (storeData.businessHours) {
         try {
@@ -148,6 +163,15 @@ export default function Settings() {
     } finally {
       setUpdatingProfile(false);
     }
+  };
+
+  const handleLinkMercadoPago = () => {
+    // Usar variable de entorno, si no existe usamos un hardcoded por el momento (sólo pruebas)
+    const clientId = import.meta.env.VITE_MP_CLIENT_ID || '6472016692830263';
+    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const redirectUri = `${backendUrl}/mercado-pago/callback`;
+    const url = `https://auth.mercadopago.com/authorization?client_id=${clientId}&response_type=code&platform_id=mp&state=${storeId}&redirect_uri=${redirectUri}`;
+    window.location.href = url;
   };
 
   if (loading) return <div className="loader-container">Cargando configuración maestra...</div>;
@@ -343,9 +367,19 @@ export default function Settings() {
                 <Paper withBorder p="md" radius="md" style={{ background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div>
                     <Text fw={700}>Estado de Vinculación</Text>
-                    <Text size="xs" color="dimmed">Actualmente no hay ninguna cuenta vinculada.</Text>
+                    {isMercadoPagoLinked ? (
+                      <Badge color="green" leftSection={<CheckCircle size={10} />}>Vinculado Exitosamente</Badge>
+                    ) : (
+                      <Text size="xs" color="dimmed">Actualmente no hay ninguna cuenta vinculada.</Text>
+                    )}
                   </div>
-                  <Button color="blue">Vincular Cuenta MP</Button>
+                  <Button 
+                    color={isMercadoPagoLinked ? "gray" : "blue"} 
+                    variant={isMercadoPagoLinked ? "outline" : "filled"}
+                    onClick={handleLinkMercadoPago}
+                  >
+                    {isMercadoPagoLinked ? 'Re-vincular Cuenta' : 'Vincular Cuenta MP'}
+                  </Button>
                 </Paper>
               </Stack>
             </Card>
