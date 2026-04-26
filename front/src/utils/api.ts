@@ -11,6 +11,7 @@ export const api = {
     activeStoreSlug = slug;
   },
 
+  async request(endpoint: string, options: RequestOptions = {}) {
     // Obtener slug de la URL directamente para evitar condiciones de carrera con useEffect
     let contextSlug = activeStoreSlug;
     if (!contextSlug) {
