@@ -3,7 +3,7 @@ import {
   Title, Text, Card, Group, Stack, Badge, 
   SimpleGrid, Paper, Table, ActionIcon, 
   TextInput, Select, ScrollArea, Tooltip,
-  Tabs, Modal
+  Tabs, Modal, Divider
 } from '@mantine/core';
 import { 
   History, Calendar, Eye, 
@@ -33,7 +33,6 @@ interface Order {
 }
 
 export default function OrderHistory() {
-  const { storeData } = useOutletContext<{ storeData: any }>();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   
