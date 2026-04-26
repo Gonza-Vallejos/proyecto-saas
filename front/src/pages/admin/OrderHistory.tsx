@@ -10,7 +10,6 @@ import {
   ShoppingBag, Utensils, MonitorSmartphone
 } from 'lucide-react';
 import { api } from '../../utils/api';
-import { useOutletContext } from 'react-router-dom';
 
 interface OrderItem {
   id: string;
