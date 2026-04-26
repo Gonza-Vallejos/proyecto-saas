@@ -118,7 +118,6 @@ export class OrdersService {
           select: { name: true }
         }
       },
-      },
       orderBy: { createdAt: 'desc' },
     });
   }
