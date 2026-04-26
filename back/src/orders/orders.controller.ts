@@ -30,6 +30,13 @@ export class OrdersController {
     return this.ordersService.findAllByStore(req.user.storeId, status, origin, startDate, endDate);
   }
 
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN', 'KITCHEN', 'WAITER', 'CASHIER'])
+  async findOne(@Param('id') id: string, @Request() req: any) {
+    return this.ordersService.findOne(id, req.user.storeId);
+  }
+
   @Patch(':id/status')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN', 'KITCHEN', 'WAITER'])

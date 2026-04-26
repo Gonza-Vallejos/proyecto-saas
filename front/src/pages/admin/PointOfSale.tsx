@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Title, Text, Card, Group, Stack, TextInput, Button, Table, ActionIcon, Divider, Badge, Modal, Loader } from '@mantine/core';
 import { ShoppingCart, Barcode, Trash2, CreditCard, Banknote } from 'lucide-react';
 import Swal from 'sweetalert2';
@@ -14,6 +14,35 @@ export default function PointOfSale() {
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [loadingQr, setLoadingQr] = useState(false);
+  const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
+
+  // Polling para Mercado Pago
+  useEffect(() => {
+    let interval: any;
+    if (qrModalOpen && pendingOrderId) {
+      interval = setInterval(async () => {
+        try {
+          const order = await api.get(`/orders/${pendingOrderId}`);
+          if (order.status === 'PAID') {
+            setQrModalOpen(false);
+            setCart([]);
+            setTotal(0);
+            setPendingOrderId(null);
+            Swal.fire({
+              title: '¡Pago Confirmado!',
+              text: 'Mercado Pago ha procesado el pago correctamente.',
+              icon: 'success',
+              timer: 2500,
+              showConfirmButton: false
+            });
+          }
+        } catch (e) {
+          console.error('Error polling order status', e);
+        }
+      }, 3000); // Poll cada 3 segundos
+    }
+    return () => clearInterval(interval);
+  }, [qrModalOpen, pendingOrderId]);
 
   const handleScan = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,11 +90,10 @@ export default function PointOfSale() {
         customerName: 'Cliente Mostrador',
         origin: 'POS',
         status: 'PAID', // In real life, MP should be PENDING until webhook confirms, but for UX simplicity in POS without WebSockets yet we can assume paid or wait.
-        orderItems: cart.map(item => ({
+        items: cart.map(item => ({
           productId: item.id,
           quantity: item.quantity,
-          priceAtTime: item.price,
-          options: []
+          priceAtTime: item.price
         }))
       });
 
@@ -90,9 +118,25 @@ export default function PointOfSale() {
       setLoadingQr(true);
       setQrModalOpen(true);
       try {
+        // 1. Crear la orden PENDING
+        const orderRes = await api.post('/orders', {
+          customerName: 'Cliente Mostrador',
+          origin: 'POS',
+          status: 'PENDING',
+          items: cart.map(item => ({
+            productId: item.id,
+            quantity: item.quantity,
+            priceAtTime: item.price
+          }))
+        });
+
+        setPendingOrderId(orderRes.id);
+
+        // 2. Generar Preferencia
         const res = await api.post('/mercado-pago/preference', {
           items: cart,
-          returnUrl: window.location.href // No importa mucho en POS, pero es obligatorio
+          returnUrl: window.location.href, // No importa mucho en POS, pero es obligatorio
+          orderId: orderRes.id
         });
         
         setQrUrl(res.init_point);

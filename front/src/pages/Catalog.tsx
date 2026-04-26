@@ -175,6 +175,11 @@ export default function Catalog() {
   
   // Customer Identity
   const [customerName, setCustomerName] = useState<string>('');
+  const [customerPhone, setCustomerPhone] = useState<string>('');
+  const [customerEmail, setCustomerEmail] = useState<string>('');
+  const [isDelivery, setIsDelivery] = useState<boolean>(false);
+  const [customerAddress, setCustomerAddress] = useState<string>('');
+  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [showNamePrompt, setShowNamePrompt] = useState(false);
   const [isOrdering, setIsOrdering] = useState(false);
 
@@ -510,9 +515,11 @@ export default function Catalog() {
   const handleMercadoPagoOrder = async () => {
     if (!store) return;
     const savedName = localStorage.getItem('siit_customer_name');
-    if (!savedName && !customerName) {
+    
+    // Si faltan datos clave, abrimos el modal de checkout de Mercado Pago
+    if (!customerPhone || !customerEmail || (isDelivery && !customerAddress) || (!savedName && !customerName)) {
       setCartOpened(false);
-      setShowNamePrompt(true);
+      setCheckoutModalOpen(true);
       return;
     }
 
@@ -524,6 +531,7 @@ export default function Catalog() {
       // Registrar pedido primero (pendiente de pago)
       const orderData = {
         customerName: nameToUse,
+        customerPhone: customerPhone,
         items: cart.map(item => ({
           productId: item.product.id,
           quantity: item.quantity,
@@ -531,7 +539,7 @@ export default function Catalog() {
           observations: item.observations,
           selectedModifiers: item.selectedModifiers
         })),
-        observations: "Pago Online (Mercado Pago)",
+        observations: `Pago Online. ${isDelivery ? 'CON ENVÍO: ' + customerAddress : 'RETIRO EN LOCAL'}. Email: ${customerEmail}`,
         total: cart.reduce((acc, item) => {
           const extras = item.selectedModifiers.reduce((sum, g) => sum + g.options.reduce((s, o) => s + o.price, 0), 0);
           return acc + (item.product.price + extras) * item.quantity;
@@ -1243,6 +1251,93 @@ export default function Catalog() {
           </Box>
         )}
       </Drawer>
+
+      {/* Modal para pedir datos de contacto para Mercado Pago */}
+      <Modal 
+        opened={checkoutModalOpen} 
+        onClose={() => setCheckoutModalOpen(false)} 
+        title="Completa tus datos de envío y pago" 
+        centered
+        radius="lg"
+        padding="xl"
+      >
+        <Stack gap="md">
+          <Text size="sm" color="dimmed">Por favor, completa tus datos para procesar el pago y envío correctamente.</Text>
+          <TextInput 
+            label="Tu nombre" 
+            placeholder="Ej: Juan Pérez" 
+            size="md"
+            radius="md"
+            value={customerName}
+            onChange={(e) => setCustomerName(e.currentTarget.value)}
+            required
+          />
+          <TextInput 
+            label="Número de Teléfono" 
+            placeholder="Ej: 1123456789" 
+            size="md"
+            radius="md"
+            value={customerPhone}
+            onChange={(e) => setCustomerPhone(e.currentTarget.value)}
+            required
+          />
+          <TextInput 
+            label="Correo Electrónico" 
+            placeholder="Ej: tu@email.com" 
+            size="md"
+            radius="md"
+            value={customerEmail}
+            onChange={(e) => setCustomerEmail(e.currentTarget.value)}
+            required
+          />
+          
+          <Divider label="Tipo de Entrega" labelPosition="center" my="xs" />
+          
+          <Radio.Group
+            value={isDelivery ? 'delivery' : 'pickup'}
+            onChange={(val) => setIsDelivery(val === 'delivery')}
+          >
+            <Group mt="xs">
+              <Radio value="pickup" label="Retiro en el local" />
+              <Radio value="delivery" label="Envío a domicilio" />
+            </Group>
+          </Radio.Group>
+
+          {isDelivery && (
+            <TextInput 
+              label="Dirección de Envío" 
+              placeholder="Ej: Av. Siempreviva 742" 
+              size="md"
+              radius="md"
+              value={customerAddress}
+              onChange={(e) => setCustomerAddress(e.currentTarget.value)}
+              required
+            />
+          )}
+
+          <Button 
+            fullWidth 
+            size="md" 
+            radius="md" 
+            mt="md"
+            onClick={() => {
+              if (!customerName.trim() || !customerPhone.trim() || !customerEmail.trim()) {
+                Swal.fire('Error', 'Por favor completa todos los campos requeridos.', 'error');
+                return;
+              }
+              if (isDelivery && !customerAddress.trim()) {
+                Swal.fire('Error', 'Por favor ingresa la dirección de envío.', 'error');
+                return;
+              }
+              localStorage.setItem('siit_customer_name', customerName);
+              setCheckoutModalOpen(false);
+              handleMercadoPagoOrder();
+            }}
+          >
+            Continuar a Mercado Pago
+          </Button>
+        </Stack>
+      </Modal>
 
       {/* Modal para pedir nombre la primera vez */}
       <Modal 

@@ -118,8 +118,28 @@ export class OrdersService {
           select: { name: true }
         }
       },
+      },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  async findOne(id: string, storeId: string) {
+    const order = await this.prisma.order.findFirst({
+      where: { id, storeId },
+      include: {
+        items: {
+          include: {
+            product: true
+          }
+        },
+        table: true,
+        waiter: {
+          select: { name: true }
+        }
+      }
+    });
+    if (!order) throw new BadRequestException('Pedido no encontrado');
+    return order;
   }
 
   async updateStatus(id: string, storeId: string, status: string) {
