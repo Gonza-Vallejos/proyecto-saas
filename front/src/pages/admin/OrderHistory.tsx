@@ -7,7 +7,7 @@ import {
 } from '@mantine/core';
 import { 
   History, Calendar, Eye, 
-  ShoppingBag, Utensils, MonitorSmartphone
+  ShoppingBag, Utensils, MonitorSmartphone, CreditCard
 } from 'lucide-react';
 import { api } from '../../utils/api';
 
