@@ -2,11 +2,12 @@ import { useEffect, useState, useCallback } from 'react';
 import { 
   Title, Text, Card, Group, Stack, Badge, 
   SimpleGrid, Paper, Table, ActionIcon, 
-  TextInput, Select, ScrollArea, Tooltip
+  TextInput, Select, ScrollArea, Tooltip,
+  Tabs, Modal
 } from '@mantine/core';
 import { 
   History, Calendar, Eye, 
-  ShoppingBag, Utensils
+  ShoppingBag, Utensils, MonitorSmartphone
 } from 'lucide-react';
 import { api } from '../../utils/api';
 import { useOutletContext } from 'react-router-dom';
@@ -37,15 +38,20 @@ export default function OrderHistory() {
   const [loading, setLoading] = useState(true);
   
   // Filters
+  const [activeTab, setActiveTab] = useState<string | null>('orders');
   const [statusFilter, setStatusFilter] = useState('all');
   const [originFilter, setOriginFilter] = useState('all');
   const [startDate, setStartDate] = useState(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]); // Last 7 days
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
 
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [orderModalOpen, setOrderModalOpen] = useState(false);
+
   const fetchHistory = useCallback(async () => {
     setLoading(true);
     try {
-      let url = `/orders?status=${statusFilter}`;
+      const currentStatus = activeTab === 'sales' ? 'PAID' : statusFilter;
+      let url = `/orders?status=${currentStatus}`;
       if (originFilter !== 'all') url += `&origin=${originFilter}`;
       if (startDate) url += `&startDate=${startDate}T00:00:00Z`;
       if (endDate) url += `&endDate=${endDate}T23:59:59Z`;
@@ -61,7 +67,7 @@ export default function OrderHistory() {
 
   useEffect(() => {
     fetchHistory();
-  }, [fetchHistory]);
+  }, [fetchHistory, activeTab]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -76,6 +82,7 @@ export default function OrderHistory() {
 
   const getOriginIcon = (origin: string) => {
     if (origin === 'WHATSAPP') return <Tooltip label="WhatsApp"><ShoppingBag size={14} color="#25D366" /></Tooltip>;
+    if (origin === 'POS') return <Tooltip label="Punto de Venta"><MonitorSmartphone size={14} color="#3b82f6" /></Tooltip>;
     return <Tooltip label="Mesa"><Utensils size={14} color="#0ea5e9" /></Tooltip>;
   };
 
@@ -92,11 +99,26 @@ export default function OrderHistory() {
       <Group justify="space-between" mb="2rem">
         <div>
           <Title order={2} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <History size={28} color="#6366f1" /> Historial de Pedidos
+            <History size={28} color="#6366f1" /> {activeTab === 'sales' ? 'Reporte de Ventas' : 'Historial de Pedidos'}
           </Title>
-          <Text color="dimmed" size="sm">Consulta el registro histórico de todas tus ventas.</Text>
+          <Text color="dimmed" size="sm">
+            {activeTab === 'sales' 
+              ? 'Consulta las ventas concretadas (pagadas) por WhatsApp y Punto de Venta.' 
+              : 'Consulta el registro histórico de todas tus ventas.'}
+          </Text>
         </div>
       </Group>
+
+      <Tabs value={activeTab} onChange={(val) => { setActiveTab(val); setStatusFilter('all'); }} mb="xl">
+        <Tabs.List>
+          <Tabs.Tab value="orders" leftSection={<History size={16} />}>
+            Historial General
+          </Tabs.Tab>
+          <Tabs.Tab value="sales" leftSection={<ShoppingBag size={16} />}>
+            Reporte de Ventas (Pagados)
+          </Tabs.Tab>
+        </Tabs.List>
+      </Tabs>
 
       {/* Filters */}
       <Paper withBorder p="md" radius="md" mb="xl" bg="gray.0">
@@ -115,30 +137,37 @@ export default function OrderHistory() {
             onChange={(e) => setEndDate(e.target.value)} 
             leftSection={<Calendar size={16} />}
           />
-          <Select 
-            label="Estado"
-            data={[
-              { value: 'all', label: 'Todos los estados' },
-              { value: 'PENDING', label: 'Pendientes' },
-              { value: 'READY', label: 'Listos' },
-              { value: 'PAID', label: 'Pagados' },
-              { value: 'CANCELLED', label: 'Cancelados' },
-            ]}
-            value={statusFilter}
-            onChange={(val) => setStatusFilter(val || 'all')}
-          />
-          {storeData?.hasOrderManagement && (
+          {activeTab !== 'sales' ? (
             <Select 
-              label="Origen"
+              label="Estado"
               data={[
-                { value: 'all', label: 'Todos los canales' },
-                { value: 'WHATSAPP', label: 'Ventas WhatsApp' },
-                { value: 'TABLE', label: 'Ventas de Salón' },
+                { value: 'all', label: 'Todos los estados' },
+                { value: 'PENDING', label: 'Pendientes' },
+                { value: 'READY', label: 'Listos' },
+                { value: 'PAID', label: 'Pagados' },
+                { value: 'CANCELLED', label: 'Cancelados' },
               ]}
-              value={originFilter}
-              onChange={(val) => setOriginFilter(val || 'all')}
+              value={statusFilter}
+              onChange={(val) => setStatusFilter(val || 'all')}
+            />
+          ) : (
+            <TextInput 
+              label="Estado"
+              value="Pagado"
+              disabled
             />
           )}
+          <Select 
+            label="Origen"
+            data={[
+              { value: 'all', label: 'Todos los canales' },
+              { value: 'WHATSAPP', label: 'Ventas WhatsApp' },
+              { value: 'POS', label: 'Punto de Venta (POS)' },
+              { value: 'TABLE', label: 'Ventas de Salón' },
+            ]}
+            value={originFilter}
+            onChange={(val) => setOriginFilter(val || 'all')}
+          />
         </SimpleGrid>
       </Paper>
 
@@ -214,7 +243,14 @@ export default function OrderHistory() {
                   </Table.Td>
                   <Table.Td>{getStatusBadge(order.status)}</Table.Td>
                   <Table.Td ta="center">
-                     <ActionIcon variant="light" color="blue">
+                     <ActionIcon 
+                       variant="light" 
+                       color="blue" 
+                       onClick={() => {
+                         setSelectedOrder(order);
+                         setOrderModalOpen(true);
+                       }}
+                     >
                        <Eye size={16} />
                      </ActionIcon>
                   </Table.Td>
@@ -224,6 +260,61 @@ export default function OrderHistory() {
           </Table>
         </ScrollArea>
       </Card>
+
+      {/* Modal de Detalle de Venta */}
+      <Modal
+        opened={orderModalOpen}
+        onClose={() => {
+          setOrderModalOpen(false);
+          setSelectedOrder(null);
+        }}
+        title={`Detalle de Venta #${selectedOrder?.id.slice(-6)}`}
+        centered
+        radius="md"
+        size="md"
+      >
+        {selectedOrder && (
+          <Stack gap="md">
+            <Group justify="space-between">
+              <Text size="sm" fw={700}>Fecha:</Text>
+              <Text size="sm">{new Date(selectedOrder.createdAt).toLocaleDateString('es-AR')} {new Date(selectedOrder.createdAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}hs</Text>
+            </Group>
+
+            <Group justify="space-between">
+              <Text size="sm" fw={700}>Canal / Origen:</Text>
+              <Badge color="blue" variant="light">{selectedOrder.origin}</Badge>
+            </Group>
+
+            <Group justify="space-between">
+              <Text size="sm" fw={700}>Cliente:</Text>
+              <Text size="sm">{selectedOrder.customerName || 'Cliente Mostrador'}</Text>
+            </Group>
+
+            {selectedOrder.customerPhone && (
+              <Group justify="space-between">
+                <Text size="sm" fw={700}>Teléfono:</Text>
+                <Text size="sm">{selectedOrder.customerPhone}</Text>
+              </Group>
+            )}
+
+            <Divider label="Productos" labelPosition="center" my="xs" />
+
+            {selectedOrder.items.map((item) => (
+              <Group key={item.id} justify="space-between">
+                <Text size="sm" fw={500}>{item.quantity}x {item.product?.name || 'Producto Eliminado'}</Text>
+                <Text size="sm" fw={700}>$ {(item.priceAtTime * item.quantity).toLocaleString()}</Text>
+              </Group>
+            ))}
+
+            <Divider my="xs" />
+
+            <Group justify="space-between">
+              <Text size="md" fw={900}>Total:</Text>
+              <Text size="lg" fw={900} color="teal.8">$ {selectedOrder.total.toLocaleString()}</Text>
+            </Group>
+          </Stack>
+        )}
+      </Modal>
     </div>
   );
 }
