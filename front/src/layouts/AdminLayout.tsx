@@ -160,7 +160,7 @@ export default function AdminLayout() {
       </Link>
       {storeData?.hasWhatsAppOrders && (
         <Link to={`${adminPrefix}/orders-online`} style={{ ...navLinkStyle, ...(isActive(`${adminPrefix}/orders-online`) ? activeNavLinkStyle : {}) }}>
-          <MessageSquare size={18} /> Pedidos WhatsApp
+          <MessageSquare size={18} /> Pedidos Online
         </Link>
       )}
     </>
@@ -194,7 +194,7 @@ export default function AdminLayout() {
 
       {storeData?.hasWhatsAppOrders && (
         <Link to={`${adminPrefix}/orders-online`} style={{ ...navLinkStyle, ...(isActive(`${adminPrefix}/orders-online`) ? activeNavLinkStyle : {}) }}>
-          <MessageSquare size={18} /> Pedidos WhatsApp
+          <MessageSquare size={18} /> Pedidos Online
         </Link>
       )}
 

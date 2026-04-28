@@ -49,7 +49,16 @@ export class ProductsService {
     });
     if (!product) throw new NotFoundException('Producto no encontrado en tu tienda');
 
-    return this.prisma.product.delete({ where: { id: productId } });
+    try {
+      return await this.prisma.product.delete({ where: { id: productId } });
+    } catch (e: any) {
+      if (e.code === 'P2003') {
+        throw new ForbiddenException(
+          'No se puede eliminar este producto porque ya está registrado en ventas anteriores (Historial). Para sacarlo de la vista del catálogo, puedes desvincularlo de su categoría actual.'
+        );
+      }
+      throw e;
+    }
   }
 
   async update(storeId: string, productId: string, data: UpdateProductDto) {
