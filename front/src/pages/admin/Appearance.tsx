@@ -45,6 +45,7 @@ export default function Appearance() {
         setSecondaryColor('#6366f1');
         setBgColor('#F8F9FA');
         setTextColor('#1e293b');
+        setIconColor('#64748b');
         setFontFamily('Inter');
         setCardStyle('modern');
         setHeroStyle('curve');
@@ -54,6 +55,7 @@ export default function Appearance() {
         setSecondaryColor('#a855f7');
         setBgColor('#0f172a');
         setTextColor('#f8fafc');
+        setIconColor('#94a3b8');
         setFontFamily('Poppins');
         setCardStyle('modern');
         setHeroStyle('rect');
@@ -63,6 +65,7 @@ export default function Appearance() {
         setSecondaryColor('#e11d48');
         setBgColor('#fffbeb');
         setTextColor('#451a03');
+        setIconColor('#b45309');
         setFontFamily('Outfit');
         setCardStyle('classic');
         setHeroStyle('curve');
@@ -72,6 +75,7 @@ export default function Appearance() {
         setSecondaryColor('#78350f');
         setBgColor('#fafaf9');
         setTextColor('#1c1917');
+        setIconColor('#78350f');
         setFontFamily('Playfair Display');
         setCardStyle('horizontal');
         setHeroStyle('rect');
@@ -81,6 +85,7 @@ export default function Appearance() {
         setSecondaryColor('#4b5563');
         setBgColor('#ffffff');
         setTextColor('#000000');
+        setIconColor('#6b7280');
         setFontFamily('Outfit');
         setCardStyle('modern');
         setHeroStyle('rect');
@@ -90,6 +95,7 @@ export default function Appearance() {
         setSecondaryColor('#16a34a');
         setBgColor('#f0fdf4');
         setTextColor('#14532d');
+        setIconColor('#15803d');
         setFontFamily('Inter');
         setCardStyle('classic');
         setHeroStyle('curve');
@@ -99,6 +105,7 @@ export default function Appearance() {
         setSecondaryColor('#d946ef');
         setBgColor('#030712');
         setTextColor('#e0f2fe');
+        setIconColor('#22d3ee');
         setFontFamily('Montserrat');
         setCardStyle('modern');
         setHeroStyle('rect');
