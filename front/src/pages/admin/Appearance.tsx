@@ -76,6 +76,33 @@ export default function Appearance() {
         setCardStyle('horizontal');
         setHeroStyle('rect');
         break;
+      case 'minimal-bw':
+        setPrimaryColor('#000000');
+        setSecondaryColor('#4b5563');
+        setBgColor('#ffffff');
+        setTextColor('#000000');
+        setFontFamily('Outfit');
+        setCardStyle('modern');
+        setHeroStyle('rect');
+        break;
+      case 'forest-eco':
+        setPrimaryColor('#15803d');
+        setSecondaryColor('#16a34a');
+        setBgColor('#f0fdf4');
+        setTextColor('#14532d');
+        setFontFamily('Inter');
+        setCardStyle('classic');
+        setHeroStyle('curve');
+        break;
+      case 'cyberpunk':
+        setPrimaryColor('#06b6d4');
+        setSecondaryColor('#d946ef');
+        setBgColor('#030712');
+        setTextColor('#e0f2fe');
+        setFontFamily('Montserrat');
+        setCardStyle('modern');
+        setHeroStyle('rect');
+        break;
     }
   };
 
@@ -172,6 +199,9 @@ export default function Appearance() {
               <Button variant="light" color="pink" onClick={() => applyPreset('glass-dark')}>Dark Neon</Button>
               <Button variant="light" color="orange" onClick={() => applyPreset('sunset')}>Warm Sunset</Button>
               <Button variant="light" color="dark" onClick={() => applyPreset('luxury')}>Luxury Gold</Button>
+              <Button variant="light" color="gray" onClick={() => applyPreset('minimal-bw')}>Minimal B&W</Button>
+              <Button variant="light" color="green" onClick={() => applyPreset('forest-eco')}>Forest Eco</Button>
+              <Button variant="light" color="cyan" onClick={() => applyPreset('cyberpunk')}>Cyberpunk Neon</Button>
             </SimpleGrid>
           </Card>
 
