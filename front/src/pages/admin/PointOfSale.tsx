@@ -290,7 +290,17 @@ export default function PointOfSale() {
       {/* Modal para Código QR de Mercado Pago */}
       <Modal 
         opened={qrModalOpen} 
-        onClose={() => setQrModalOpen(false)}
+        onClose={async () => {
+          setQrModalOpen(false);
+          if (pendingOrderId) {
+            try {
+              await api.patch(`/orders/${pendingOrderId}/status`, { status: 'CANCELLED' });
+            } catch (e) {
+              console.error('Error cancelling pending order:', e);
+            }
+            setPendingOrderId(null);
+          }
+        }}
         title={
           <Group gap="xs">
             <CreditCard size={20} color="#0ea5e9" />
@@ -318,7 +328,24 @@ export default function PointOfSale() {
                 fullWidth 
                 color="green" 
                 size="md" 
-                onClick={() => processOrder()}
+                onClick={async () => {
+                  if (!pendingOrderId) return;
+                  try {
+                    await api.patch(`/orders/${pendingOrderId}/status`, { status: 'PAID' });
+                    setCart([]);
+                    setTotal(0);
+                    setQrModalOpen(false);
+                    setPendingOrderId(null);
+                    Swal.fire({
+                      title: '¡Venta Registrada!',
+                      icon: 'success',
+                      timer: 1500,
+                      showConfirmButton: false
+                    });
+                  } catch (e: any) {
+                    Swal.fire('Error', 'No se pudo registrar el pago.', 'error');
+                  }
+                }}
                 loading={loadingQr}
               >
                 Confirmar Pago Recibido

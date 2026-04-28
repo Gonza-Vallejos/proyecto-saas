@@ -852,9 +852,11 @@ export default function Catalog() {
                       onClick={() => scrollToCategory(sub.id)}
                       style={{
                         height: '28px',
+                        padding: '0 12px',
                         fontSize: '0.75rem',
                         fontWeight: selectedCategory === sub.id ? 700 : 500,
                         whiteSpace: 'nowrap',
+                        flexShrink: 0,
                         transition: 'all 0.2s'
                       }}
                     >
