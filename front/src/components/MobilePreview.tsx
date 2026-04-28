@@ -1,4 +1,4 @@
-import { Box, Text, Title, Image, SimpleGrid, Card, Badge, Button, Group, ScrollArea, Stack } from '@mantine/core';
+import { Box, Text, Title, Image, SimpleGrid, Card, Badge, Button, Group, ScrollArea, Stack, ActionIcon } from '@mantine/core';
 import { ShoppingCart, Clock } from 'lucide-react';
 import { useEffect } from 'react';
 import InstagramPng from '../assets/instagram.png';
@@ -41,12 +41,12 @@ export default function MobilePreview({ name, primaryColor, secondaryColor, bgCo
       <Box style={{ position: 'absolute', left: '-15px', top: '150px', width: '3px', height: '40px', background: '#475569', borderRadius: '4px 0 0 4px' }} />
       <Box style={{ position: 'absolute', right: '-15px', top: '120px', width: '3px', height: '60px', background: '#475569', borderRadius: '0 4px 4px 0' }} />
 
-      <Box 
-        style={{ 
-          width: '340px', 
-          height: '680px', 
-          border: '14px solid #0f172a', 
-          borderRadius: '40px', 
+      <Box
+        style={{
+          width: '340px',
+          height: '680px',
+          border: '14px solid #0f172a',
+          borderRadius: '40px',
           position: 'relative',
           backgroundColor: bgColor || '#ffffff',
           overflow: 'hidden',
@@ -57,15 +57,15 @@ export default function MobilePreview({ name, primaryColor, secondaryColor, bgCo
         }}
       >
         {/* Isla Dinámica / Notch Premium */}
-        <Box style={{ 
-          position: 'absolute', 
-          top: '10px', 
-          left: '50%', 
-          transform: 'translateX(-50%)', 
-          width: '110px', 
-          height: '24px', 
-          background: '#000', 
-          borderRadius: '20px', 
+        <Box style={{
+          position: 'absolute',
+          top: '10px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '110px',
+          height: '24px',
+          background: '#000',
+          borderRadius: '20px',
           zIndex: 100,
           display: 'flex',
           alignItems: 'center',
@@ -87,103 +87,102 @@ export default function MobilePreview({ name, primaryColor, secondaryColor, bgCo
           pointerEvents: 'none',
           zIndex: 90
         }} />
-      
-      <ScrollArea scrollbarSize={2} style={{ height: '100%' }}>
-        {/* Header Preview */}
-        <Box p="md" style={{ borderBottom: '1px solid #eee', background: '#fff', zIndex: 10 }}>
-          <Group justify="space-between" align="center">
-            <Group gap="xs">
-              {logoUrl ? (
-                <Image src={logoUrl} w={24} h={24} radius="xl" />
-              ) : (
-                <Box w={24} h={24} bg={primaryColor} style={{ borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 900 }}>
-                  {name?.charAt(0)}
-                </Box>
-              )}
-              <Title order={6} style={{ fontSize: '10px', fontFamily: 'inherit', fontWeight: 800, color: textColor }}>{name?.substring(0, 15)}</Title>
-            </Group>
-             <Group gap={5}>
-              <ActionIcon variant="subtle" color={iconColor} size="xs">
-                <Clock size={12} color={iconColor} />
-              </ActionIcon>
-              <Box style={{ position: 'relative' }}>
-                <ActionIcon variant="light" color={iconColor} size="sm" radius="md">
-                  <ShoppingCart size={14} color={iconColor} />
+
+        <ScrollArea scrollbarSize={2} style={{ height: '100%' }}>
+          {/* Header Preview */}
+          <Box p="md" style={{ borderBottom: '1px solid #eee', background: '#fff', zIndex: 10 }}>
+            <Group justify="space-between" align="center">
+              <Group gap="xs">
+                {logoUrl ? (
+                  <Image src={logoUrl} w={24} h={24} radius="xl" />
+                ) : (
+                  <Box w={24} h={24} bg={primaryColor} style={{ borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 900 }}>
+                    {name?.charAt(0)}
+                  </Box>
+                )}
+                <Title order={6} style={{ fontSize: '10px', fontFamily: 'inherit', fontWeight: 800, color: textColor }}>{name?.substring(0, 15)}</Title>
+              </Group>
+              <Group gap={5}>
+                <ActionIcon variant="subtle" color={iconColor} size="xs">
+                  <Clock size={12} color={iconColor} />
                 </ActionIcon>
-                <Badge 
-                  size="9px" 
-                  circle 
-                  color={secondaryColor} 
-                  style={{ position: 'absolute', top: -4, right: -4, border: '1.5px solid white', minWidth: '12px', height: '12px', padding: 0 }}
-                >
-                  2
-                </Badge>
-              </Box>
+                <Box style={{ position: 'relative' }}>
+                  <ActionIcon variant="light" color={iconColor} size="sm" radius="md">
+                    <ShoppingCart size={14} color={iconColor} />
+                  </ActionIcon>
+                  <Badge
+                    size="9px"
+                    circle
+                    color={secondaryColor}
+                    style={{ position: 'absolute', top: -4, right: -4, border: '1.5px solid white', minWidth: '12px', height: '12px', padding: 0 }}
+                  >
+                    2
+                  </Badge>
+                </Box>
+              </Group>
             </Group>
-          </Group>
-        </Box>
+          </Box>
 
-        {/* Category Ribbon Preview */}
-        <Box px="md" py={10} style={{ background: '#fff' }}>
-          <Group gap="xs" wrap="nowrap" style={{ overflow: 'hidden' }}>
-            <Badge variant="filled" color={primaryColor} size="sm" radius="md">Todo</Badge>
-            <Badge variant="light" color="gray" size="sm" radius="md">Burgers</Badge>
-            <Badge variant="light" color="gray" size="sm" radius="md">Pizzas</Badge>
-          </Group>
-        </Box>
-
-        {/* Hero Preview */}
-        <Box p="xl" style={{ 
-          textAlign: 'center', 
-          background: heroImageUrl ? `linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%)` : '#f8fafc',
-          backgroundImage: heroImageUrl ? `url(${heroImageUrl})` : 'none',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          borderBottom: heroStyle === 'curve' ? 'none' : '1px solid #eee',
-          clipPath: heroStyle === 'curve' ? 'ellipse(150% 100% at 50% 0%)' : 'none',
-          paddingBottom: heroStyle === 'curve' ? '40px' : 'xl'
-        }}>
-          <Title order={2} style={{ fontSize: '18px', color: textColor, fontFamily: 'inherit' }}>{name}</Title>
-          <Text size="xs" color="dimmed" style={{ fontFamily: 'inherit' }}>Catálogo Digital</Text>
-        </Box>
-
-        {/* Product Grid Preview */}
-        <Box p="sm">
-          <SimpleGrid cols={1} spacing="md">
-            {mockProducts.map((p) => (
-              <RenderPreviewCard key={p.id} product={p} style={cardStyle} primary={primaryColor} secondary={secondaryColor} textColor={textColor} />
-            ))}
-          </SimpleGrid>
-        </Box>
-
-        {/* Footer Preview */}
-        <Box p="md" mt="xl" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: primaryColor }}>
-          <Stack gap="xs" align="center">
-            <Text fw={700} size="xs" c={textColor} style={{ opacity: 0.9 }}>Encuéntranos</Text>
-            <Group gap="xs">
-              <Box style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: secondaryColor }} />
-              <Image src={UbicacionPng} w={14} h={14} style={{ filter: 'brightness(0) invert(1) opacity(0.8)' }} />
-              <Text size="10px" c={textColor} style={{ opacity: 0.8 }}>Calle Ficticia 123</Text>
+          {/* Category Ribbon Preview */}
+          <Box px="md" py={10} style={{ background: '#fff' }}>
+            <Group gap="xs" wrap="nowrap" style={{ overflow: 'hidden' }}>
+              <Badge variant="filled" color={primaryColor} size="sm" radius="md">Todo</Badge>
+              <Badge variant="light" color="gray" size="sm" radius="md">Burgers</Badge>
+              <Badge variant="light" color="gray" size="sm" radius="md">Pizzas</Badge>
             </Group>
-            <Group gap="xs">
-               <Box style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: secondaryColor }} />
-               <Image src={WhatsAppPng} w={14} h={14} />
-               <Text size="10px" c={textColor} style={{ opacity: 0.8 }}>+54 9 11 1234 5678</Text>
-            </Group>
-            <Group gap="xs">
-               <Box style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: secondaryColor }} />
-               <Image src={InstagramPng} w={14} h={14} />
-               <Text size="10px" c={textColor} style={{ opacity: 0.8 }}>@tu_cuenta</Text>
-            </Group>
-            <Text size="10px" c={textColor} style={{ fontFamily: 'inherit', opacity: 0.4, marginTop: '5px' }}>© 2026 {name}</Text>
-          </Stack>
-        </Box>
-      </ScrollArea>
+          </Box>
+
+          {/* Hero Preview */}
+          <Box p="xl" style={{
+            textAlign: 'center',
+            background: heroImageUrl ? `linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%)` : '#f8fafc',
+            backgroundImage: heroImageUrl ? `url(${heroImageUrl})` : 'none',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            borderBottom: heroStyle === 'curve' ? 'none' : '1px solid #eee',
+            clipPath: heroStyle === 'curve' ? 'ellipse(150% 100% at 50% 0%)' : 'none',
+            paddingBottom: heroStyle === 'curve' ? '40px' : 'xl'
+          }}>
+            <Title order={2} style={{ fontSize: '18px', color: textColor, fontFamily: 'inherit' }}>{name}</Title>
+            <Text size="xs" color="dimmed" style={{ fontFamily: 'inherit' }}>Catálogo Digital</Text>
+          </Box>
+
+          {/* Product Grid Preview */}
+          <Box p="sm">
+            <SimpleGrid cols={1} spacing="md">
+              {mockProducts.map((p) => (
+                <RenderPreviewCard key={p.id} product={p} style={cardStyle} primary={primaryColor} secondary={secondaryColor} textColor={textColor} />
+              ))}
+            </SimpleGrid>
+          </Box>
+
+          {/* Footer Preview */}
+          <Box p="md" mt="xl" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: primaryColor }}>
+            <Stack gap="xs" align="center">
+              <Text fw={700} size="xs" c={textColor} style={{ opacity: 0.9 }}>Encuéntranos</Text>
+              <Group gap="xs">
+                <Box style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: secondaryColor }} />
+                <Image src={UbicacionPng} w={14} h={14} style={{ filter: 'brightness(0) invert(1) opacity(0.8)' }} />
+                <Text size="10px" c={textColor} style={{ opacity: 0.8 }}>Calle Ficticia 123</Text>
+              </Group>
+              <Group gap="xs">
+                <Box style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: secondaryColor }} />
+                <Image src={WhatsAppPng} w={14} h={14} />
+                <Text size="10px" c={textColor} style={{ opacity: 0.8 }}>+54 9 11 1234 5678</Text>
+              </Group>
+              <Group gap="xs">
+                <Box style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: secondaryColor }} />
+                <Image src={InstagramPng} w={14} h={14} />
+                <Text size="10px" c={textColor} style={{ opacity: 0.8 }}>@tu_cuenta</Text>
+              </Group>
+              <Text size="10px" c={textColor} style={{ fontFamily: 'inherit', opacity: 0.4, marginTop: '5px' }}>© 2026 {name}</Text>
+            </Stack>
+          </Box>
+        </ScrollArea>
+      </Box>
     </Box>
   );
 }
-
-import { ActionIcon } from '@mantine/core';
 
 // Datos estáticos fuera para evitar recrearlos
 const mockProductsData = [
