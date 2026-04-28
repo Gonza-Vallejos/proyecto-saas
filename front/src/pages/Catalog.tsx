@@ -172,6 +172,18 @@ export default function Catalog() {
   const [cartOpened, setCartOpened] = useState(false);
   const [addingProduct, setAddingProduct] = useState<Product | null>(null);
   const isMobile = useMediaQuery('(max-width: 768px)');
+
+  const footerTextColor = useMemo(() => {
+    const color = store?.primaryColor || '#0ea5e9';
+    if (color.startsWith('#') && color.length === 7) {
+      const r = parseInt(color.slice(1, 3), 16);
+      const g = parseInt(color.slice(3, 5), 16);
+      const b = parseInt(color.slice(5, 7), 16);
+      const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+      return yiq >= 128 ? '#1e293b' : '#ffffff';
+    }
+    return '#ffffff';
+  }, [store?.primaryColor]);
   
   // Customer Identity
   const [customerName, setCustomerName] = useState<string>('');
@@ -909,25 +921,25 @@ export default function Catalog() {
         <Container size="xl">
           <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing={40} mb={isMobile ? 30 : 60}>
             <Stack gap="md" align={isMobile ? 'center' : 'flex-start'} style={{ textAlign: isMobile ? 'center' : 'left' }}>
-              <Title order={3} size={isMobile ? 'h3' : 'h2'} c="var(--text-color)">{store.name}</Title>
-              <Text size="sm" c="var(--text-color)" style={{ lineHeight: 1.6, maxWidth: isMobile ? '300px' : 'none', opacity: 0.8 }}>
+              <Title order={3} size={isMobile ? 'h3' : 'h2'} c={footerTextColor}>{store.name}</Title>
+              <Text size="sm" c={footerTextColor} style={{ lineHeight: 1.6, maxWidth: isMobile ? '300px' : 'none', opacity: 0.8 }}>
                 {store.description || 'Calidad y servicio excepcional para todos nuestros clientes registrados.'}
               </Text>
             </Stack>
 
             <Stack gap="md" align={isMobile ? 'center' : 'flex-start'} style={{ textAlign: isMobile ? 'center' : 'left', order: isMobile ? 2 : 2 }}>
-              <Title order={4} size="xs" tt="uppercase" c="var(--text-color)" fw={700} style={{ opacity: 0.9 }}>Encuéntranos</Title>
+              <Title order={4} size="xs" tt="uppercase" c={footerTextColor} fw={700} style={{ opacity: 0.9 }}>Encuéntranos</Title>
                 <Stack gap="sm" align={isMobile ? 'center' : 'flex-start'}>
                   {store.address && (
                     <Group gap="md" justify={isMobile ? 'center' : 'flex-start'} wrap="nowrap">
-                      <Image src={UbicacionPng} w={24} h={24} style={{ filter: 'brightness(0) invert(1)' }} />
+                      <Image src={UbicacionPng} w={24} h={24} style={{ filter: footerTextColor === '#1e293b' ? 'brightness(0)' : 'brightness(0) invert(1)' }} />
                       <Box 
                         component="a" 
                         href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.address)}`} 
                         target="_blank" 
                         style={{ textDecoration: 'none', color: 'inherit' }}
                       >
-                        <Text size="sm" c="var(--text-color)" fw={500} style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>{store.address}</Text>
+                        <Text size="sm" c={footerTextColor} fw={500} style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>{store.address}</Text>
                       </Box>
                     </Group>
                   )}
@@ -941,7 +953,7 @@ export default function Catalog() {
                         target="_blank" 
                         style={{ textDecoration: 'none', color: 'inherit' }}
                       >
-                        <Text size="sm" c="var(--text-color)" fw={500}>{store.whatsapp}</Text>
+                        <Text size="sm" c={footerTextColor} fw={500}>{store.whatsapp}</Text>
                       </Box>
                     </Group>
                   )}
@@ -955,7 +967,7 @@ export default function Catalog() {
                         target="_blank" 
                         style={{ textDecoration: 'none', color: 'inherit' }}
                       >
-                        <Text size="sm" c="var(--text-color)" fw={500}>@{store.instagram.split('?')[0].replace(/\/+$/, '').split('/').pop()}</Text>
+                        <Text size="sm" c={footerTextColor} fw={500}>@{store.instagram.split('?')[0].replace(/\/+$/, '').split('/').pop()}</Text>
                       </Box>
                     </Group>
                   )}
@@ -963,7 +975,7 @@ export default function Catalog() {
              </Stack>
 
             <Stack gap="md" align={isMobile ? 'center' : 'flex-start'} style={{ textAlign: isMobile ? 'center' : 'left', order: isMobile ? 3 : 4 }}>
-              <Title order={4} size="xs" tt="uppercase" c="var(--text-color)" fw={700} style={{ opacity: 0.9 }}>Horarios</Title>
+              <Title order={4} size="xs" tt="uppercase" c={footerTextColor} fw={700} style={{ opacity: 0.9 }}>Horarios</Title>
               {store.businessHours && (() => {
                 const hours = JSON.parse(store.businessHours);
                 const weekDays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
@@ -978,9 +990,9 @@ export default function Catalog() {
                   <Group key={label} justify="space-between" wrap="nowrap" style={{ width: '100%', marginBottom: '8px' }}>
                     <Group gap="xs">
                        <Box style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--secondary-color)' }} />
-                       <Text size="xs" fw={700} c="#fff">{label}:</Text>
+                       <Text size="xs" fw={700} c={footerTextColor}>{label}:</Text>
                     </Group>
-                    <Text size="xs" c="#fff" style={{ opacity: 0.8 }} fs={config.isOpen ? "normal" : "italic"}>
+                    <Text size="xs" c={footerTextColor} style={{ opacity: 0.8 }} fs={config.isOpen ? "normal" : "italic"}>
                       {config.isOpen ? `${config.open} - ${config.close}` : 'Cerrado'}
                     </Text>
                   </Group>
