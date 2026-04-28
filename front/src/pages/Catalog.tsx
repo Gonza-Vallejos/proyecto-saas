@@ -1425,6 +1425,7 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMob
   const getCardStyle = () => {
     const base = {
       display: styleType === 'horizontal' ? 'flex' : 'block',
+      flexDirection: styleType === 'horizontal' ? 'row' : 'column',
       opacity: isOut ? 0.6 : 1,
       overflow: 'hidden',
       transition: 'transform 0.2s ease, box-shadow 0.2s ease',

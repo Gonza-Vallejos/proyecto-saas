@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Title, Text, Card, Group, Stack, ColorInput, Select, Button, SimpleGrid, Box, Divider, Badge } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { Palette, Save, Smartphone, Type, Image as ImageIcon } from 'lucide-react';
 import MobilePreview from '../../components/MobilePreview';
 import FileUploader from '../../components/FileUploader';
@@ -16,6 +17,7 @@ const GOOGLE_FONTS = [
 ];
 
 export default function Appearance() {
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
