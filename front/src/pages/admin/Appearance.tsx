@@ -299,7 +299,7 @@ export default function Appearance() {
 
         <Box style={{ 
           position: isMobile ? 'relative' : 'fixed', 
-          top: isMobile ? '0' : '90px', 
+          top: isMobile ? '0' : '160px', 
           right: isMobile ? 'auto' : '40px',
           zIndex: isMobile ? 1 : 100,
           margin: isMobile ? '2rem auto' : '0',
