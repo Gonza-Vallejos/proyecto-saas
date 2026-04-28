@@ -6,7 +6,6 @@ import {
   ShoppingCart,
   Package, 
   Trash2, 
-  Clock,
   Wifi,
   CreditCard
 } from 'lucide-react';
