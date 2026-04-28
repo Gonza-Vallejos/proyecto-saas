@@ -1492,9 +1492,9 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMob
 
       <Stack p={styleType === 'horizontal' ? 'md' : 'xl'} gap="sm" style={{ flex: 1, justifyContent: 'space-between' }}>
         <Box>
-          <Group justify="space-between" align="flex-start" mb={4}>
-            <Title order={3} size="1rem" style={{ fontFamily: 'inherit', lineHeight: 1.2, flex: 1, paddingRight: '8px', color: 'var(--text-color)' }}>{product.name}</Title>
-            <Text fw={900} size="lg" color="var(--primary-color)">${formatPrice(product.price)}</Text>
+          <Group gap="sm" align="center" mb={4}>
+            <Title order={3} size="1.1rem" style={{ fontFamily: 'inherit', lineHeight: 1.2, color: 'var(--text-color)' }}>{product.name}</Title>
+            <Text fw={900} size="md" color="var(--primary-color)" style={{ backgroundColor: 'color-mix(in srgb, var(--primary-color) 10%, transparent)', padding: '2px 8px', borderRadius: '6px' }}>${formatPrice(product.price)}</Text>
           </Group>
           <Text size="xs" color="dimmed" lineClamp={2} style={{ fontFamily: 'inherit' }}>
             {product.description || 'Calidad superior garantizada en cada detalle de este producto.'}

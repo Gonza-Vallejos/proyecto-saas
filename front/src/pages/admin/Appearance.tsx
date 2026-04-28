@@ -149,8 +149,9 @@ export default function Appearance() {
         </Button>
       </Group>
 
-      <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl" style={{ alignItems: 'start' }}>
-        <Stack gap="xl">
+      <Box style={{ display: 'flex', flexWrap: 'wrap-reverse', gap: '2rem', alignItems: 'stretch' }}>
+        <Box style={{ flex: '1 1 500px', minWidth: '320px' }}>
+          <Stack gap="xl">
           {/* SECCION PRESETS */}
           <Card withBorder radius="md" p="xl" shadow="sm">
             <Group mb="lg">
@@ -286,10 +287,12 @@ export default function Appearance() {
             </Stack>
           </Card>
 
-        </Stack>
+          </Stack>
+        </Box>
 
-        {/* Simulador Móvil */}
-        <Box style={{ height: 'fit-content', position: 'sticky', top: '100px', transform: 'scale(0.85)', transformOrigin: 'top center' }}>
+        <Box style={{ flex: '0 0 380px', minWidth: '340px', margin: '0 auto' }}>
+          {/* Simulador Móvil */}
+          <Box style={{ position: 'sticky', top: '100px', transform: 'scale(0.85)', transformOrigin: 'top center' }}>
           <Stack align="center" gap="md">
             <Text fw={700} size="sm" color="dimmed" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Smartphone size={16} /> Previsualización en Tiempo Real
@@ -309,7 +312,8 @@ export default function Appearance() {
             />
           </Stack>
         </Box>
-      </SimpleGrid>
+        </Box>
+      </Box>
     </div>
   );
 }
