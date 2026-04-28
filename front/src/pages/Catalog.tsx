@@ -192,6 +192,7 @@ export default function Catalog() {
   const [isDelivery, setIsDelivery] = useState<boolean>(false);
   const [customerAddress, setCustomerAddress] = useState<string>('');
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
+  const [checkoutMethod, setCheckoutMethod] = useState<'WHATSAPP' | 'MP'>('WHATSAPP');
   const [showNamePrompt, setShowNamePrompt] = useState(false);
   const [isOrdering, setIsOrdering] = useState(false);
 
@@ -465,6 +466,7 @@ export default function Catalog() {
       // 1. Guardar el pedido en la base de datos (Supabase) via API pública
       const orderData = {
         customerName: nameToUse,
+        customerPhone: customerPhone,
         items: cart.map(item => ({
           productId: item.product.id,
           quantity: item.quantity,
@@ -472,7 +474,7 @@ export default function Catalog() {
           observations: item.observations,
           selectedModifiers: item.selectedModifiers
         })),
-        observations: "Pedido vía WhatsApp",
+        observations: `Pedido vía WhatsApp - ${isDelivery ? 'Envío a domicilio' : 'Retiro en el local'}${isDelivery ? ` (${customerAddress})` : ''}`,
         total: cart.reduce((acc, item) => {
           const extras = item.selectedModifiers.reduce((sum, g) => sum + g.options.reduce((s, o) => s + o.price, 0), 0);
           return acc + (item.product.price + extras) * item.quantity;
@@ -487,7 +489,11 @@ export default function Catalog() {
 
       // 2. Armar y enviar el mensaje de WhatsApp
       let message = `*Nuevo Pedido - ${store.name}*\n`;
-      message += `Cliente: *${nameToUse}*\n\n`;
+      message += `Cliente: *${nameToUse}*\n`;
+      message += `Teléfono: *${customerPhone}*\n`;
+      message += `Entrega: *${isDelivery ? 'Envío a domicilio' : 'Retiro en el local'}*\n`;
+      if (isDelivery) message += `Dirección: *${customerAddress}*\n\n`;
+      else message += `\n`;
       
       let total = 0;
       cart.forEach(item => {
@@ -1233,7 +1239,10 @@ export default function Catalog() {
                 radius="xl" 
                 color="green" 
                 leftSection={<Image src={WhatsAppPng} w={18} h={18} />}
-                onClick={handleSendOrder}
+                onClick={() => {
+                  setCheckoutMethod('WHATSAPP');
+                  setCheckoutModalOpen(true);
+                }}
                 loading={isOrdering}
                >
                  Enviar Pedido por WhatsApp
@@ -1247,7 +1256,10 @@ export default function Catalog() {
                   mt="sm"
                   variant="light"
                   leftSection={<CreditCard size={18} />}
-                  onClick={handleMercadoPagoOrder}
+                  onClick={() => {
+                    setCheckoutMethod('MP');
+                    setCheckoutModalOpen(true);
+                  }}
                   loading={isOrdering}
                  >
                    Pagar online con Mercado Pago
@@ -1326,6 +1338,7 @@ export default function Catalog() {
             size="md" 
             radius="md" 
             mt="md"
+            color={checkoutMethod === 'WHATSAPP' ? 'green' : 'blue'}
             onClick={() => {
               if (!customerName.trim() || !customerPhone.trim() || !customerEmail.trim()) {
                 Swal.fire('Error', 'Por favor completa todos los campos requeridos.', 'error');
@@ -1337,10 +1350,15 @@ export default function Catalog() {
               }
               localStorage.setItem('siit_customer_name', customerName);
               setCheckoutModalOpen(false);
-              handleMercadoPagoOrder();
+              
+              if (checkoutMethod === 'WHATSAPP') {
+                handleSendOrder();
+              } else {
+                handleMercadoPagoOrder();
+              }
             }}
           >
-            Continuar a Mercado Pago
+            {checkoutMethod === 'WHATSAPP' ? 'Enviar Pedido por WhatsApp' : 'Continuar a Mercado Pago'}
           </Button>
         </Stack>
       </Modal>

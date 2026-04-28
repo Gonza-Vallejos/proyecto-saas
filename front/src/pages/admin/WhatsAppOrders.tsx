@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Title, Text, Card, Group, Stack, Badge, Button, SimpleGrid, Paper, Box, ScrollArea, ActionIcon } from '@mantine/core';
-import { Clock, CheckCircle2, PlayCircle, MessageSquare, RefreshCw, ShoppingBag } from 'lucide-react';
+import { Title, Text, Card, Group, Stack, Badge, Button, SimpleGrid, Paper, Box, ScrollArea, ActionIcon, Tabs } from '@mantine/core';
+import { Clock, CheckCircle2, PlayCircle, MessageSquare, RefreshCw, ShoppingBag, CreditCard } from 'lucide-react';
 import { api } from '../../utils/api';
 import Swal from 'sweetalert2';
 import { socket } from '../../utils/socket';
@@ -39,9 +39,12 @@ export default function WhatsAppOrders() {
   const fetchOrders = useCallback(async (isAuto = false) => {
     if (!isAuto) setIsRefreshing(true);
     try {
-      // Obtener todos y filtrar en frontend por origen WHATSAPP y CATALOG
       const data = await api.get('/orders');
-      const filtered = data.filter((o: any) => o.origin === 'WHATSAPP' || o.origin === 'CATALOG');
+      // Filtrar por origen y estados activos
+      const filtered = data.filter((o: any) => 
+        (o.origin === 'WHATSAPP' || o.origin === 'CATALOG') && 
+        ['PENDING', 'PREPARING', 'READY'].includes(o.status)
+      );
       setOrders(filtered);
     } catch (e) {
       console.error(e);
@@ -94,7 +97,7 @@ export default function WhatsAppOrders() {
     switch (status) {
       case 'PENDING': return 'Nuevo';
       case 'PREPARING': return 'En Proceso';
-      case 'READY': return 'Listo / Enviado';
+      case 'READY': return 'Listo';
       default: return status;
     }
   };
@@ -124,7 +127,7 @@ export default function WhatsAppOrders() {
         </Group>
         
         <Stack gap={2}>
-          <Title order={3} size="h4">{order.customerName || 'Cliente WhatsApp'}</Title>
+          <Title order={3} size="h4">{order.customerName || 'Cliente Externo'}</Title>
           {order.customerPhone && (
             <Text size="xs" color="dimmed" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                {order.customerPhone}
@@ -132,16 +135,18 @@ export default function WhatsAppOrders() {
           )}
 
           <Group gap="xs" mt="xs">
-            {order.observations && order.observations.includes('CON ENVÍO') && (
+            {order.observations && (order.observations.includes('CON ENVÍO') || order.observations.includes('Envío a domicilio')) && (
               <Badge color="teal" variant="light" size="xs">🚚 Envío</Badge>
             )}
-            {order.observations && order.observations.includes('RETIRO EN LOCAL') && (
+            {order.observations && (order.observations.includes('RETIRO EN LOCAL') || order.observations.includes('Retiro en el local')) && (
               <Badge color="violet" variant="light" size="xs">🏪 Retiro</Badge>
             )}
-            {order.origin === 'CATALOG' && (
-              <Badge color="pink" variant="light" size="xs">💳 Pago Online</Badge>
-            )}
           </Group>
+          {order.observations && (
+            <Text size="xs" color="dimmed" mt="4px" fs="italic">
+              Obs: {order.observations}
+            </Text>
+          )}
         </Stack>
       </Box>
 
@@ -185,13 +190,6 @@ export default function WhatsAppOrders() {
                       </Text>
                     ))}
                   </Stack>
-                )}
-                {item.observations && (
-                  <Paper withBorder p="xs" mt="xs" ml="52px" bg="gray.0">
-                    <Text size="xs" color="dimmed" fs="italic">
-                      "{item.observations}"
-                    </Text>
-                  </Paper>
                 )}
               </Box>
             );
@@ -245,10 +243,64 @@ export default function WhatsAppOrders() {
               Marcar como LISTO
             </Button>
           )}
+          {order.status === 'READY' && (
+            <Button fullWidth variant="light" color="gray" onClick={() => handleUpdateStatus(order.id, 'PAID')}>
+              Archivar Pedido
+            </Button>
+          )}
         </Stack>
       </Box>
     </Card>
   );
+
+  const renderOrderGrid = (ordersList: Order[]) => {
+    const pending = ordersList.filter(o => o.status === 'PENDING');
+    const preparing = ordersList.filter(o => o.status === 'PREPARING');
+    const ready = ordersList.filter(o => o.status === 'READY');
+
+    if (ordersList.length === 0) {
+      return (
+        <Paper withBorder p="3rem" radius="md" ta="center" mt="xl">
+          <Stack align="center" gap="md">
+            <MessageSquare size={48} opacity={0.3} />
+            <Text fw={700} size="xl">Sin pedidos en esta sección</Text>
+            <Text color="dimmed">Cuando entren pedidos aparecerán organizados aquí.</Text>
+          </Stack>
+        </Paper>
+      );
+    }
+
+    return (
+      <Stack gap="2.5rem" mt="xl">
+        {pending.length > 0 && (
+          <Box>
+            <Badge color="blue" size="lg" mb="lg">NUEVOS PEDIDOS ({pending.length})</Badge>
+            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
+              {pending.map(order => renderOrderCard(order))}
+            </SimpleGrid>
+          </Box>
+        )}
+
+        {preparing.length > 0 && (
+          <Box>
+            <Badge color="orange" size="lg" mb="lg">EN PREPARACIÓN ({preparing.length})</Badge>
+            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
+              {preparing.map(order => renderOrderCard(order))}
+            </SimpleGrid>
+          </Box>
+        )}
+
+        {ready.length > 0 && (
+          <Box>
+            <Badge color="green" size="lg" mb="lg">LISTOS / TERMINADOS ({ready.length})</Badge>
+            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
+              {ready.map(order => renderOrderCard(order))}
+            </SimpleGrid>
+          </Box>
+        )}
+      </Stack>
+    );
+  };
 
   if (loading) return <div className="loader-container">Cargando pedidos externos...</div>;
 
@@ -257,44 +309,33 @@ export default function WhatsAppOrders() {
       <Group justify="space-between" mb="2rem">
         <div>
           <Title order={2} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <ShoppingBag size={28} color="#25D366" /> Pedidos WhatsApp
+            <ShoppingBag size={28} color="#25D366" /> Monitor de Pedidos
           </Title>
-          <Text color="dimmed" size="sm">Pedidos recibidos desde el catálogo online.</Text>
+          <Text color="dimmed" size="sm">Supervisa pedidos externos y gestiona estados de cocina.</Text>
         </div>
         <Button variant="light" leftSection={<RefreshCw size={18} className={isRefreshing ? 'rotating' : ''} />} onClick={() => fetchOrders()}>
           Refrescar
         </Button>
       </Group>
 
-      {orders.length === 0 ? (
-        <Paper withBorder p="3rem" radius="md" ta="center">
-          <Stack align="center" gap="md">
-            <MessageSquare size={48} opacity={0.3} />
-            <Text fw={700} size="xl">Sin pedidos online</Text>
-            <Text color="dimmed">Cuando los clientes pidan por el catálogo, aparecerán aquí.</Text>
-          </Stack>
-        </Paper>
-      ) : (
-        <Stack gap="3rem">
-          {orders.filter(o => o.status === 'PENDING').length > 0 && (
-            <Box>
-              <Badge color="blue" size="lg" mb="xl">NUEVOS PEDIDOS</Badge>
-              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
-                {orders.filter(o => o.status === 'PENDING').map(order => renderOrderCard(order))}
-              </SimpleGrid>
-            </Box>
-          )}
+      <Tabs defaultValue="whatsapp" color="teal">
+        <Tabs.List>
+          <Tabs.Tab value="whatsapp" leftSection={<MessageSquare size={16} />}>
+            Pedidos WhatsApp
+          </Tabs.Tab>
+          <Tabs.Tab value="mp" leftSection={<CreditCard size={16} />}>
+            Pedidos Online (Mercado Pago)
+          </Tabs.Tab>
+        </Tabs.List>
 
-          {orders.filter(o => o.status === 'PREPARING').length > 0 && (
-            <Box>
-              <Badge color="orange" size="lg" mb="xl">EN PREPARACIÓN</Badge>
-              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
-                {orders.filter(o => o.status === 'PREPARING').map(order => renderOrderCard(order))}
-              </SimpleGrid>
-            </Box>
-          )}
-        </Stack>
-      )}
+        <Tabs.Panel value="whatsapp">
+          {renderOrderGrid(orders.filter(o => o.origin === 'WHATSAPP'))}
+        </Tabs.Panel>
+
+        <Tabs.Panel value="mp">
+          {renderOrderGrid(orders.filter(o => o.origin === 'CATALOG'))}
+        </Tabs.Panel>
+      </Tabs>
 
       <style>{`
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
