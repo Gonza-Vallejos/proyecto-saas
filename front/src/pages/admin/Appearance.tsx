@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Title, Text, Card, Group, Stack, ColorInput, Select, Button, SimpleGrid, Box, Divider, Badge } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { Palette, Save, Smartphone, Type, Image as ImageIcon } from 'lucide-react';
 import MobilePreview from '../../components/MobilePreview';
 import FileUploader from '../../components/FileUploader';
@@ -16,6 +17,7 @@ const GOOGLE_FONTS = [
 ];
 
 export default function Appearance() {
+  const isMobile = useMediaQuery('(max-width: 1024px)');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -149,8 +151,13 @@ export default function Appearance() {
         </Button>
       </Group>
 
-      <Box style={{ display: 'flex', flexWrap: 'wrap-reverse', gap: '2rem', alignItems: 'stretch' }}>
-        <Box style={{ flex: '1 1 500px', minWidth: '320px' }}>
+      <Box style={{ 
+        position: 'relative', 
+        paddingRight: isMobile ? '0' : '400px',
+        display: isMobile ? 'flex' : 'block',
+        flexDirection: isMobile ? 'column-reverse' : 'row'
+      } as any}>
+        <Box>
           <Stack gap="xl">
           {/* SECCION PRESETS */}
           <Card withBorder radius="md" p="xl" shadow="sm">
@@ -290,10 +297,16 @@ export default function Appearance() {
           </Stack>
         </Box>
 
-        <Box style={{ flex: '0 0 380px', minWidth: '340px', margin: '0 auto' }}>
+        <Box style={{ 
+          position: isMobile ? 'relative' : 'fixed', 
+          top: isMobile ? '0' : '90px', 
+          right: isMobile ? 'auto' : '40px',
+          zIndex: isMobile ? 1 : 100,
+          margin: isMobile ? '2rem auto' : '0',
+          width: isMobile ? '100%' : '340px'
+        } as any}>
           {/* Simulador Móvil */}
-          <Box style={{ position: 'sticky', top: '100px', transform: 'scale(0.85)', transformOrigin: 'top center' }}>
-          <Stack align="center" gap="md">
+          <Stack align="center" gap="md" style={{ transform: 'scale(0.8)', transformOrigin: 'top center' }}>
             <Text fw={700} size="sm" color="dimmed" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Smartphone size={16} /> Previsualización en Tiempo Real
             </Text>
@@ -311,7 +324,6 @@ export default function Appearance() {
               fontFamily={fontFamily}
             />
           </Stack>
-        </Box>
         </Box>
       </Box>
     </div>
