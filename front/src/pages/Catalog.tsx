@@ -795,7 +795,7 @@ export default function Catalog() {
             {/* Fila 1: Categorías Principales */}
             <Group 
               ref={navRef}
-              justify="flex-start" 
+              justify={isMobile ? 'flex-start' : 'center'} 
               gap="xs" 
               py="sm"
               style={{ 
@@ -832,7 +832,7 @@ export default function Catalog() {
                 padding: '8px 0'
               }}>
                 <Group 
-                  justify="flex-start" 
+                  justify={isMobile ? 'flex-start' : 'center'} 
                   gap="sm" 
                   px="md"
                   style={{ 

@@ -19,6 +19,9 @@ import WaiterView from './pages/WaiterView';
 import Register from './pages/Register';
 import NotFound from './pages/NotFound';
 
+import { useEffect } from 'react';
+import { api } from './utils/api';
+
 // Componente para decidir qué mostrar en el índice del /admin según el rol
 const AdminIndex = () => {
   const { user } = useOutletContext<{ user: { role: string } }>();
@@ -37,6 +40,21 @@ const AdminIndex = () => {
 };
 
 function App() {
+  useEffect(() => {
+    // Ping backend periódicamente para mantener Render despierto si hay pestañas abiertas
+    const pingBackend = async () => {
+      try {
+        await api.get('/auth/profile').catch(() => {});
+      } catch (e) {
+        // Ignorar errores
+      }
+    };
+
+    pingBackend();
+    const interval = setInterval(pingBackend, 10 * 60 * 1000); // 10 minutos
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>
