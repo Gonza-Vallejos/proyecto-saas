@@ -999,19 +999,9 @@ export default function Catalog() {
 
                 // If not all same, use the two-column layout as before
                 return (
-                 <Group gap="md" align="flex-start" mt="sm" justify={isMobile ? 'center' : 'flex-start'}>
-                    <ActionIcon variant="light" color="var(--text-color)" radius="xl" size="lg" style={{ opacity: 0.8 }}>
-                      <Clock size={20} color="var(--text-color)" />
-                    </ActionIcon>
-                    <SimpleGrid cols={{ base: 2, sm: 1 }} spacing={isMobile ? 20 : 5} style={{ flex: 1 }}>
-                      <Stack gap={2}>
-                        {Object.entries(hours).slice(0, 4).map(([day, config]: [any, any]) => renderRow(day, config))}
-                      </Stack>
-                      <Stack gap={2}>
-                        {Object.entries(hours).slice(4).map(([day, config]: [any, any]) => renderRow(day, config))}
-                      </Stack>
-                    </SimpleGrid>
-                 </Group>
+                  <Stack gap="xs" mt="sm" style={{ width: '100%', maxWidth: isMobile ? '280px' : 'none', margin: isMobile ? '0 auto' : '0' }}>
+                    {Object.entries(hours).map(([day, config]: [any, any]) => renderRow(day, config))}
+                  </Stack>
                 );
               })()}
             </Stack>
@@ -1424,8 +1414,8 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMob
   
   const getCardStyle = () => {
     const base = {
-      display: styleType === 'horizontal' ? 'flex' : 'block',
-      flexDirection: styleType === 'horizontal' ? 'row' : 'column',
+      display: (styleType === 'horizontal' ? 'flex' : 'block') as any,
+      flexDirection: (styleType === 'horizontal' ? 'row' : 'column') as any,
       opacity: isOut ? 0.6 : 1,
       overflow: 'hidden',
       transition: 'transform 0.2s ease, box-shadow 0.2s ease',
@@ -1479,7 +1469,7 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMob
         <img 
           src={product.imageUrl ? fixUrl(product.imageUrl) : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600'} 
           alt={product.name}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', backgroundColor: '#f8fafc' }}
+          style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', backgroundColor: '#f1f5f9' }}
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.onerror = null; // Previene bucle infinito si placehold falla

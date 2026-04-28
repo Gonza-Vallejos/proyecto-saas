@@ -191,7 +191,7 @@ const mockProductsData = [
 ];
 
 function RenderPreviewCard({ product, style, primary, secondary, textColor }: any) {
-  const imgStyle = { objectFit: 'cover' as const, height: '100%', width: '100%' };
+  const imgStyle = { objectFit: 'contain' as const, height: '100%', width: '100%', backgroundColor: '#f1f5f9' };
 
   if (style === 'minimal' || style === 'modern') {
     return (

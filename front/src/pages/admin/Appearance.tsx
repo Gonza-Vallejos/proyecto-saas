@@ -17,7 +17,6 @@ const GOOGLE_FONTS = [
 ];
 
 export default function Appearance() {
-  const isDesktop = useMediaQuery('(min-width: 1024px)');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
