@@ -139,7 +139,7 @@ export default function KitchenDashboard() {
       </Box>
 
       {/* Contenido (Items) */}
-      <ScrollArea h={250} p="md">
+      <ScrollArea style={{ maxHeight: '250px' }} p="md">
         <Stack gap="md">
           {order.items.map((item, idx) => {
             const modifiers = item.selectedModifiers ? JSON.parse(item.selectedModifiers) : [];

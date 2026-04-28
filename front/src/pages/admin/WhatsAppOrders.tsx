@@ -145,7 +145,7 @@ export default function WhatsAppOrders() {
         </Stack>
       </Box>
 
-      <ScrollArea h={220} p="md">
+      <ScrollArea style={{ maxHeight: '220px' }} p="md">
         <Stack gap="md">
           {order.items.map((item, idx) => {
             const modifiers = item.selectedModifiers ? JSON.parse(item.selectedModifiers) : [];
