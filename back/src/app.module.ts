@@ -30,7 +30,7 @@ import { MercadoPagoModule } from './mercado-pago/mercado-pago.module';
     // Rate Limiting
     ThrottlerModule.forRoot([{
       ttl: 60000,
-      limit: 20,
+      limit: 120,
     }]),
     PrismaModule, 
     AuthModule, 
