@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsBoolean, IsUUID, IsArray } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsBoolean, IsUUID, IsArray, ValidateIf } from 'class-validator';
 
 export class CreateProductDto {
   @IsString({ message: 'El nombre debe ser un texto.' })
@@ -15,9 +15,10 @@ export class CreateProductDto {
   @IsOptional()
   imageUrl?: string;
 
-  @IsUUID('all', { message: 'El ID de la categoría debe ser un UUID válido.' })
   @IsOptional()
-  categoryId?: string;
+  @ValidateIf((o, v) => v !== null && v !== '')
+  @IsUUID('all', { message: 'El ID de la categoría debe ser un UUID válido.' })
+  categoryId?: string | null;
 
   @IsBoolean({ message: 'El control de stock debe ser un valor booleano.' })
   @IsOptional()
@@ -54,9 +55,10 @@ export class UpdateProductDto {
   @IsOptional()
   imageUrl?: string;
 
-  @IsUUID('all', { message: 'El ID de la categoría debe ser un UUID válido.' })
   @IsOptional()
-  categoryId?: string;
+  @ValidateIf((o, v) => v !== null && v !== '')
+  @IsUUID('all', { message: 'El ID de la categoría debe ser un UUID válido.' })
+  categoryId?: string | null;
 
   @IsBoolean({ message: 'El control de stock debe ser un valor booleano.' })
   @IsOptional()
