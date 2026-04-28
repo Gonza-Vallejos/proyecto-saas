@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsHexColor, IsUrl, IsIn } from 'class-validator';
+import { IsString, IsOptional, IsHexColor, IsUrl, IsIn, IsBoolean } from 'class-validator';
 
 export class UpdateStoreAppearanceDto {
   @IsString({ message: 'El nombre debe ser un texto.' })
@@ -80,4 +80,8 @@ export class UpdateStoreAppearanceDto {
   @IsString({ message: 'La contraseña del WiFi debe ser un texto.' })
   @IsOptional()
   wifiPassword?: string;
+
+  @IsBoolean({ message: 'El permiso de pagos en catálogo debe ser un booleano.' })
+  @IsOptional()
+  allowCatalogPayments?: boolean;
 }

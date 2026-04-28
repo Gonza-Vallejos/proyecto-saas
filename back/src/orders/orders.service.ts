@@ -177,7 +177,7 @@ export class OrdersService {
         // Se reintegra si:
         // 1. Era WhatsApp o POS (descontó al inicio)
         // 2. Era Table pero ya estaba en estado READY (descontó al pasar a READY)
-        const wasAlreadyDeducted = origin === 'WHATSAPP' || order.origin === 'POS' || order.status === 'READY';
+        const wasAlreadyDeducted = order.origin === 'WHATSAPP' || order.origin === 'POS' || order.status === 'READY';
         
         if (wasAlreadyDeducted) {
           for (const item of order.items) {

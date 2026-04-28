@@ -254,7 +254,7 @@ export default function OrderHistory() {
                     <Text size="sm" fw={500}>
                       {order.origin === 'TABLE' ? `Mesa ${order.table?.number}` : order.customerName || 'Cliente WA'}
                     </Text>
-                    {order.waiter && <Text size="xs" color="dimmed">Mozo: {order.waiter.name}</Text>}
+                    {order.origin === 'TABLE' && order.waiter && <Text size="xs" color="dimmed">Mozo: {order.waiter.name}</Text>}
                   </Table.Td>
                   <Table.Td>
                     <Tooltip label={order.items.map(i => `${i.quantity}x ${i.product?.name}`).join(', ')}>
