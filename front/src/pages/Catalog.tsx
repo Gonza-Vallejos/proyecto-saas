@@ -632,7 +632,7 @@ export default function Catalog() {
         left: 0,
         right: 0,
         zIndex: 1000,
-        backgroundColor: scrolled ? 'rgba(255,255,255,0.95)' : 'transparent',
+        backgroundColor: scrolled ? 'var(--bg-color)' : 'transparent',
         backdropFilter: scrolled ? 'blur(10px)' : 'none',
         height: isMobile ? '60px' : '76px',
         display: 'flex',
@@ -730,10 +730,10 @@ export default function Catalog() {
         display: 'flex', 
         alignItems: 'center', 
         paddingTop: isMobile ? '40px' : '76px',
-        background: store.heroImageUrl 
-          ? `linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%)` 
-          : '#f8fafc',
-        backgroundImage: store.heroImageUrl ? `url(${fixUrl(store.heroImageUrl)})` : 'none',
+        backgroundImage: store.heroImageUrl 
+          ? `linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 100%), url(${fixUrl(store.heroImageUrl)})` 
+          : 'none',
+        backgroundColor: store.heroImageUrl ? 'transparent' : '#f8fafc',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         clipPath: store.heroStyle === 'curve' ? (isMobile ? 'none' : 'ellipse(150% 100% at 50% 0%)') : 'none',
@@ -772,7 +772,8 @@ export default function Catalog() {
         position: 'sticky', 
         top: isMobile ? '60px' : '76px', 
         zIndex: 900, 
-        backgroundColor: 'rgba(255,255,255,0.98)', 
+        backgroundColor: 'var(--bg-color)', 
+        opacity: 0.98, 
         backdropFilter: 'blur(10px)',
         borderBottom: '1px solid rgba(0,0,0,0.05)',
         transition: 'all 0.3s ease',
@@ -1421,31 +1422,63 @@ export default function Catalog() {
 function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMobile }: any) {
   const isOut = product.trackStock && product.stock <= 0;
   
+  const getCardStyle = () => {
+    const base = {
+      display: styleType === 'horizontal' ? 'flex' : 'block',
+      opacity: isOut ? 0.6 : 1,
+      overflow: 'hidden',
+      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+    };
+
+    if (styleType === 'modern') {
+      return {
+        ...base,
+        backgroundColor: 'color-mix(in srgb, var(--bg-card) 80%, transparent)',
+        backdropFilter: 'blur(12px)',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.05)',
+        borderRadius: '24px',
+      };
+    }
+    
+    if (styleType === 'horizontal') {
+      return {
+        ...base,
+        backgroundColor: 'var(--bg-card)',
+        border: '1px solid rgba(0, 0, 0, 0.06)',
+        borderRadius: '16px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)',
+      };
+    }
+
+    // Default or Classic
+    return {
+      ...base,
+      backgroundColor: 'var(--bg-card)',
+      border: '1px solid rgba(0, 0, 0, 0.08)',
+      boxShadow: 'var(--mantine-shadow-sm)',
+      borderRadius: '12px',
+    };
+  };
+
   return (
     <Card 
-      radius="xl" 
       padding={0} 
       className="product-card"
-      style={{ 
-        display: styleType === 'horizontal' ? 'flex' : 'block',
-        backgroundColor: 'var(--bg-card)',
-        border: '1px solid rgba(0,0,0,0.05)',
-        opacity: isOut ? 0.6 : 1,
-        overflow: 'hidden'
-      }}
+      style={getCardStyle()}
     >
       <Box style={{ 
-        width: styleType === 'horizontal' ? '160px' : '100%', 
+        width: styleType === 'horizontal' ? (isMobile ? '110px' : '180px') : '100%', 
         position: 'relative',
-        height: styleType === 'horizontal' ? 'auto' : '260px',
-        minHeight: styleType === 'horizontal' ? '160px' : 'auto',
+        height: styleType === 'horizontal' ? 'auto' : (isMobile ? '180px' : '260px'),
+        minHeight: styleType === 'horizontal' ? (isMobile ? '110px' : '180px') : 'auto',
         overflow: 'hidden',
         flexShrink: 0
       }}>
         <img 
           src={product.imageUrl ? fixUrl(product.imageUrl) : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600'} 
           alt={product.name}
-          style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', backgroundColor: '#f8fafc' }}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', backgroundColor: '#f8fafc' }}
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.onerror = null; // Previene bucle infinito si placehold falla

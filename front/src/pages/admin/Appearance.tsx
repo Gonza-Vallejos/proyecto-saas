@@ -36,6 +36,47 @@ export default function Appearance() {
     fetchData();
   }, []);
 
+  const applyPreset = (presetName: string) => {
+    switch (presetName) {
+      case 'modern-blue':
+        setPrimaryColor('#0ea5e9');
+        setSecondaryColor('#6366f1');
+        setBgColor('#F8F9FA');
+        setTextColor('#1e293b');
+        setFontFamily('Inter');
+        setCardStyle('modern');
+        setHeroStyle('curve');
+        break;
+      case 'glass-dark':
+        setPrimaryColor('#ec4899');
+        setSecondaryColor('#a855f7');
+        setBgColor('#0f172a');
+        setTextColor('#f8fafc');
+        setFontFamily('Poppins');
+        setCardStyle('modern');
+        setHeroStyle('rect');
+        break;
+      case 'sunset':
+        setPrimaryColor('#f97316');
+        setSecondaryColor('#e11d48');
+        setBgColor('#fffbeb');
+        setTextColor('#451a03');
+        setFontFamily('Outfit');
+        setCardStyle('classic');
+        setHeroStyle('curve');
+        break;
+      case 'luxury':
+        setPrimaryColor('#b45309');
+        setSecondaryColor('#78350f');
+        setBgColor('#fafaf9');
+        setTextColor('#1c1917');
+        setFontFamily('Playfair Display');
+        setCardStyle('horizontal');
+        setHeroStyle('rect');
+        break;
+    }
+  };
+
   const fetchData = async () => {
     try {
       const data = await api.get('/stores/my-store');
@@ -110,6 +151,22 @@ export default function Appearance() {
 
       <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl" style={{ alignItems: 'start' }}>
         <Stack gap="xl">
+          {/* SECCION PRESETS */}
+          <Card withBorder radius="md" p="xl" shadow="sm">
+            <Group mb="lg">
+              <Box bg="teal.0" p="xs" style={{ borderRadius: '8px' }}>
+                <Palette size={20} color="#0d9488" />
+              </Box>
+              <Title order={4}>Estilos Prediseñados (Themes)</Title>
+            </Group>
+            <SimpleGrid cols={2} spacing="xs">
+              <Button variant="light" color="blue" onClick={() => applyPreset('modern-blue')}>Modern Blue</Button>
+              <Button variant="light" color="pink" onClick={() => applyPreset('glass-dark')}>Dark Neon</Button>
+              <Button variant="light" color="orange" onClick={() => applyPreset('sunset')}>Warm Sunset</Button>
+              <Button variant="light" color="dark" onClick={() => applyPreset('luxury')}>Luxury Gold</Button>
+            </SimpleGrid>
+          </Card>
+
           {/* SECCION 1: IDENTIDAD DE MARCA */}
           <Card withBorder radius="md" p="xl" shadow="sm">
             <Group mb="lg">
@@ -232,7 +289,7 @@ export default function Appearance() {
         </Stack>
 
         {/* Simulador Móvil */}
-        <Box style={{ height: 'fit-content', position: 'sticky', top: '90px' }}>
+        <Box style={{ height: 'fit-content', position: 'sticky', top: '100px', transform: 'scale(0.85)', transformOrigin: 'top center' }}>
           <Stack align="center" gap="md">
             <Text fw={700} size="sm" color="dimmed" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Smartphone size={16} /> Previsualización en Tiempo Real

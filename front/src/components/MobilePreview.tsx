@@ -35,23 +35,58 @@ export default function MobilePreview({ name, primaryColor, secondaryColor, bgCo
   const mockProducts = mockProductsData;
 
   return (
-    <Box 
-      style={{ 
-        width: '320px', 
-        height: '640px', 
-        border: '12px solid #1e293b', 
-        borderRadius: '36px', 
-        position: 'relative',
-        backgroundColor: bgColor || '#ffffff',
-        overflow: 'hidden',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-        display: 'flex',
-        flexDirection: 'column',
-        fontFamily: fontFamily || 'Inter' // Aplicación de la fuente
-      }}
-    >
-      {/* Notch simulado */}
-      <Box style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '120px', height: '18px', background: '#1e293b', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px', zIndex: 50 }} />
+    <Box style={{ position: 'relative' }}>
+      {/* Botones laterales simulados */}
+      <Box style={{ position: 'absolute', left: '-15px', top: '100px', width: '3px', height: '40px', background: '#475569', borderRadius: '4px 0 0 4px' }} />
+      <Box style={{ position: 'absolute', left: '-15px', top: '150px', width: '3px', height: '40px', background: '#475569', borderRadius: '4px 0 0 4px' }} />
+      <Box style={{ position: 'absolute', right: '-15px', top: '120px', width: '3px', height: '60px', background: '#475569', borderRadius: '0 4px 4px 0' }} />
+
+      <Box 
+        style={{ 
+          width: '340px', 
+          height: '680px', 
+          border: '14px solid #0f172a', 
+          borderRadius: '40px', 
+          position: 'relative',
+          backgroundColor: bgColor || '#ffffff',
+          overflow: 'hidden',
+          boxShadow: '0 30px 60px -12px rgba(0, 0, 0, 0.4), inset 0 0 4px rgba(255,255,255,0.2)',
+          display: 'flex',
+          flexDirection: 'column',
+          fontFamily: fontFamily || 'Inter'
+        }}
+      >
+        {/* Isla Dinámica / Notch Premium */}
+        <Box style={{ 
+          position: 'absolute', 
+          top: '10px', 
+          left: '50%', 
+          transform: 'translateX(-50%)', 
+          width: '110px', 
+          height: '24px', 
+          background: '#000', 
+          borderRadius: '20px', 
+          zIndex: 100,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-around',
+          padding: '0 15px'
+        }}>
+          <Box style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#1e1b4b' }} />
+          <Box style={{ width: '40px', height: '4px', borderRadius: '10px', background: '#334155' }} />
+        </Box>
+
+        {/* Reflejo de pantalla de cristal */}
+        <Box style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.05) 100%)',
+          pointerEvents: 'none',
+          zIndex: 90
+        }} />
       
       <ScrollArea scrollbarSize={2} style={{ height: '100%' }}>
         {/* Header Preview */}
