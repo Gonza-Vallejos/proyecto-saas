@@ -251,8 +251,17 @@ export default function Catalog() {
       products: store.products.filter(p => p.categoryId === cat.id)
     })).filter(cat => cat.products.length > 0);
 
+    // Agregar Categoría Virtual de Promos al principio si existen
+    const bundleProducts = store.products.filter(p => p.isBundle);
+    const bundlesCategory = bundleProducts.length > 0 ? [{
+      id: 'promos-virtual-cat',
+      name: '🔥 Promociones',
+      slug: 'promociones',
+      products: bundleProducts
+    }] : [];
+
     if (selectedCategory === 'all') {
-      // Vista de "Todos": Orden jerárquico tradicional
+      // Vista de "Todos": Orden jerárquico tradicional + Promos arriba
       const orderedCats = store.categories
         .filter(c => !c.parentId)
         .flatMap(parent => [
@@ -260,9 +269,16 @@ export default function Catalog() {
           ...store.categories.filter(child => child.parentId === parent.id)
         ]);
 
-      return orderedCats
+      const mainGroups = orderedCats
         .map(cat => catsWithProducts.find(cp => cp.id === cat.id))
         .filter(Boolean) as any[];
+
+      return [...bundlesCategory, ...mainGroups];
+    }
+
+    // Caso especial: Seleccionó la categoría virtual de Promos
+    if (selectedCategory === 'promos-virtual-cat') {
+      return bundlesCategory;
     }
 
     // Vista filtrada: Determinar qué mostrar
@@ -290,10 +306,21 @@ export default function Catalog() {
   // Categorías principales (Padres) que tienen contenido
   const parentCategories = useMemo(() => {
     if (!store) return [];
-    return store.categories.filter(c => !c.parentId && (
+    
+    const baseParents = store.categories.filter(c => !c.parentId && (
       store.products.some(p => p.categoryId === c.id) ||
       store.categories.some(child => child.parentId === c.id && store.products.some(p => p.categoryId === child.id))
     ));
+
+    // Si hay promos, agregamos el botón virtual al inicio
+    if (store.products.some(p => p.isBundle)) {
+      return [
+        { id: 'promos-virtual-cat', name: 'Promos', slug: 'promociones' },
+        ...baseParents
+      ];
+    }
+
+    return baseParents;
   }, [store]);
 
   // Subcategorías de la categoría actualmente activa (si es padre) o de su padre (si es hijo)

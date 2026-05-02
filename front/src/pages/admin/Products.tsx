@@ -479,7 +479,13 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
                   <Select
                     label="Producto Componente"
                     placeholder="Elegir..."
-                    data={products.filter((p: any) => p.id !== product?.id).map((p: any) => ({ value: p.id, label: p.name }))}
+                    data={products
+                      .filter((p: any) => p.id !== product?.id && !p.isBundle)
+                      .map((p: any) => ({ 
+                        value: p.id, 
+                        label: p.name,
+                        group: p.category?.name || 'Sin Categoría'
+                      }))}
                     value={item.productId}
                     onChange={(val) => {
                       const newItems = [...bundleItems];
