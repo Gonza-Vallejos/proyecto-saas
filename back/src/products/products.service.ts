@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto, UpdateProductDto } from './products.dto';
 
@@ -80,56 +80,63 @@ export class ProductsService {
     });
     if (!product) throw new NotFoundException('Producto no encontrado en tu tienda');
 
-    const updatedProduct = await this.prisma.product.update({
-      where: { id: productId },
-      data: {
-        name: data.name,
-        description: data.description,
-        price: data.price,
-        imageUrl: data.imageUrl,
-        categoryId: data.categoryId,
-        trackStock: data.trackStock,
-        stock: data.stock,
-        barcode: data.barcode,
-        isBundle: data.isBundle,
-        notes: data.notes
-      }
-    });
-    
-    // Bundle Items
-    if (data.bundleItems !== undefined) {
-      await this.prisma.bundleItem.deleteMany({ where: { bundleId: productId } });
-      if (data.bundleItems.length > 0) {
-         await this.prisma.bundleItem.createMany({
-           data: data.bundleItems.map(bi => ({
-             bundleId: productId,
-             productId: bi.productId,
-             quantity: bi.quantity
-           }))
-         });
-      }
-    }
-    
-    // Actualizar relaciones de modificadores si fueron pasadas en la request
-    if (data.modifierGroupIds !== undefined) {
-      // 1. Borrar asociaciones viejas
-      await this.prisma.productModifierGroup.deleteMany({
-        where: { productId }
+    try {
+      const updatedProduct = await this.prisma.product.update({
+        where: { id: productId },
+        data: {
+          name: data.name,
+          description: data.description,
+          price: data.price,
+          imageUrl: data.imageUrl,
+          categoryId: data.categoryId,
+          trackStock: data.trackStock,
+          stock: data.stock,
+          barcode: data.barcode || null,
+          isBundle: data.isBundle,
+          notes: data.notes
+        }
       });
-
-      const mods: string[] = data.modifierGroupIds || [];
-      // 2. Crear las nuevas (si hay)
-      if (mods.length > 0) {
-        await this.prisma.productModifierGroup.createMany({
-          data: mods.map(id => ({
-            productId,
-            modifierGroupId: id
-          }))
-        });
+      
+      // Bundle Items
+      if (data.bundleItems !== undefined) {
+        await this.prisma.bundleItem.deleteMany({ where: { bundleId: productId } });
+        if (data.bundleItems.length > 0) {
+           await this.prisma.bundleItem.createMany({
+             data: data.bundleItems.map(bi => ({
+               bundleId: productId,
+               productId: bi.productId,
+               quantity: bi.quantity
+             }))
+           });
+        }
       }
-    }
+      
+      // Actualizar relaciones de modificadores si fueron pasadas en la request
+      if (data.modifierGroupIds !== undefined) {
+        // 1. Borrar asociaciones viejas
+        await this.prisma.productModifierGroup.deleteMany({
+          where: { productId }
+        });
 
-    return updatedProduct;
+        const mods: string[] = data.modifierGroupIds || [];
+        // 2. Crear las nuevas (si hay)
+        if (mods.length > 0) {
+          await this.prisma.productModifierGroup.createMany({
+            data: mods.map(id => ({
+              productId,
+              modifierGroupId: id
+            }))
+          });
+        }
+      }
+
+      return updatedProduct;
+    } catch (e: any) {
+      if (e.code === 'P2002' && e.meta?.target?.includes('barcode')) {
+        throw new BadRequestException('El código de barras ya está siendo usado por otro producto.');
+      }
+      throw e;
+    }
   }
 
   async findByBarcode(storeId: string, barcode: string) {
