@@ -26,8 +26,8 @@ export class OrdersService {
     });
 
     const result = await this.prisma.$transaction(async (tx) => {
-      // 1. Verificar stock si es pedido de WhatsApp o POS
-      if (origin === 'WHATSAPP' || origin === 'POS') {
+      // 1. Verificar stock si es pedido de WhatsApp, POS o Catálogo (MP)
+      if (origin === 'WHATSAPP' || origin === 'POS' || origin === 'CATALOG') {
         for (const item of items) {
           const product = await tx.product.findUnique({ where: { id: item.productId } });
           if (product?.trackStock && product.stock < item.quantity) {
@@ -58,8 +58,8 @@ export class OrdersService {
         },
       });
 
-      // 3. Descontar stock inmediatamente si es WhatsApp o POS
-      if (origin === 'WHATSAPP' || origin === 'POS') {
+      // 3. Descontar stock inmediatamente si es WhatsApp, POS o Catálogo (MP)
+      if (origin === 'WHATSAPP' || origin === 'POS' || origin === 'CATALOG') {
         for (const item of items) {
           const product = await tx.product.findUnique({ where: { id: item.productId } });
           if (product?.trackStock) {

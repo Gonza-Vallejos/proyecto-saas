@@ -437,11 +437,6 @@ export default function Catalog() {
   const handleSendOrder = async () => {
     if (!store) return;
     const savedName = localStorage.getItem('siit_customer_name');
-    if (!savedName && !customerName) {
-      setCartOpened(false); // Cerramos el carrito para que se vea bien el modal
-      setShowNamePrompt(true);
-      return;
-    }
     
     // Si el módulo de pedidos no está activo, enviamos directamente a WhatsApp sin guardar en BD
     if (!store.hasWhatsAppOrders) {
@@ -450,13 +445,19 @@ export default function Catalog() {
         message += `• ${item.quantity}x *${item.product.name}*\n`;
       });
       message += `\n*Por favor, confírmame el total y el tiempo de entrega.*`;
-      window.open(`https://wa.me/${store.whatsapp}?text=${encodeURIComponent(message)}`, '_blank');
+      
+      const waUrl = `https://wa.me/${store.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+      if (isMobile) {
+        window.location.assign(waUrl);
+      } else {
+        window.open(waUrl, '_blank');
+      }
+
       setCart([]);
       setCartOpened(false);
       return;
     }
 
-    // Si ya tenemos el nombre, procedemos
     const nameToUse = customerName || savedName || 'Cliente';
     if (!savedName) localStorage.setItem('siit_customer_name', nameToUse);
 
@@ -515,15 +516,25 @@ export default function Catalog() {
       message += `\n*Total: $${formatPrice(total)}*\n`;
       message += `\n_Pedido registrado en el sistema_`;
 
-      window.open(`https://wa.me/${store.whatsapp}?text=${encodeURIComponent(message)}`, '_blank');
+      const waUrl = `https://wa.me/${store.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+      
+      // En móviles, window.open suele ser bloqueado después de un fetch (contexto perdido)
+      // Usamos window.location.assign para asegurar que abra la app de WhatsApp
+      if (isMobile) {
+        window.location.assign(waUrl);
+      } else {
+        window.open(waUrl, '_blank');
+      }
+      
       setCart([]);
       setCartOpened(false);
-    } catch (e) {
+    } catch (e: any) {
       console.error("Error al registrar pedido:", e);
-      Swal.fire('Error', 'No pudimos registrar tu pedido, pero puedes intentar enviarlo por WhatsApp igualmente.', 'warning')
+      Swal.fire('Error', `No pudimos registrar tu pedido: ${e.message}. Puedes intentar enviarlo por WhatsApp igualmente.`, 'warning')
         .then(() => {
-          // Fallback a WhatsApp aunque falle la API
-          window.open(`https://wa.me/${store.whatsapp}?text=${encodeURIComponent("Hola, quiero hacer un pedido...")}`, '_blank');
+          const fallbackUrl = `https://wa.me/${store.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent("Hola, quiero hacer un pedido...")}`;
+          if (isMobile) window.location.assign(fallbackUrl);
+          else window.open(fallbackUrl, '_blank');
         });
     } finally {
       setIsOrdering(false);
@@ -596,8 +607,9 @@ export default function Catalog() {
       const mpData = await res.json();
       window.location.href = mpData.init_point;
 
-    } catch (e) {
-      Swal.fire('Error', 'No pudimos generar el cobro con Mercado Pago en este momento.', 'error');
+    } catch (e: any) {
+      console.error("Error en Mercado Pago:", e);
+      Swal.fire('Error', `No pudimos generar el cobro con Mercado Pago: ${e.message}`, 'error');
     } finally {
       setIsOrdering(false);
     }
@@ -1240,6 +1252,7 @@ export default function Catalog() {
                 color="green" 
                 leftSection={<Image src={WhatsAppPng} w={18} h={18} />}
                 onClick={() => {
+                  setCartOpened(false);
                   setCheckoutMethod('WHATSAPP');
                   setCheckoutModalOpen(true);
                 }}
@@ -1257,6 +1270,7 @@ export default function Catalog() {
                   variant="light"
                   leftSection={<CreditCard size={18} />}
                   onClick={() => {
+                    setCartOpened(false);
                     setCheckoutMethod('MP');
                     setCheckoutModalOpen(true);
                   }}
@@ -1278,6 +1292,7 @@ export default function Catalog() {
         centered
         radius="lg"
         padding="xl"
+        zIndex={3000}
       >
         <Stack gap="md">
           <Text size="sm" color="dimmed">Por favor, completa tus datos para procesar el pago y envío correctamente.</Text>
@@ -1339,7 +1354,8 @@ export default function Catalog() {
             radius="md" 
             mt="md"
             color={checkoutMethod === 'WHATSAPP' ? 'green' : 'blue'}
-            onClick={() => {
+            loading={isOrdering}
+            onClick={async () => {
               if (!customerName.trim() || !customerPhone.trim() || !customerEmail.trim()) {
                 Swal.fire('Error', 'Por favor completa todos los campos requeridos.', 'error');
                 return;
@@ -1349,13 +1365,14 @@ export default function Catalog() {
                 return;
               }
               localStorage.setItem('siit_customer_name', customerName);
-              setCheckoutModalOpen(false);
               
               if (checkoutMethod === 'WHATSAPP') {
-                handleSendOrder();
+                await handleSendOrder();
               } else {
-                handleMercadoPagoOrder();
+                await handleMercadoPagoOrder();
               }
+              
+              setCheckoutModalOpen(false);
             }}
           >
             {checkoutMethod === 'WHATSAPP' ? 'Enviar Pedido por WhatsApp' : 'Continuar a Mercado Pago'}
