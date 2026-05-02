@@ -29,8 +29,21 @@ export class OrdersService {
       // 1. Verificar stock si es pedido de WhatsApp, POS o Catálogo (MP)
       if (origin === 'WHATSAPP' || origin === 'POS' || origin === 'CATALOG') {
         for (const item of items) {
-          const product = await tx.product.findUnique({ where: { id: item.productId } });
-          if (product?.trackStock && product.stock < item.quantity) {
+          const product = await tx.product.findUnique({ 
+            where: { id: item.productId },
+            include: { bundleItems: { include: { product: true } } }
+          });
+          
+          if (!product) continue;
+
+          if (product.isBundle) {
+            // Validar stock de cada componente
+            for (const bundleItem of product.bundleItems) {
+              if (bundleItem.product.trackStock && bundleItem.product.stock < (item.quantity * bundleItem.quantity)) {
+                throw new BadRequestException(`Stock insuficiente para componente: ${bundleItem.product.name} (parte de la promo). Disponible: ${bundleItem.product.stock}`);
+              }
+            }
+          } else if (product.trackStock && product.stock < item.quantity) {
             throw new BadRequestException(`Stock insuficiente para: ${product.name}. Disponible: ${product.stock}`);
           }
         }
@@ -61,8 +74,22 @@ export class OrdersService {
       // 3. Descontar stock inmediatamente si es WhatsApp, POS o Catálogo (MP)
       if (origin === 'WHATSAPP' || origin === 'POS' || origin === 'CATALOG') {
         for (const item of items) {
-          const product = await tx.product.findUnique({ where: { id: item.productId } });
-          if (product?.trackStock) {
+          const product = await tx.product.findUnique({ 
+            where: { id: item.productId },
+            include: { bundleItems: true }
+          });
+          
+          if (!product) continue;
+
+          if (product.isBundle) {
+            // Descontar stock de cada componente
+            for (const bundleItem of product.bundleItems) {
+              await tx.product.update({
+                where: { id: bundleItem.productId },
+                data: { stock: { decrement: item.quantity * bundleItem.quantity } }
+              });
+            }
+          } else if (product.trackStock) {
             await tx.product.update({
               where: { id: item.productId },
               data: { stock: { decrement: item.quantity } },

@@ -22,6 +22,8 @@ interface Product {
   trackStock: boolean;
   stock: number;
   barcode?: string;
+  isBundle?: boolean;
+  bundleItems?: any[];
 }
 
 export default function Products() {
@@ -228,7 +230,10 @@ export default function Products() {
                   </td>
                   <td style={tdStyle}>
                     <Stack gap={2}>
-                      <Text fw={700} size="sm" color="#1e293b">{p.name}</Text>
+                      <Group gap="xs">
+                        <Text fw={700} size="sm" color="#1e293b">{p.name}</Text>
+                        {p.isBundle && <Badge color="green" size="xs" variant="filled">PROMO</Badge>}
+                      </Group>
                       {p.description && <Text size="xs" color="dimmed" lineClamp={1} style={{ maxWidth: '300px' }}>{p.description}</Text>}
                       {p.barcode && <Group gap="xs"><Barcode size={12} color="#94a3b8" /><Text size="xs" color="dimmed">{p.barcode}</Text></Group>}
                     </Stack>
@@ -281,18 +286,18 @@ export default function Products() {
 
       <ProductFormModal 
         opened={showAddForm} onClose={() => setShowAddForm(false)} onSubmit={handleAddProduct}
-        categories={categories} modifiers={modifiers} storeInfo={storeInfo} title="Subir Producto"
+        categories={categories} modifiers={modifiers} products={products} storeInfo={storeInfo} title="Subir Producto"
       />
 
       <ProductFormModal 
         opened={!!editingProduct} onClose={() => setEditingProduct(null)} onSubmit={handleUpdateProduct}
-        categories={categories} modifiers={modifiers} product={editingProduct} storeInfo={storeInfo} title="Modificar Producto"
+        categories={categories} modifiers={modifiers} products={products} product={editingProduct} storeInfo={storeInfo} title="Modificar Producto"
       />
     </div>
   );
 }
 
-function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, product, storeInfo, title }: any) {
+function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, products, product, storeInfo, title }: any) {
   const [name, setName] = useState('');
   const [price, setPrice] = useState<number | string>(0);
   const [description, setDescription] = useState('');
@@ -302,6 +307,8 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
   const [trackStock, setTrackStock] = useState(false);
   const [stock, setStock] = useState<number | string>(0);
   const [barcode, setBarcode] = useState('');
+  const [isBundle, setIsBundle] = useState(false);
+  const [bundleItems, setBundleItems] = useState<{ productId: string, quantity: number }[]>([]);
 
   useEffect(() => {
     if (product) {
@@ -314,6 +321,8 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
       setTrackStock(product.trackStock || false);
       setStock(product.stock || 0);
       setBarcode(product.barcode || '');
+      setIsBundle(product.isBundle || false);
+      setBundleItems(product.bundleItems?.map((bi: any) => ({ productId: bi.productId, quantity: bi.quantity })) || []);
     } else {
       setName('');
       setPrice(0);
@@ -324,6 +333,8 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
       setTrackStock(false);
       setStock(0);
       setBarcode('');
+      setIsBundle(false);
+      setBundleItems([]);
     }
   }, [product, opened]);
 
@@ -448,6 +459,66 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
           </Box>
         )}
 
+        {/* Sección de Promo / Combo */}
+        <Box p="md" style={{ background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+          <Group justify="space-between" mb="xs">
+            <Stack gap={0}>
+              <Text fw={700} size="sm">Es una Promo / Combo</Text>
+              <Text size="xs" color="dimmed">Compone este producto con otros de tu lista</Text>
+            </Stack>
+            <Switch 
+              checked={isBundle} 
+              onChange={(e) => setIsBundle(e.currentTarget.checked)} 
+              color="green"
+            />
+          </Group>
+          {isBundle && (
+            <Stack gap="sm" mt="md">
+              {bundleItems.map((item, index) => (
+                <Group key={index} grow align="flex-end">
+                  <Select
+                    label="Producto Componente"
+                    placeholder="Elegir..."
+                    data={products.filter((p: any) => p.id !== product?.id).map((p: any) => ({ value: p.id, label: p.name }))}
+                    value={item.productId}
+                    onChange={(val) => {
+                      const newItems = [...bundleItems];
+                      newItems[index].productId = val || '';
+                      setBundleItems(newItems);
+                    }}
+                    radius="md"
+                    searchable
+                  />
+                  <NumberInput
+                    label="Cantidad"
+                    value={item.quantity}
+                    onChange={(val) => {
+                      const newItems = [...bundleItems];
+                      newItems[index].quantity = Number(val) || 1;
+                      setBundleItems(newItems);
+                    }}
+                    min={1}
+                    radius="md"
+                    style={{ maxWidth: '100px' }}
+                  />
+                  <ActionIcon color="red" variant="subtle" onClick={() => setBundleItems(bundleItems.filter((_, i) => i !== index))}>
+                    <Trash2 size={18} />
+                  </ActionIcon>
+                </Group>
+              ))}
+              <Button 
+                variant="light" 
+                color="green" 
+                size="xs" 
+                leftSection={<Plus size={14} />}
+                onClick={() => setBundleItems([...bundleItems, { productId: '', quantity: 1 }])}
+              >
+                Agregar Producto a la Promo
+              </Button>
+            </Stack>
+          )}
+        </Box>
+
         <Textarea 
           label="Descripción (Opcional)" 
           value={description} 
@@ -462,7 +533,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
           <Button 
             size="md" 
             radius="md" 
-            onClick={() => onSubmit({ name, price, description, imageUrl, categoryId, modifierGroupIds, trackStock, stock, barcode })}
+            onClick={() => onSubmit({ name, price, description, imageUrl, categoryId, modifierGroupIds, trackStock, stock, barcode, isBundle, bundleItems })}
             style={{ paddingLeft: '2rem', paddingRight: '2rem' }}
           >
             {product ? 'Guardar Cambios' : 'Crear Producto'}

@@ -36,6 +36,14 @@ export class CreateProductDto {
   @IsString({ message: 'El código de barras debe ser un texto.' })
   @IsOptional()
   barcode?: string;
+
+  @IsBoolean({ message: 'Indica si es una promo/combo.' })
+  @IsOptional()
+  isBundle?: boolean;
+
+  @IsArray({ message: 'Los ítems de la promo deben ser una lista.' })
+  @IsOptional()
+  bundleItems?: { productId: string, quantity: number }[];
 }
 
 export class UpdateProductDto {
@@ -76,4 +84,12 @@ export class UpdateProductDto {
   @IsString({ message: 'El código de barras debe ser un texto.' })
   @IsOptional()
   barcode?: string;
+
+  @IsBoolean({ message: 'Indica si es una promo/combo.' })
+  @IsOptional()
+  isBundle?: boolean;
+
+  @IsArray({ message: 'Los ítems de la promo deben ser una lista.' })
+  @IsOptional()
+  bundleItems?: { productId: string, quantity: number }[];
 }

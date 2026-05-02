@@ -1298,7 +1298,7 @@ export default function Catalog() {
           <Text size="sm" color="dimmed">Por favor, completa tus datos para procesar el pago y envío correctamente.</Text>
           <TextInput 
             label="Tu nombre" 
-            placeholder="Ej: Juan Pérez" 
+            placeholder="Tu nombre completo" 
             size="md"
             radius="md"
             value={customerName}
@@ -1314,10 +1314,11 @@ export default function Catalog() {
             value={customerPhone}
             onChange={(e) => setCustomerPhone(e.currentTarget.value)}
             required
+            maxLength={15}
           />
           <TextInput 
             label="Correo Electrónico" 
-            placeholder="Ej: tu@email.com" 
+            placeholder="correo@ejemplo.com" 
             size="md"
             radius="md"
             type="email"
@@ -1341,7 +1342,7 @@ export default function Catalog() {
           {isDelivery && (
             <TextInput 
               label="Dirección de Envío" 
-              placeholder="Ej: Av. Siempreviva 742" 
+              placeholder="Calle, número, piso o aclaraciones" 
               size="md"
               radius="md"
               value={customerAddress}
@@ -1370,10 +1371,10 @@ export default function Catalog() {
                 return;
               }
 
-              // Validación de Teléfono (mínimo 8 dígitos)
+              // Validación de Teléfono (entre 8 y 15 dígitos)
               const phoneDigits = customerPhone.replace(/\D/g, '');
-              if (phoneDigits.length < 8) {
-                Swal.fire('Error', 'Por favor ingresa un número de teléfono válido (mínimo 8 dígitos).', 'error');
+              if (phoneDigits.length < 8 || phoneDigits.length > 15) {
+                Swal.fire('Error', 'Por favor ingresa un número de teléfono válido (entre 8 y 15 dígitos).', 'error');
                 return;
               }
 
@@ -1410,7 +1411,7 @@ export default function Catalog() {
           <Text size="sm" color="dimmed">Para que la tienda sepa quién hace el pedido, por favor ingresa tu nombre.</Text>
           <TextInput 
             label="Tu nombre" 
-            placeholder="Ej: Juan Pérez" 
+            placeholder="Tu nombre completo" 
             size="md"
             radius="md"
             value={customerName}
@@ -1543,6 +1544,9 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMob
         />
         {isOut && (
           <Badge variant="filled" color="red" style={{ position: 'absolute', top: 10, right: 10, fontSize: '10px' }}>AGOTADO</Badge>
+        )}
+        {product.isBundle && (
+          <Badge variant="filled" color="green" style={{ position: 'absolute', top: 10, left: 10, fontSize: '10px' }}>PROMO</Badge>
         )}
       </Box>
 
@@ -1758,7 +1762,7 @@ function ProductSelectionModal({ product, onClose, onAdd, isMobile, showObservat
         {showObservations && (
           <Textarea 
             label="Instrucciones Especiales" 
-            placeholder="Ej: Sin cebolla, pan bien tostado..." 
+            placeholder="Aclaraciones, detalles del producto, etc..." 
             value={obs} 
             onChange={(e) => setObs(e.currentTarget.value)}
           />

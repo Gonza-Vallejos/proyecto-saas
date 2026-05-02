@@ -20,6 +20,15 @@ export class ProductsService {
         stock: data.stock || 0,
         barcode: data.barcode || null,
         storeId,
+        isBundle: data.isBundle || false,
+        bundleItems: data.bundleItems && data.bundleItems.length > 0 
+          ? {
+              create: data.bundleItems.map(bi => ({
+                productId: bi.productId,
+                quantity: bi.quantity
+              }))
+            }
+          : undefined,
         modifierGroups: data.modifierGroupIds && data.modifierGroupIds.length > 0 
           ? {
               create: data.modifierGroupIds.map(id => ({ modifierGroupId: id }))
@@ -36,6 +45,9 @@ export class ProductsService {
         category: true,
         modifierGroups: {
           include: { modifierGroup: true }
+        },
+        bundleItems: {
+          include: { product: true }
         }
       },
       orderBy: { createdAt: 'desc' }
@@ -78,8 +90,23 @@ export class ProductsService {
         trackStock: data.trackStock,
         stock: data.stock,
         barcode: data.barcode,
+        isBundle: data.isBundle
       }
     });
+    
+    // Bundle Items
+    if (data.bundleItems !== undefined) {
+      await this.prisma.bundleItem.deleteMany({ where: { bundleId: productId } });
+      if (data.bundleItems.length > 0) {
+         await this.prisma.bundleItem.createMany({
+           data: data.bundleItems.map(bi => ({
+             bundleId: productId,
+             productId: bi.productId,
+             quantity: bi.quantity
+           }))
+         });
+      }
+    }
     
     // Actualizar relaciones de modificadores si fueron pasadas en la request
     if (data.modifierGroupIds !== undefined) {

@@ -127,10 +127,27 @@ model Product {
   // Relación con ítems de pedido
   orderItems  OrderItem[]
 
+  // Configuración de Promos / Combos
+  isBundle    Boolean @default(false)
+  bundleItems BundleItem[] @relation("BundleToItems")
+  containedIn BundleItem[] @relation("ItemsInBundle")
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@unique([storeId, barcode]) // Código de barras único por tienda
+}
+
+model BundleItem {
+  id        String @id @default(uuid())
+  bundleId  String
+  productId String
+  quantity  Int    @default(1)
+
+  bundle    Product @relation("BundleToItems", fields: [bundleId], references: [id], onDelete: Cascade)
+  product   Product @relation("ItemsInBundle", fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([bundleId, productId])
 }
 
 model ModifierGroup {
