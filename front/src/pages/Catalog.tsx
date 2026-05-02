@@ -1292,7 +1292,7 @@ export default function Catalog() {
         centered
         radius="lg"
         padding="xl"
-        zIndex={3000}
+        zIndex={1000}
       >
         <Stack gap="md">
           <Text size="sm" color="dimmed">Por favor, completa tus datos para procesar el pago y envío correctamente.</Text>
@@ -1310,6 +1310,7 @@ export default function Catalog() {
             placeholder="Ej: 1123456789" 
             size="md"
             radius="md"
+            type="tel"
             value={customerPhone}
             onChange={(e) => setCustomerPhone(e.currentTarget.value)}
             required
@@ -1319,6 +1320,7 @@ export default function Catalog() {
             placeholder="Ej: tu@email.com" 
             size="md"
             radius="md"
+            type="email"
             value={customerEmail}
             onChange={(e) => setCustomerEmail(e.currentTarget.value)}
             required
@@ -1360,6 +1362,21 @@ export default function Catalog() {
                 Swal.fire('Error', 'Por favor completa todos los campos requeridos.', 'error');
                 return;
               }
+
+              // Validación de Email
+              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+              if (!emailRegex.test(customerEmail)) {
+                Swal.fire('Error', 'Por favor ingresa un correo electrónico válido.', 'error');
+                return;
+              }
+
+              // Validación de Teléfono (mínimo 8 dígitos)
+              const phoneDigits = customerPhone.replace(/\D/g, '');
+              if (phoneDigits.length < 8) {
+                Swal.fire('Error', 'Por favor ingresa un número de teléfono válido (mínimo 8 dígitos).', 'error');
+                return;
+              }
+
               if (isDelivery && !customerAddress.trim()) {
                 Swal.fire('Error', 'Por favor ingresa la dirección de envío.', 'error');
                 return;
