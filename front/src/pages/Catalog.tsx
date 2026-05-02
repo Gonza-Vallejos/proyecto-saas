@@ -1036,10 +1036,10 @@ export default function Catalog() {
                 );
 
                 const renderRow = (label: string, config: any) => (
-                  <Group key={label} justify="space-between" wrap="nowrap" style={{ width: '100%', marginBottom: '8px' }}>
+                  <Group key={label} justify="space-between" wrap="nowrap" style={{ width: '100%', marginBottom: '6px' }}>
                     <Group gap="xs">
                        <Box style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--secondary-color)' }} />
-                       <Text size="xs" fw={700} c={footerTextColor}>{label}:</Text>
+                       <Text size="xs" fw={700} c={footerTextColor} style={{ minWidth: '70px' }}>{label}:</Text>
                     </Group>
                     <Text size="xs" c={footerTextColor} style={{ opacity: 0.8 }} fs={config.isOpen ? "normal" : "italic"}>
                       {config.isOpen ? `${config.open} - ${config.close}` : 'Cerrado'}
@@ -1049,7 +1049,7 @@ export default function Catalog() {
 
                 if (allSame) {
                   return (
-                    <Stack gap={2} mt="sm">
+                    <Stack gap={2} mt="sm" style={{ width: '100%', maxWidth: '280px', margin: isMobile ? '0 auto' : '0' }}>
                       {renderRow('Lunes a Viernes', firstDay)}
                       {renderRow('Sábado', hours['Sábado'])}
                       {renderRow('Domingo', hours['Domingo'])}
@@ -1059,7 +1059,7 @@ export default function Catalog() {
 
                 // If not all same, use the two-column layout as before
                 return (
-                  <Stack gap="xs" mt="sm" style={{ width: '100%', maxWidth: isMobile ? '280px' : 'none', margin: isMobile ? '0 auto' : '0' }}>
+                  <Stack gap="xs" mt="sm" style={{ width: '100%', maxWidth: '280px', margin: isMobile ? '0 auto' : '0' }}>
                     {Object.entries(hours).map(([day, config]: [any, any]) => renderRow(day, config))}
                   </Stack>
                 );
