@@ -74,6 +74,7 @@ interface Product {
   modifierGroups?: {
     modifierGroup: ModifierGroup;
   }[];
+  isBundle?: boolean;
 }
 
 interface CartItem {
