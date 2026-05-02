@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Plus, Trash2, Image as ImageIcon, Edit3, Boxes, Search, Filter, X, Barcode } from 'lucide-react';
-import { Modal, Button, TextInput, NumberInput, Select, MultiSelect, Textarea, Group, ActionIcon, Tooltip, Switch, Badge, Text, Stack, Box, Title, Card, Transition } from '@mantine/core';
+import { Modal, Button, TextInput, NumberInput, Select, MultiSelect, Textarea, Group, ActionIcon, Tooltip, Switch, Badge, Text, Stack, Box, Title, Card, Transition, TagsInput } from '@mantine/core';
 import FileUploader from '../../components/FileUploader';
 import { api } from '../../utils/api';
 import Swal from 'sweetalert2';
@@ -530,16 +530,13 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
         </Box>
 
         {/* Sección de Notas / Etiquetas */}
-        <MultiSelect
+        <TagsInput
           label="Notas Olfativas / Etiquetas"
           description="Escribe una nota y presiona Enter para agregarla"
           placeholder="Ej: Dulce, Amaderado, Ámbar..."
-          data={['Dulce', 'Amaderado', 'Cítrico', 'Florido', 'Ámbar', 'Avainillado', 'Especiado', 'Fresco', ...notes]}
+          data={['Dulce', 'Amaderado', 'Cítrico', 'Florido', 'Ámbar', 'Avainillado', 'Especiado', 'Fresco']}
           value={notes}
           onChange={setNotes}
-          searchable
-          creatable
-          getCreateLabel={(query) => `+ Agregar "${query}"`}
           radius="md"
         />
 
