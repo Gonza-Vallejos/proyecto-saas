@@ -446,7 +446,7 @@ export default function Catalog() {
       });
       message += `\n*Por favor, confírmame el total y el tiempo de entrega.*`;
       
-      const waUrl = `https://wa.me/${store.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+      const waUrl = `https://wa.me/${(store.whatsapp ?? '').replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
       if (isMobile) {
         window.location.assign(waUrl);
       } else {
@@ -516,7 +516,7 @@ export default function Catalog() {
       message += `\n*Total: $${formatPrice(total)}*\n`;
       message += `\n_Pedido registrado en el sistema_`;
 
-      const waUrl = `https://wa.me/${store.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+      const waUrl = `https://wa.me/${(store.whatsapp ?? '').replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
       
       // En móviles, window.open suele ser bloqueado después de un fetch (contexto perdido)
       // Usamos window.location.assign para asegurar que abra la app de WhatsApp
@@ -532,7 +532,7 @@ export default function Catalog() {
       console.error("Error al registrar pedido:", e);
       Swal.fire('Error', `No pudimos registrar tu pedido: ${e.message}. Puedes intentar enviarlo por WhatsApp igualmente.`, 'warning')
         .then(() => {
-          const fallbackUrl = `https://wa.me/${store.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent("Hola, quiero hacer un pedido...")}`;
+          const fallbackUrl = `https://wa.me/${(store.whatsapp ?? '').replace(/\D/g, '')}?text=${encodeURIComponent("Hola, quiero hacer un pedido...")}`;
           if (isMobile) window.location.assign(fallbackUrl);
           else window.open(fallbackUrl, '_blank');
         });
