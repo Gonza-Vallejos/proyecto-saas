@@ -142,8 +142,12 @@ export default function WhatsAppOrders() {
             {order.observations && (order.observations.includes('RETIRO EN LOCAL') || order.observations.includes('Retiro en el local')) && (
               <Badge color="violet" variant="light" size="xs">🏪 Retiro</Badge>
             )}
-            {order.paymentStatus === 'PAID' && (
+            {order.paymentStatus === 'PAID' ? (
               <Badge color="green" variant="filled" size="xs" leftSection={<CreditCard size={10} />}>PAGADO</Badge>
+            ) : (
+              order.origin === 'CATALOG' && (
+                <Badge color="yellow" variant="outline" size="xs" leftSection={<Clock size={10} />}>PENDIENTE DE PAGO</Badge>
+              )
             )}
           </Group>
           {order.observations && (
