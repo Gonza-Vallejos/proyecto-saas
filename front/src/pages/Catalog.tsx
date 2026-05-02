@@ -608,10 +608,13 @@ export default function Catalog() {
       const orderRes = await fetch(`${BASE_URL}/orders/public/${store.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...orderData, status: 'PENDING' }) // Importante: estado PENDING
+        body: JSON.stringify({ ...orderData, status: 'PENDING' })
       });
 
-      if (!orderRes.ok) throw new Error('Error al registrar pedido');
+      if (!orderRes.ok) {
+        const errorData = await orderRes.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Error al registrar pedido');
+      }
       const createdOrder = await orderRes.json();
 
       // Crear preferencia en MP
