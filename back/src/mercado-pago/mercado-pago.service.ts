@@ -112,7 +112,7 @@ export class MercadoPagoService {
       if (payment.status === 'approved' && payment.external_reference) {
         // Actualizar el pedido en la BD
         const orderId = payment.external_reference;
-        await this.prisma.order.update({
+        await (this.prisma.order.update as any)({
           where: { id: orderId },
           data: { paymentStatus: 'PAID' }
         });
