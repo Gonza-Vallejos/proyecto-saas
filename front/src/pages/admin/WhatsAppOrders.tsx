@@ -145,9 +145,7 @@ export default function WhatsAppOrders() {
             {order.paymentStatus === 'PAID' ? (
               <Badge color="green" variant="filled" size="xs" leftSection={<CreditCard size={10} />}>PAGADO</Badge>
             ) : (
-              order.origin === 'CATALOG' && (
-                <Badge color="yellow" variant="outline" size="xs" leftSection={<Clock size={10} />}>PENDIENTE DE PAGO</Badge>
-              )
+              <Badge color="orange" variant="outline" size="xs" leftSection={<Clock size={10} />}>PENDIENTE DE PAGO</Badge>
             )}
           </Group>
           {order.observations && (
