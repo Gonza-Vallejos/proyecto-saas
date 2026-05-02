@@ -114,7 +114,7 @@ export class MercadoPagoService {
         const orderId = payment.external_reference;
         await this.prisma.order.update({
           where: { id: orderId },
-          data: { status: 'PAID' }
+          data: { paymentStatus: 'PAID' }
         });
         this.logger.log(`Pedido ${orderId} pagado exitosamente vía MP`);
         // Opcional: Emitir WebSocket para Kitchen/Waiter aquí (el EventsGateway puede manejarlo si conectamos OrdersService)

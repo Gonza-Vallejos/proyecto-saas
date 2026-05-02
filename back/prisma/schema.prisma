@@ -209,6 +209,7 @@ model Table {
 model Order {
   id           String      @id @default(uuid())
   status       String      @default("PENDING") // PENDING, PREPARING, READY, DELIVERED, PAID, CANCELLED
+  paymentStatus String     @default("PENDING") // PENDING, PAID, FAILED
   total        Float       @default(0)
   observations String?
   

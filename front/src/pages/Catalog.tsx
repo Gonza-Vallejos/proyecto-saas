@@ -243,7 +243,7 @@ export default function Catalog() {
   }, [cartOpened, !!addingProduct]);
 
 
-  // Group products by category with hierarchical filtering
+  // Agrupar productos por categoría con filtrado jerárquico
   const groupedProducts = useMemo(() => {
     if (!store) return [];
     
@@ -1057,11 +1057,13 @@ export default function Catalog() {
                   );
                 }
 
-                // If not all same, use the two-column layout as before
+                // Si no todos son iguales, usar diseño de dos columnas para escritorio
                 return (
-                  <Stack gap="xs" mt="sm" style={{ width: '100%', maxWidth: '280px', margin: isMobile ? '0 auto' : '0' }}>
-                    {Object.entries(hours).map(([day, config]: [any, any]) => renderRow(day, config))}
-                  </Stack>
+                  <Box mt="sm" style={{ width: '100%', maxWidth: isMobile ? '280px' : '500px', margin: isMobile ? '0 auto' : '0' }}>
+                    <SimpleGrid cols={isMobile ? 1 : 2} spacing={isMobile ? "xs" : "xl"} verticalSpacing={0}>
+                      {Object.entries(hours).map(([day, config]: [any, any]) => renderRow(day, config))}
+                    </SimpleGrid>
+                  </Box>
                 );
               })()}
             </Stack>
@@ -1076,7 +1078,7 @@ export default function Catalog() {
         </Container>
       </Box>
 
-      {/* Cart Drawer */}
+      {/* Drawer del Carrito */}
       <Drawer
         opened={cartOpened}
         onClose={() => setCartOpened(false)}

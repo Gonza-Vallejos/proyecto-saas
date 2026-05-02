@@ -21,6 +21,7 @@ interface OrderItem {
 interface Order {
   id: string;
   status: string;
+  paymentStatus: string;
   total: number;
   observations?: string;
   createdAt: string;
@@ -141,6 +142,9 @@ export default function WhatsAppOrders() {
             {order.observations && (order.observations.includes('RETIRO EN LOCAL') || order.observations.includes('Retiro en el local')) && (
               <Badge color="violet" variant="light" size="xs">🏪 Retiro</Badge>
             )}
+            {order.paymentStatus === 'PAID' && (
+              <Badge color="green" variant="filled" size="xs" leftSection={<CreditCard size={10} />}>PAGADO</Badge>
+            )}
           </Group>
           {order.observations && (
             <Text size="xs" color="dimmed" mt="4px" fs="italic">
@@ -221,6 +225,19 @@ export default function WhatsAppOrders() {
                 Aceptar
               </Button>
               <Button variant="light" color="red" onClick={async () => {
+                if (order.paymentStatus === 'PAID') {
+                  const confirmPaid = await Swal.fire({
+                    title: '¡Atención: Pedido Pagado!',
+                    text: 'Este pedido ya fue cobrado por Mercado Pago. Si lo rechazas, deberás realizar la devolución del dinero manualmente desde tu cuenta de MP. ¿Deseas continuar?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    confirmButtonText: 'Sí, rechazar igual',
+                    cancelButtonText: 'Cancelar'
+                  });
+                  if (!confirmPaid.isConfirmed) return;
+                }
+
                 const result = await Swal.fire({
                   title: '¿Rechazar pedido?',
                   text: 'El pedido se cancelará y el stock será devuelto automáticamente.',

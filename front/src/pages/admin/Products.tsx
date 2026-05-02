@@ -34,11 +34,11 @@ export default function Products() {
   const [storeInfo, setStoreInfo] = useState<{ hasStockControl: boolean, hasModifiers: boolean } | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Modals
+  // Modales
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  // Filters
+  // Filtros
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string | null>('all');
   const [stockFilter, setStockFilter] = useState<string | null>('all');
@@ -62,7 +62,7 @@ export default function Products() {
         api.get('/admin/products'),
         api.get('/admin/categories'),
         api.get('/stores/my-store'),
-        api.get('/modifiers').catch(() => []) // Catching in case it fails or unsupported
+        api.get('/modifiers').catch(() => []) // Capturar en caso de fallo o falta de soporte
       ]);
       
       setProducts(prodRes);

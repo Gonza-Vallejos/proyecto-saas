@@ -37,7 +37,7 @@ export class OrdersService {
           if (!product) continue;
 
           if (product.isBundle) {
-            // Validar stock de cada componente
+            // Validar stock de cada componente (Promo)
             for (const bundleItem of product.bundleItems) {
               if (bundleItem.product.trackStock && bundleItem.product.stock < (item.quantity * bundleItem.quantity)) {
                 throw new BadRequestException(`Stock insuficiente para componente: ${bundleItem.product.name} (parte de la promo). Disponible: ${bundleItem.product.stock}`);
@@ -82,7 +82,7 @@ export class OrdersService {
           if (!product) continue;
 
           if (product.isBundle) {
-            // Descontar stock de cada componente
+            // Descontar stock de cada componente (Promo)
             for (const bundleItem of product.bundleItems) {
               await tx.product.update({
                 where: { id: bundleItem.productId },

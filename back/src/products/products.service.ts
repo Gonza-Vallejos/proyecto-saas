@@ -97,7 +97,7 @@ export class ProductsService {
         }
       });
       
-      // Bundle Items
+      // Ítems de la Promo
       if (data.bundleItems !== undefined) {
         await this.prisma.bundleItem.deleteMany({ where: { bundleId: productId } });
         if (data.bundleItems.length > 0) {
