@@ -24,6 +24,7 @@ interface Product {
   barcode?: string;
   isBundle?: boolean;
   bundleItems?: any[];
+  notes?: string[];
 }
 
 export default function Products() {
@@ -309,6 +310,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
   const [barcode, setBarcode] = useState('');
   const [isBundle, setIsBundle] = useState(false);
   const [bundleItems, setBundleItems] = useState<{ productId: string, quantity: number }[]>([]);
+  const [notes, setNotes] = useState<string[]>([]);
 
   useEffect(() => {
     if (product) {
@@ -323,6 +325,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
       setBarcode(product.barcode || '');
       setIsBundle(product.isBundle || false);
       setBundleItems(product.bundleItems?.map((bi: any) => ({ productId: bi.productId, quantity: bi.quantity })) || []);
+      setNotes(product.notes || []);
     } else {
       setName('');
       setPrice(0);
@@ -335,6 +338,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
       setBarcode('');
       setIsBundle(false);
       setBundleItems([]);
+      setNotes([]);
     }
   }, [product, opened]);
 
@@ -525,6 +529,20 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
           )}
         </Box>
 
+        {/* Sección de Notas / Etiquetas */}
+        <MultiSelect
+          label="Notas Olfativas / Etiquetas"
+          description="Escribe una nota y presiona Enter para agregarla"
+          placeholder="Ej: Dulce, Amaderado, Ámbar..."
+          data={['Dulce', 'Amaderado', 'Cítrico', 'Florido', 'Ámbar', 'Avainillado', 'Especiado', 'Fresco', ...notes]}
+          value={notes}
+          onChange={setNotes}
+          searchable
+          creatable
+          getCreateLabel={(query) => `+ Agregar "${query}"`}
+          radius="md"
+        />
+
         <Textarea 
           label="Descripción (Opcional)" 
           value={description} 
@@ -539,7 +557,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
           <Button 
             size="md" 
             radius="md" 
-            onClick={() => onSubmit({ name, price, description, imageUrl, categoryId, modifierGroupIds, trackStock, stock, barcode, isBundle, bundleItems })}
+            onClick={() => onSubmit({ name, price, description, imageUrl, categoryId, modifierGroupIds, trackStock, stock, barcode, isBundle, bundleItems, notes })}
             style={{ paddingLeft: '2rem', paddingRight: '2rem' }}
           >
             {product ? 'Guardar Cambios' : 'Crear Producto'}

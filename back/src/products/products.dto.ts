@@ -44,6 +44,11 @@ export class CreateProductDto {
   @IsArray({ message: 'Los ítems de la promo deben ser una lista.' })
   @IsOptional()
   bundleItems?: { productId: string, quantity: number }[];
+
+  @IsArray({ message: 'Las notas deben ser una lista.' })
+  @IsString({ each: true })
+  @IsOptional()
+  notes?: string[];
 }
 
 export class UpdateProductDto {
@@ -92,4 +97,9 @@ export class UpdateProductDto {
   @IsArray({ message: 'Los ítems de la promo deben ser una lista.' })
   @IsOptional()
   bundleItems?: { productId: string, quantity: number }[];
+
+  @IsArray({ message: 'Las notas deben ser una lista.' })
+  @IsString({ each: true })
+  @IsOptional()
+  notes?: string[];
 }

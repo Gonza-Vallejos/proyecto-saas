@@ -21,6 +21,7 @@ export class ProductsService {
         barcode: data.barcode || null,
         storeId,
         isBundle: data.isBundle || false,
+        notes: data.notes || [],
         bundleItems: data.bundleItems && data.bundleItems.length > 0 
           ? {
               create: data.bundleItems.map(bi => ({
@@ -90,7 +91,8 @@ export class ProductsService {
         trackStock: data.trackStock,
         stock: data.stock,
         barcode: data.barcode,
-        isBundle: data.isBundle
+        isBundle: data.isBundle,
+        notes: data.notes
       }
     });
     

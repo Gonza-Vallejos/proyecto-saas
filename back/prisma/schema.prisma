@@ -132,6 +132,9 @@ model Product {
   bundleItems BundleItem[] @relation("BundleToItems")
   containedIn BundleItem[] @relation("ItemsInBundle")
 
+  // Notas olfativas / Etiquetas (Útiles para perfumería u otros rubros)
+  notes       String[] @default([])
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

@@ -75,6 +75,7 @@ interface Product {
     modifierGroup: ModifierGroup;
   }[];
   isBundle?: boolean;
+  notes?: string[];
 }
 
 interface CartItem {
@@ -1587,6 +1588,23 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMob
           <Text size="xs" color="dimmed" lineClamp={2} style={{ fontFamily: 'inherit' }}>
             {product.description || 'Calidad superior garantizada en cada detalle de este producto.'}
           </Text>
+          {product.notes && product.notes.length > 0 && (
+            <Group gap={4} mt="xs" wrap="wrap">
+              {product.notes.map((note: string, idx: number) => (
+                <Badge 
+                  key={idx} 
+                  variant="outline" 
+                  color="orange" 
+                  size="sm" 
+                  radius="xl"
+                  styles={{ label: { textTransform: 'uppercase', fontSize: '9px', fontWeight: 700 } }}
+                  leftSection={<Box style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#f59e0b' }} />}
+                >
+                  {note}
+                </Badge>
+              ))}
+            </Group>
+          )}
         </Box>
 
         <Stack gap="xs">
