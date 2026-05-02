@@ -5,15 +5,15 @@ import { MercadoPagoConfig, Preference } from 'mercadopago';
 @Injectable()
 export class MercadoPagoService {
   private readonly logger = new Logger(MercadoPagoService.name);
-  
-  constructor(private prisma: PrismaService) {}
+
+  constructor(private prisma: PrismaService) { }
 
   async handleOAuthCallback(code: string, storeId: string) {
     try {
       let backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
       if (backendUrl.endsWith('/')) backendUrl = backendUrl.slice(0, -1);
       const redirectUri = `${backendUrl}/mercado-pago/callback`;
-      
+
       const response = await fetch('https://api.mercadopago.com/oauth/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -27,7 +27,7 @@ export class MercadoPagoService {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         this.logger.error('MP OAuth Error', data);
         throw new BadRequestException('Error en respuesta de Mercado Pago');
@@ -40,7 +40,7 @@ export class MercadoPagoService {
           mercadoPagoPublicKey: data.public_key
         }
       });
-      
+
       return store.slug;
     } catch (e: any) {
       this.logger.error('Error linking MP account', e.message);
@@ -53,7 +53,7 @@ export class MercadoPagoService {
   }
 
   async createPreference(storeId: string, items: any[], returnUrl: string, orderId?: string) {
-    const store = await this.prisma.store.findUnique({ where: { id: storeId }});
+    const store = await this.prisma.store.findUnique({ where: { id: storeId } });
     if (!store?.mercadoPagoAccessToken) {
       throw new BadRequestException('La tienda no tiene Mercado Pago vinculado');
     }
@@ -88,7 +88,7 @@ export class MercadoPagoService {
     }
 
     const response = await preference.create({ body });
-    return { 
+    return {
       init_point: response.init_point,
       id: response.id
     };
@@ -98,7 +98,7 @@ export class MercadoPagoService {
     if (type !== 'payment') return;
 
     try {
-      const store = await this.prisma.store.findUnique({ where: { id: storeId }});
+      const store = await this.prisma.store.findUnique({ where: { id: storeId } });
       if (!store?.mercadoPagoAccessToken) return;
 
       // Obtener detalles del pago
