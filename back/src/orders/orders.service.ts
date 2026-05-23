@@ -176,7 +176,7 @@ export class OrdersService {
 
       if (shouldDeductStock && order.origin !== 'WHATSAPP') {
         for (const item of order.items) {
-          if (item.product.trackStock) {
+          if (item.product && item.productId && item.product.trackStock) {
             await tx.product.update({
               where: { id: item.productId },
               data: {
@@ -197,7 +197,7 @@ export class OrdersService {
         
         if (wasAlreadyDeducted) {
           for (const item of order.items) {
-            if (item.product.trackStock) {
+            if (item.product && item.productId && item.product.trackStock) {
               await tx.product.update({
                 where: { id: item.productId },
                 data: {
