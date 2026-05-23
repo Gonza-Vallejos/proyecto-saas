@@ -26,8 +26,6 @@ interface Order {
   customerName?: string;
   customerPhone?: string;
   createdAt: string;
-  table?: { number: string };
-  waiter?: { name: string };
   items: OrderItem[];
 }
 
@@ -82,7 +80,7 @@ export default function OrderHistory() {
     if (origin === 'WHATSAPP') return <Tooltip label="Pedido WhatsApp"><ShoppingBag size={14} color="#25D366" /></Tooltip>;
     if (origin === 'CATALOG') return <Tooltip label="Tienda Virtual / Mercado Pago"><CreditCard size={14} color="#ec4899" /></Tooltip>;
     if (origin === 'POS') return <Tooltip label="Punto de Venta (Caja)"><MonitorSmartphone size={14} color="#3b82f6" /></Tooltip>;
-    return <Tooltip label="Mesa"><Utensils size={14} color="#0ea5e9" /></Tooltip>;
+    return <Tooltip label="Canal Desconocido"><ShoppingBag size={14} color="#cbd5e1" /></Tooltip>;
   };
 
   // Stats
@@ -94,14 +92,13 @@ export default function OrderHistory() {
     whatsappSales: orders.filter(o => o.status === 'PAID' && o.origin === 'WHATSAPP').reduce((acc, o) => acc + o.total, 0),
     catalogSales: orders.filter(o => o.status === 'PAID' && o.origin === 'CATALOG').reduce((acc, o) => acc + o.total, 0),
     posSales: orders.filter(o => o.status === 'PAID' && o.origin === 'POS').reduce((acc, o) => acc + o.total, 0),
-    tableSales: orders.filter(o => o.status === 'PAID' && o.origin === 'TABLE').reduce((acc, o) => acc + o.total, 0),
   };
 
   return (
-    <div style={{ animation: 'fadeUp 0.5s ease-out' }}>
+    <div className="admin-page">
       <Group justify="space-between" mb="2rem">
         <div>
-          <Title order={2} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <Title order={2} className="admin-title-row">
             <History size={28} color="#6366f1" /> {activeTab === 'sales' ? 'Reporte de Ventas' : 'Historial de Pedidos'}
           </Title>
           <Text color="dimmed" size="sm">
@@ -166,7 +163,6 @@ export default function OrderHistory() {
               { value: 'all', label: 'Todos los canales' },
               { value: 'WHATSAPP', label: 'Ventas WhatsApp' },
               { value: 'POS', label: 'Punto de Venta (POS)' },
-              { value: 'TABLE', label: 'Ventas de Salón' },
             ]}
             value={originFilter}
             onChange={(val) => setOriginFilter(val || 'all')}
@@ -195,7 +191,7 @@ export default function OrderHistory() {
       </SimpleGrid>
 
       {/* Breakdown by Channel (Row 2) */}
-      <SimpleGrid cols={{ base: 1, sm: 4 }} mb="xl">
+      <SimpleGrid cols={{ base: 1, sm: 3 }} mb="xl">
         <Paper withBorder p="sm" radius="md" bg="green.0">
           <Text size="xs" color="green.9" fw={700} tt="uppercase">Ventas WhatsApp</Text>
           <Text fw={700} size="md" color="green.9">$ {stats.whatsappSales.toLocaleString()}</Text>
@@ -208,10 +204,6 @@ export default function OrderHistory() {
           <Text size="xs" color="indigo.9" fw={700} tt="uppercase">Ventas Caja (POS)</Text>
           <Text fw={700} size="md" color="indigo.9">$ {stats.posSales.toLocaleString()}</Text>
         </Paper>
-        <Paper withBorder p="sm" radius="md" bg="blue.0">
-          <Text size="xs" color="blue.9" fw={700} tt="uppercase">Ventas de Salón</Text>
-          <Text fw={700} size="md" color="blue.9">$ {stats.tableSales.toLocaleString()}</Text>
-        </Paper>
       </SimpleGrid>
 
       <Card withBorder radius="md" p={0}>
@@ -219,7 +211,7 @@ export default function OrderHistory() {
            <Table verticalSpacing="md" highlightOnHover>
             <Table.Thead bg="gray.0">
               <Table.Tr>
-                <Table.Th style={{ paddingLeft: '1.5rem' }}>Fecha</Table.Th>
+                <Table.Th className="!pl-6">Fecha</Table.Th>
                 <Table.Th>Canal</Table.Th>
                 <Table.Th>Cliente / Mesa</Table.Th>
                 <Table.Th>Productos</Table.Th>
@@ -239,7 +231,7 @@ export default function OrderHistory() {
                 </Table.Tr>
               ) : orders.map(order => (
                 <Table.Tr key={order.id}>
-                  <Table.Td style={{ paddingLeft: '1.5rem' }}>
+                  <Table.Td className="!pl-6">
                     <Stack gap={0}>
                       <Text size="sm" fw={600}>
                         {new Date(order.createdAt).toLocaleDateString('es-AR')}
@@ -252,9 +244,8 @@ export default function OrderHistory() {
                   <Table.Td>{getOriginIcon(order.origin)}</Table.Td>
                   <Table.Td>
                     <Text size="sm" fw={500}>
-                      {order.origin === 'TABLE' ? `Mesa ${order.table?.number}` : order.customerName || 'Cliente WA'}
+                      {order.customerName || 'Cliente'}
                     </Text>
-                    {order.origin === 'TABLE' && order.waiter && <Text size="xs" color="dimmed">Mozo: {order.waiter.name}</Text>}
                   </Table.Td>
                   <Table.Td>
                     <Tooltip label={order.items.map(i => `${i.quantity}x ${i.product?.name}`).join(', ')}>

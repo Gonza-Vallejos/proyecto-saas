@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 import InstagramPng from '../assets/instagram.png';
 import WhatsAppPng from '../assets/whatsapp.png';
 import UbicacionPng from '../assets/ubicacion.png';
+import StoreThemeRoot from './StoreThemeRoot';
+import { cn } from '../lib/cn';
 
 interface PreviewProps {
   name: string;
@@ -19,7 +21,19 @@ interface PreviewProps {
   fontFamily?: string;
 }
 
-export default function MobilePreview({ name, primaryColor, secondaryColor, bgColor, textColor, iconColor, cardStyle, heroStyle, logoUrl, heroImageUrl, fontFamily }: PreviewProps) {
+export default function MobilePreview({
+  name,
+  primaryColor,
+  secondaryColor,
+  bgColor,
+  textColor,
+  iconColor,
+  cardStyle,
+  heroStyle,
+  logoUrl,
+  heroImageUrl,
+  fontFamily,
+}: PreviewProps) {
   useEffect(() => {
     if (fontFamily) {
       const link = document.createElement('link');
@@ -32,90 +46,48 @@ export default function MobilePreview({ name, primaryColor, secondaryColor, bgCo
     }
   }, [fontFamily]);
 
-  const mockProducts = mockProductsData;
+  const theme = { primaryColor, secondaryColor, bgColor, textColor, iconColor, fontFamily };
 
   return (
-    <Box style={{ position: 'relative' }}>
-      {/* Botones laterales simulados */}
-      <Box style={{ position: 'absolute', left: '-15px', top: '100px', width: '3px', height: '40px', background: '#475569', borderRadius: '4px 0 0 4px' }} />
-      <Box style={{ position: 'absolute', left: '-15px', top: '150px', width: '3px', height: '40px', background: '#475569', borderRadius: '4px 0 0 4px' }} />
-      <Box style={{ position: 'absolute', right: '-15px', top: '120px', width: '3px', height: '60px', background: '#475569', borderRadius: '0 4px 4px 0' }} />
+    <div className="preview-shell">
+      <div className="preview-side-btn-left preview-side-btn-left--upper" />
+      <div className="preview-side-btn-left preview-side-btn-left--lower" />
+      <div className="preview-side-btn-right" />
 
-      <Box
-        style={{
-          width: '340px',
-          height: '680px',
-          border: '14px solid #0f172a',
-          borderRadius: '40px',
-          position: 'relative',
-          backgroundColor: bgColor || '#ffffff',
-          overflow: 'hidden',
-          boxShadow: '0 30px 60px -12px rgba(0, 0, 0, 0.4), inset 0 0 4px rgba(255,255,255,0.2)',
-          display: 'flex',
-          flexDirection: 'column',
-          fontFamily: fontFamily || 'Inter'
-        }}
+      <StoreThemeRoot
+        theme={theme}
+        className="preview-device"
+        style={{ backgroundColor: bgColor || '#ffffff' }}
       >
-        {/* Isla Dinámica / Notch Premium */}
-        <Box style={{
-          position: 'absolute',
-          top: '10px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '110px',
-          height: '24px',
-          background: '#000',
-          borderRadius: '20px',
-          zIndex: 100,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-around',
-          padding: '0 15px'
-        }}>
-          <Box style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#1e1b4b' }} />
-          <Box style={{ width: '40px', height: '4px', borderRadius: '10px', background: '#334155' }} />
+        <Box className="preview-notch">
+          <Box className="preview-notch-dot" />
+          <Box className="preview-notch-bar" />
         </Box>
 
-        {/* Reflejo de pantalla de cristal */}
-        <Box style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.05) 100%)',
-          pointerEvents: 'none',
-          zIndex: 90
-        }} />
+        <Box className="preview-glass-reflection" />
 
-        <ScrollArea scrollbarSize={2} style={{ height: '100%' }}>
-          {/* Header Preview */}
-          <Box p="md" style={{ borderBottom: '1px solid #eee', background: '#fff', zIndex: 10 }}>
+        <ScrollArea scrollbarSize={2} className="h-full">
+          <Box className="preview-header">
             <Group justify="space-between" align="center">
               <Group gap="xs">
                 {logoUrl ? (
                   <Image src={logoUrl} w={24} h={24} radius="xl" />
                 ) : (
-                  <Box w={24} h={24} bg={primaryColor} style={{ borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 900 }}>
-                    {name?.charAt(0)}
-                  </Box>
+                  <Box className="preview-logo-fallback bg-store-primary">{name?.charAt(0)}</Box>
                 )}
-                <Title order={6} style={{ fontSize: '10px', fontFamily: 'inherit', fontWeight: 800, color: textColor }}>{name?.substring(0, 15)}</Title>
+                <Title order={6} className="text-[10px] font-extrabold text-store">
+                  {name?.substring(0, 15)}
+                </Title>
               </Group>
               <Group gap={5}>
                 <ActionIcon variant="subtle" color={iconColor} size="xs">
                   <Clock size={12} color={iconColor} />
                 </ActionIcon>
-                <Box style={{ position: 'relative' }}>
+                <Box className="relative">
                   <ActionIcon variant="light" color={iconColor} size="sm" radius="md">
                     <ShoppingCart size={14} color={iconColor} />
                   </ActionIcon>
-                  <Badge
-                    size="9px"
-                    circle
-                    color={secondaryColor}
-                    style={{ position: 'absolute', top: -4, right: -4, border: '1.5px solid white', minWidth: '12px', height: '12px', padding: 0 }}
-                  >
+                  <Badge size="9px" circle color={secondaryColor} className="preview-cart-badge">
                     2
                   </Badge>
                 </Box>
@@ -123,129 +95,193 @@ export default function MobilePreview({ name, primaryColor, secondaryColor, bgCo
             </Group>
           </Box>
 
-          {/* Category Ribbon Preview */}
-          <Box px="md" py={10} style={{ background: '#fff' }}>
-            <Group gap="xs" wrap="nowrap" style={{ overflow: 'hidden' }}>
-              <Badge variant="filled" color={primaryColor} size="sm" radius="md">Todo</Badge>
-              <Badge variant="light" color="gray" size="sm" radius="md">Burgers</Badge>
-              <Badge variant="light" color="gray" size="sm" radius="md">Pizzas</Badge>
+          <Box className="preview-categories">
+            <Group gap="xs" wrap="nowrap" className="overflow-hidden">
+              <Badge variant="filled" color={primaryColor} size="sm" radius="md">
+                Todo
+              </Badge>
+              <Badge variant="light" color="gray" size="sm" radius="md">
+                Burgers
+              </Badge>
+              <Badge variant="light" color="gray" size="sm" radius="md">
+                Pizzas
+              </Badge>
             </Group>
           </Box>
 
-          {/* Hero Preview */}
-          <Box p="xl" style={{
-            textAlign: 'center',
-            background: heroImageUrl ? `linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%)` : '#f8fafc',
-            backgroundImage: heroImageUrl ? `url(${heroImageUrl})` : 'none',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            borderBottom: heroStyle === 'curve' ? 'none' : '1px solid #eee',
-            clipPath: heroStyle === 'curve' ? 'ellipse(150% 100% at 50% 0%)' : 'none',
-            paddingBottom: heroStyle === 'curve' ? '40px' : 'xl'
-          }}>
-            <Title order={2} style={{ fontSize: '18px', color: textColor, fontFamily: 'inherit' }}>{name}</Title>
-            <Text size="xs" color="dimmed" style={{ fontFamily: 'inherit' }}>Catálogo Digital</Text>
+          <Box
+            p="xl"
+            className={cn('preview-hero', heroStyle === 'curve' && 'preview-hero--curve')}
+            style={{
+              backgroundImage: heroImageUrl
+                ? `linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%), url(${heroImageUrl})`
+                : undefined,
+              borderBottom: heroStyle === 'curve' ? undefined : '1px solid #eee',
+            }}
+          >
+            <Title order={2} className="text-lg text-store">
+              {name}
+            </Title>
+            <Text size="xs" c="dimmed">
+              Catálogo Digital
+            </Text>
           </Box>
 
-          {/* Product Grid Preview */}
           <Box p="sm">
             <SimpleGrid cols={1} spacing="md">
-              {mockProducts.map((p) => (
-                <RenderPreviewCard key={p.id} product={p} style={cardStyle} primary={primaryColor} secondary={secondaryColor} textColor={textColor} />
+              {mockProductsData.map((p) => (
+                <RenderPreviewCard
+                  key={p.id}
+                  product={p}
+                  style={cardStyle}
+                  primary={primaryColor}
+                  secondary={secondaryColor}
+                />
               ))}
             </SimpleGrid>
           </Box>
 
-          {/* Footer Preview */}
-          <Box p="md" mt="xl" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: primaryColor }}>
+          <Box p="md" mt="xl" className="border-t border-white/10 bg-store-primary">
             <Stack gap="xs" align="center">
-              <Text fw={700} size="xs" c={textColor} style={{ opacity: 0.9 }}>Encuéntranos</Text>
+              <Text fw={700} size="xs" c={textColor} className="opacity-90">
+                Encuéntranos
+              </Text>
               <Group gap="xs">
-                <Box style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: secondaryColor }} />
-                <Image src={UbicacionPng} w={14} h={14} style={{ filter: 'brightness(0) invert(1) opacity(0.8)' }} />
-                <Text size="10px" c={textColor} style={{ opacity: 0.8 }}>Calle Ficticia 123</Text>
+                <Box className="preview-footer-dot" />
+                <Image src={UbicacionPng} w={14} h={14} className="opacity-80 brightness-0 invert" />
+                <Text size="10px" c={textColor} className="opacity-80">
+                  Calle Ficticia 123
+                </Text>
               </Group>
               <Group gap="xs">
-                <Box style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: secondaryColor }} />
+                <Box className="preview-footer-dot" />
                 <Image src={WhatsAppPng} w={14} h={14} />
-                <Text size="10px" c={textColor} style={{ opacity: 0.8 }}>+54 9 11 1234 5678</Text>
+                <Text size="10px" c={textColor} className="opacity-80">
+                  +54 9 11 1234 5678
+                </Text>
               </Group>
               <Group gap="xs">
-                <Box style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: secondaryColor }} />
+                <Box className="preview-footer-dot" />
                 <Image src={InstagramPng} w={14} h={14} />
-                <Text size="10px" c={textColor} style={{ opacity: 0.8 }}>@tu_cuenta</Text>
+                <Text size="10px" c={textColor} className="opacity-80">
+                  @tu_cuenta
+                </Text>
               </Group>
-              <Text size="10px" c={textColor} style={{ fontFamily: 'inherit', opacity: 0.4, marginTop: '5px' }}>© 2026 {name}</Text>
+              <Text size="10px" c={textColor} className="mt-1 opacity-40">
+                © 2026 {name}
+              </Text>
             </Stack>
           </Box>
         </ScrollArea>
-      </Box>
-    </Box>
+      </StoreThemeRoot>
+    </div>
   );
 }
 
-// Datos estáticos fuera para evitar recrearlos
 const mockProductsData = [
-  { id: '1', name: 'Producto Premium', price: 120.50, description: 'Excelente calidad y diseño.', imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop' },
-  { id: '2', name: 'Oferta Especial', price: 85.00, description: 'Solo por tiempo limitado.', imageUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600&auto=format&fit=crop' },
+  {
+    id: '1',
+    name: 'Producto Premium',
+    price: 120.5,
+    description: 'Excelente calidad y diseño.',
+    imageUrl:
+      'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop',
+  },
+  {
+    id: '2',
+    name: 'Oferta Especial',
+    price: 85.0,
+    description: 'Solo por tiempo limitado.',
+    imageUrl:
+      'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600&auto=format&fit=crop',
+  },
 ];
 
-function RenderPreviewCard({ product, style, primary, secondary, textColor }: any) {
-  const imgStyle = { objectFit: 'contain' as const, height: '100%', width: '100%', backgroundColor: '#f1f5f9' };
+function RenderPreviewCard({
+  product,
+  style,
+  primary,
+  secondary,
+}: {
+  product: (typeof mockProductsData)[0];
+  style: string;
+  primary: string;
+  secondary: string;
+}) {
+  const imgClass = 'h-full w-full bg-slate-100 object-contain';
 
   if (style === 'minimal' || style === 'modern') {
     return (
       <Card padding="xs" radius="lg" withBorder shadow="0">
-        <Card.Section style={{ height: '150px', overflow: 'hidden' }}>
-          <Image src={product.imageUrl} style={imgStyle} />
+        <Card.Section className="h-[150px] overflow-hidden">
+          <Image src={product.imageUrl} className={imgClass} />
         </Card.Section>
-        <Box mt="xs" style={{ textAlign: 'center' }}>
-          <Text fw={700} size="sm" style={{ fontFamily: 'inherit', color: textColor }}>{product.name}</Text>
+        <Box mt="xs" className="text-center">
+          <Text fw={700} size="sm" className="text-store">
+            {product.name}
+          </Text>
           <Group gap={5} justify="center">
-            <Text size="sm" fw={900} color={primary} style={{ fontFamily: 'inherit' }}>${product.price.toFixed(2)}</Text>
-            <Badge color={secondary} size="xs" variant="light">Oferta</Badge>
+            <Text size="sm" fw={900} c={primary}>
+              ${product.price.toFixed(2)}
+            </Text>
+            <Badge color={secondary} size="xs" variant="light">
+              Oferta
+            </Badge>
           </Group>
         </Box>
-        <Button fullWidth mt="xs" size="compact-xs" color={primary} radius="md" variant="light">Añadir</Button>
+        <Button fullWidth mt="xs" size="compact-xs" color={primary} radius="md" variant="light">
+          Añadir
+        </Button>
       </Card>
     );
   }
 
   if (style === 'horizontal') {
     return (
-      <Card padding="0" radius="lg" withBorder style={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', height: '100px' }}>
-        <Box style={{ width: '100px', height: '100px' }}>
-          <Image src={product.imageUrl} style={imgStyle} />
+      <Card padding="0" radius="lg" withBorder className="flex h-[100px] flex-row overflow-hidden">
+        <Box className="h-[100px] w-[100px]">
+          <Image src={product.imageUrl} className={imgClass} />
         </Box>
-        <Stack p="xs" style={{ flex: 1 }} gap="xs" justify="center">
+        <Stack p="xs" className="flex-1" gap="xs" justify="center">
           <Box>
-            <Text fw={800} size="xs" mb={2} style={{ fontFamily: 'inherit', lineHeight: 1.1, color: textColor }}>{product.name}</Text>
+            <Text fw={800} size="xs" mb={2} className="leading-tight text-store">
+              {product.name}
+            </Text>
             <Group gap={5}>
-              <Text size="xs" color={primary} fw={900}>${product.price.toFixed(2)}</Text>
-              <Badge color={secondary} size="10px" radius="xs" variant="light">INFO</Badge>
+              <Text size="xs" c={primary} fw={900}>
+                ${product.price.toFixed(2)}
+              </Text>
+              <Badge color={secondary} size="10px" radius="xs" variant="light">
+                INFO
+              </Badge>
             </Group>
           </Box>
-          <Button size="compact-xs" color={primary} radius="md" variant="filled" leftSection={<ShoppingCart size={10} />}>Añadir</Button>
+          <Button size="compact-xs" color={primary} radius="md" variant="filled" leftSection={<ShoppingCart size={10} />}>
+            Añadir
+          </Button>
         </Stack>
       </Card>
     );
   }
 
-  // Classic Style (default)
   return (
-    <Card shadow="none" radius="lg" withBorder padding="xs" style={{ overflow: 'hidden' }}>
-      <Card.Section style={{ height: '160px', overflow: 'hidden' }}>
-        <Image src={product.imageUrl} style={imgStyle} />
+    <Card shadow="none" radius="lg" withBorder padding="xs" className="overflow-hidden">
+      <Card.Section className="h-40 overflow-hidden">
+        <Image src={product.imageUrl} className={imgClass} />
       </Card.Section>
 
       <Box mt="xs">
         <Group justify="space-between" align="center" mb={2}>
-          <Text fw={800} size="xs" style={{ fontFamily: 'inherit', color: textColor }}>{product.name}</Text>
+          <Text fw={800} size="xs" className="text-store">
+            {product.name}
+          </Text>
           <Badge color={secondary} variant="light" size="xs" radius="sm">
             Oferta
           </Badge>
         </Group>
-        <Text size="10px" style={{ fontFamily: 'inherit', color: textColor, opacity: 0.7 }} lineClamp={1} mb="xs">Calidad superior garantizada.</Text>
+        <Text size="10px" className="mb-2 line-clamp-1 text-store opacity-70">
+          Calidad superior garantizada.
+        </Text>
       </Box>
 
       <Button fullWidth size="compact-xs" color={primary} radius="md" leftSection={<ShoppingCart size={12} />}>

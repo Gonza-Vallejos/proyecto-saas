@@ -116,7 +116,7 @@ export default function WhatsAppOrders() {
     <Card key={order.id} withBorder radius="md" shadow="sm" p={0} style={{ 
       borderTop: `4px solid var(--mantine-color-${getStatusColor(order.status)}-6)`,
     }}>
-      <Box p="md" style={{ borderBottom: '1px solid #f1f5f9' }}>
+      <Box p="md" className="border-b border-slate-100">
         <Group justify="space-between" mb="xs">
           <Badge color={getStatusColor(order.status)} variant="filled">
             {getStatusLabel(order.status)}
@@ -130,7 +130,7 @@ export default function WhatsAppOrders() {
         <Stack gap={2}>
           <Title order={3} size="h4">{order.customerName || 'Cliente Externo'}</Title>
           {order.customerPhone && (
-            <Text size="xs" color="dimmed" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Text size="xs" color="dimmed" className="flex items-center gap-1">
                {order.customerPhone}
             </Text>
           )}
@@ -156,30 +156,20 @@ export default function WhatsAppOrders() {
         </Stack>
       </Box>
 
-      <ScrollArea style={{ maxHeight: '220px' }} p="md">
+      <ScrollArea className="max-h-[220px]" p="md">
         <Stack gap="md">
           {order.items.map((item, idx) => {
             const modifiers = item.selectedModifiers ? JSON.parse(item.selectedModifiers) : [];
             return (
               <Box key={item.id}>
                 <Group justify="space-between" align="center" wrap="nowrap" gap="sm">
-                  <Group gap="sm" style={{ flex: 1 }}>
-                    <Box style={{ 
-                      width: '40px', 
-                      height: '40px', 
-                      borderRadius: '8px', 
-                      backgroundColor: '#f1f5f9',
-                      overflow: 'hidden',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
+                  <Group gap="sm" className="flex-1">
+                    <Box className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-100">
                       {item.product?.imageUrl ? (
                         <img 
                           src={item.product.imageUrl} 
                           alt="" 
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          className="h-full w-full object-cover"
                         />
                       ) : (
                         <ShoppingBag size={16} color="#94a3b8" />
@@ -203,7 +193,7 @@ export default function WhatsAppOrders() {
         </Stack>
       </ScrollArea>
 
-      <Box p="md" bg="gray.0" style={{ borderTop: '1px solid #f1f5f9' }}>
+      <Box p="md" bg="gray.0" className="border-t border-slate-100">
         <Group justify="space-between" mb="md">
           <Text fw={800} size="lg">$ {order.total.toLocaleString()}</Text>
           {order.customerPhone && (
@@ -324,10 +314,10 @@ export default function WhatsAppOrders() {
   if (loading) return <div className="loader-container">Cargando pedidos externos...</div>;
 
   return (
-    <div style={{ animation: 'fadeUp 0.5s ease-out' }}>
+    <div className="admin-page">
       <Group justify="space-between" mb="2rem">
         <div>
-          <Title order={2} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <Title order={2} className="admin-title-row">
             <ShoppingBag size={28} color="#25D366" /> Monitor de Pedidos
           </Title>
           <Text color="dimmed" size="sm">Supervisa pedidos externos y gestiona estados de cocina.</Text>

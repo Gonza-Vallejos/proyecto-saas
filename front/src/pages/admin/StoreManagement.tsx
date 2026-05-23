@@ -98,7 +98,7 @@ export default function StoreManagement() {
   if (loading) return <div className="loader-container">Analizando red de tiendas...</div>;
 
   return (
-    <div style={{ animation: 'fadeUp 0.5s ease-out' }}>
+    <div className="admin-page">
       <Group justify="space-between" mb="3rem">
         <div>
           <Title order={1}>Gestión Maestra de Tiendas</Title>
@@ -113,7 +113,7 @@ export default function StoreManagement() {
       <SimpleGrid cols={{ base: 1, sm: 3 }} mb="xl">
         <Paper withBorder p="md" radius="md">
           <Group>
-            <Box bg="blue.0" p="xs" style={{ borderRadius: '8px' }}>
+            <Box bg="blue.0" p="xs" className="rounded-lg">
               <Store size={24} color="#0ea5e9" />
             </Box>
             <div>
@@ -124,7 +124,7 @@ export default function StoreManagement() {
         </Paper>
         <Paper withBorder p="md" radius="md">
            <Group>
-            <Box bg="green.0" p="xs" style={{ borderRadius: '8px' }}>
+            <Box bg="green.0" p="xs" className="rounded-lg">
               <Database size={24} color="#10b981" />
             </Box>
             <div>
@@ -135,7 +135,7 @@ export default function StoreManagement() {
         </Paper>
         <Paper withBorder p="md" radius="md">
           <Group>
-            <Box bg="violet.0" p="xs" style={{ borderRadius: '8px' }}>
+            <Box bg="violet.0" p="xs" className="rounded-lg">
               <User size={24} color="#8b5cf6" />
             </Box>
             <div>
@@ -148,19 +148,19 @@ export default function StoreManagement() {
 
       <Card withBorder radius="md" p={0} shadow="sm">
         <Table verticalSpacing="md" highlightOnHover>
-          <Table.Thead style={{ background: '#f8fafc' }}>
+          <Table.Thead className="bg-slate-50">
             <Table.Tr>
-              <Table.Th style={{ paddingLeft: '1.5rem' }}>Tienda</Table.Th>
+              <Table.Th className="!pl-6">Tienda</Table.Th>
               <Table.Th>Dueño Responsable</Table.Th>
               <Table.Th>Rubro / SaaS</Table.Th>
               <Table.Th>Estadísticas</Table.Th>
-              <Table.Th style={{ textAlign: 'center' }}>Acciones</Table.Th>
+              <Table.Th className="text-center">Acciones</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
             {stores.map(store => (
               <Table.Tr key={store.id}>
-                <Table.Td style={{ paddingLeft: '1.5rem' }}>
+                <Table.Td className="!pl-6">
                   <Stack gap={0}>
                     <Text fw={700} size="sm">{store.name}</Text>
                     <Group gap={4} wrap="nowrap">
@@ -197,7 +197,7 @@ export default function StoreManagement() {
                     </Group>
                   </Tooltip>
                 </Table.Td>
-                <Table.Td style={{ textAlign: 'center' }}>
+                <Table.Td className="text-center">
                   <Group justify="center" gap="sm">
                      <Tooltip label="Ver Estadísticas Detalladas">
                        <ActionIcon variant="subtle" color="blue"><BarChart3 size={18} /></ActionIcon>
@@ -301,7 +301,7 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
           <TextInput label="Slug (URL)" value={slug} onChange={e => setSlug(e.target.value)} required placeholder="ej: mi-tienda" />
         </SimpleGrid>
 
-        <Stack gap={4} p="md" style={{ background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+        <Stack gap={4} p="md" className="admin-muted-stack">
           <Text size="xs" fw={700} color="dimmed" tt="uppercase">Datos del Dueño</Text>
           <TextInput label="Nombre Completo" value={ownerName} onChange={e => setOwnerName(e.target.value)} required placeholder="Raúl Ivanes" />
           <TextInput label="Email de Acceso" value={ownerEmail} onChange={e => setOwnerEmail(e.target.value)} required />
@@ -344,7 +344,7 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
           </Paper>
 
           <Group grow>
-            <Paper withBorder p="sm" radius="md" style={{ opacity: !hasCart ? 0.5 : 1 }}>
+            <Paper withBorder p="sm" radius="md" className={!hasCart ? 'opacity-50' : ''}>
               <Switch 
                 label="Control de Stock" 
                 disabled={!hasCart}
@@ -353,7 +353,7 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
                 description="Requiere Carrito activo"
               />
             </Paper>
-            <Paper withBorder p="sm" radius="md" style={{ opacity: !hasCart ? 0.5 : 1 }}>
+            <Paper withBorder p="sm" radius="md" className={!hasCart ? 'opacity-50' : ''}>
               <Switch 
                 label="Pasarela de Pagos" 
                 disabled={!hasCart}

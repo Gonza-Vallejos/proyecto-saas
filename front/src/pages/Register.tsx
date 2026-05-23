@@ -16,70 +16,60 @@ export default function Register() {
     setLoading(true);
 
     try {
-      await api.post('/auth/register-superadmin', { 
-        name, 
-        email, 
+      await api.post('/auth/register-superadmin', {
+        name,
+        email,
         password,
-        secretKey: 'CREAR_DUEÑO_SECRETO' // Llave requerida por el backend para seguridad
+        secretKey: 'CREAR_DUEÑO_SECRETO',
       });
-      
+
       Swal.fire({
         title: '¡Registro Exitoso!',
         text: 'Ahora puedes iniciar sesión con tus credenciales.',
         icon: 'success',
-        confirmButtonText: 'Ir al Login'
+        confirmButtonText: 'Ir al Login',
       }).then(() => {
         navigate('/login');
       });
-    } catch (err: any) {
-      Swal.fire('Error', err.message || 'No se pudo completar el registro', 'error');
+    } catch (err: unknown) {
+      Swal.fire(
+        'Error',
+        err instanceof Error ? err.message : 'No se pudo completar el registro',
+        'error',
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  const inputWrapperClass =
+    'flex items-center rounded-lg border border-slate-200 bg-slate-50 p-3';
+  const inputClass = 'w-full border-none bg-transparent text-base outline-none';
+  const labelClass = 'mb-2 block font-medium text-slate-600';
+
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      backgroundColor: '#f1f5f9',
-    }}>
-      <div style={{
-        background: 'white',
-        padding: '3rem',
-        borderRadius: '16px',
-        boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
-        width: '100%',
-        maxWidth: '450px',
-      }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{ 
-            display: 'inline-flex', 
-            background: '#eff6ff', 
-            padding: '1rem', 
-            borderRadius: '50%', 
-            marginBottom: '1rem' 
-          }}>
-            <ShieldCheck size={32} color="#3b82f6" />
+    <div className="flex min-h-screen items-center justify-center bg-slate-100">
+      <div className="w-full max-w-[450px] rounded-2xl bg-white p-12 shadow-xl">
+        <div className="mb-8 text-center">
+          <div className="mb-4 inline-flex rounded-full bg-blue-50 p-4">
+            <ShieldCheck size={32} className="text-blue-500" />
           </div>
-          <h2 style={{ fontSize: '1.8rem', color: '#0f172a', margin: 0 }}>Crear Super Admin</h2>
-          <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+          <h2 className="m-0 text-3xl font-bold text-slate-900">Crear Super Admin</h2>
+          <p className="mt-2 text-sm text-slate-500">
             Registra el primer administrador maestro del sistema.
           </p>
         </div>
-        
-        <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+
+        <form onSubmit={handleRegister} className="flex flex-col gap-5">
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#475569' }}>Nombre Completo</label>
-            <div style={{ display: 'flex', alignItems: 'center', background: '#f8fafc', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <User size={18} color="#94a3b8" style={{ marginRight: '0.5rem' }} />
-              <input 
-                type="text" 
+            <label className={labelClass}>Nombre Completo</label>
+            <div className={inputWrapperClass}>
+              <User size={18} className="mr-2 shrink-0 text-slate-400" />
+              <input
+                type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                style={{ border: 'none', background: 'transparent', width: '100%', outline: 'none', fontSize: '1rem' }} 
+                className={inputClass}
                 placeholder="Ej: Administrador Maestro"
                 required
               />
@@ -87,14 +77,14 @@ export default function Register() {
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#475569' }}>Correo Electrónico</label>
-            <div style={{ display: 'flex', alignItems: 'center', background: '#f8fafc', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <Mail size={18} color="#94a3b8" style={{ marginRight: '0.5rem' }} />
-              <input 
-                type="email" 
+            <label className={labelClass}>Correo Electrónico</label>
+            <div className={inputWrapperClass}>
+              <Mail size={18} className="mr-2 shrink-0 text-slate-400" />
+              <input
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                style={{ border: 'none', background: 'transparent', width: '100%', outline: 'none', fontSize: '1rem' }} 
+                className={inputClass}
                 placeholder="admin@tuempresa.com"
                 required
               />
@@ -102,14 +92,14 @@ export default function Register() {
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#475569' }}>Contraseña</label>
-            <div style={{ display: 'flex', alignItems: 'center', background: '#f8fafc', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <KeyRound size={18} color="#94a3b8" style={{ marginRight: '0.5rem' }} />
-              <input 
-                type="password" 
+            <label className={labelClass}>Contraseña</label>
+            <div className={inputWrapperClass}>
+              <KeyRound size={18} className="mr-2 shrink-0 text-slate-400" />
+              <input
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                style={{ border: 'none', background: 'transparent', width: '100%', outline: 'none', fontSize: '1rem' }} 
+                className={inputClass}
                 placeholder="••••••••"
                 required
                 minLength={6}
@@ -117,36 +107,18 @@ export default function Register() {
             </div>
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={loading}
-            style={{
-              padding: '1rem',
-              background: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '1.1rem',
-              fontWeight: 600,
-              cursor: loading ? 'not-allowed' : 'pointer',
-              marginTop: '1rem',
-              transition: 'all 0.2s',
-              boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.5)'
-            }}>
+            className="mt-4 cursor-pointer rounded-lg border-none bg-blue-500 px-4 py-4 text-lg font-semibold text-white shadow-md shadow-blue-500/50 transition-all hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
             {loading ? 'Procesando...' : 'Finalizar Registro'}
           </button>
 
-          <button 
+          <button
             type="button"
             onClick={() => navigate('/login')}
-            style={{ 
-              background: 'none', 
-              border: 'none', 
-              color: '#64748b', 
-              fontSize: '0.9rem', 
-              cursor: 'pointer',
-              textDecoration: 'underline'
-            }}
+            className="cursor-pointer border-none bg-transparent text-sm text-slate-500 underline"
           >
             Ya tengo una cuenta, ir al Login
           </button>

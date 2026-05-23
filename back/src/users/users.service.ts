@@ -9,8 +9,8 @@ export class UsersService {
   async createStaff(storeId: string, data: any) {
     const { email, password, name, role } = data;
 
-    if (!['WAITER', 'KITCHEN', 'CASHIER'].includes(role)) {
-      throw new BadRequestException('Rol de personal inválido (Moso, Cocina o Cajero únicamente)');
+    if (!['CASHIER'].includes(role)) {
+      throw new BadRequestException('Rol de personal inválido (Cajero únicamente)');
     }
 
     const existing = await this.prisma.user.findUnique({ where: { email } });
@@ -34,7 +34,7 @@ export class UsersService {
     return this.prisma.user.findMany({
       where: { 
         storeId,
-        role: { in: ['WAITER', 'KITCHEN', 'CASHIER'] }
+        role: { in: ['CASHIER'] }
       },
       select: { id: true, email: true, name: true, role: true }
     });
@@ -42,7 +42,7 @@ export class UsersService {
 
   async deleteStaff(id: string, storeId: string) {
     const user = await this.prisma.user.findFirst({
-      where: { id, storeId, role: { in: ['WAITER', 'KITCHEN', 'CASHIER'] } }
+      where: { id, storeId, role: { in: ['CASHIER'] } }
     });
 
     if (!user) throw new BadRequestException('Usuario no encontrado o no pertenece a tu personal');

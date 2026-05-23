@@ -9,37 +9,37 @@ export class OrdersController {
 
   @Post('public/:storeId')
   async createPublic(@Param('storeId') storeId: string, @Body() body: any) {
-    return this.ordersService.create(storeId, null, { ...body, origin: body.origin || 'WHATSAPP' });
+    return this.ordersService.create(storeId, { ...body, origin: body.origin || 'WHATSAPP' });
   }
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN', 'WAITER', 'CASHIER'])
+  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN', 'CASHIER'])
   async create(@Request() req: any, @Body() body: any) {
-    return this.ordersService.create(req.user.storeId, req.user.id, { 
+    return this.ordersService.create(req.user.storeId, { 
       ...body, 
-      origin: body.origin || 'TABLE',
+      origin: body.origin || 'POS',
       status: body.status || 'PENDING'
     });
   }
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN', 'KITCHEN', 'WAITER'])
+  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN'])
   async findAll(@Request() req: any, @Query('status') status?: string, @Query('origin') origin?: string, @Query('startDate') startDate?: string, @Query('endDate') endDate?: string) {
     return this.ordersService.findAllByStore(req.user.storeId, status, origin, startDate, endDate);
   }
 
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN', 'KITCHEN', 'WAITER', 'CASHIER'])
+  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN', 'CASHIER'])
   async findOne(@Param('id') id: string, @Request() req: any) {
     return this.ordersService.findOne(id, req.user.storeId);
   }
 
   @Patch(':id/status')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN', 'KITCHEN', 'WAITER'])
+  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN'])
   async updateStatus(
     @Param('id') id: string,
     @Request() req: any,

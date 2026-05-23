@@ -127,10 +127,10 @@ export default function Products() {
   if (loading) return <div className="loader-container">Cargando inventario...</div>;
 
   return (
-    <div style={{ animation: 'fadeUp 0.5s ease-out' }}>
+    <div className="admin-page">
       <Group justify="space-between" mb="2rem">
         <div>
-          <Title order={1} style={{ fontSize: '1.875rem', fontWeight: 800, color: '#1e293b' }}>Gestión de Productos</Title>
+          <Title order={1} className="text-3xl font-extrabold text-slate-800">Gestión de Productos</Title>
           <Text color="dimmed" mt={4} size="sm">
             Administra tu catálogo {storeInfo?.hasStockControl ? 'con control de stock activo' : ''}.
           </Text>
@@ -142,13 +142,13 @@ export default function Products() {
           radius="md"
           variant="filled"
           color="blue"
-          style={{ boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)' }}
+          className="shadow-md shadow-blue-500/20"
         >
           Nuevo Producto
         </Button>
       </Group>
 
-      <Card withBorder radius="md" p="md" mb="xl" style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(8px)' }}>
+      <Card withBorder radius="md" p="md" mb="xl" className="bg-white/80 backdrop-blur-sm">
         <Group align="flex-end" gap="md">
           <TextInput
             placeholder="Buscar por nombre o descripción..."
@@ -156,7 +156,7 @@ export default function Products() {
             leftSection={<Search size={16} color="#94a3b8" />}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.currentTarget.value)}
-            style={{ flex: 1 }}
+            className="flex-1"
             radius="md"
             rightSection={searchQuery && (
               <ActionIcon variant="transparent" onClick={() => setSearchQuery('')}>
@@ -182,7 +182,7 @@ export default function Products() {
             value={categoryFilter}
             onChange={(val) => setCategoryFilter(val)}
             radius="md"
-            style={{ minWidth: '220px' }}
+            className="min-w-[220px]"
             searchable
           />
           <Select
@@ -198,7 +198,7 @@ export default function Products() {
             value={stockFilter}
             onChange={(val) => setStockFilter(val)}
             radius="md"
-            style={{ minWidth: '180px' }}
+            className="min-w-[180px]"
           />
           {(searchQuery || categoryFilter !== 'all' || stockFilter !== 'all') && (
             <Button variant="light" color="gray" radius="md" onClick={() => { setSearchQuery(''); setCategoryFilter('all'); setStockFilter('all'); }}>
@@ -208,39 +208,39 @@ export default function Products() {
         </Group>
       </Card>
 
-      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+      <div className="admin-table-shell">
+        <table className="admin-table">
+          <thead className="admin-table-head">
             <tr>
-              <th style={thStyle}>Vista</th>
-              <th style={thStyle}>Nombre</th>
-              {storeInfo?.hasStockControl && <th style={thStyle}>Stock</th>}
-              <th style={thStyle}>Categoría</th>
-              <th style={thStyle}>Precio</th>
-              <th style={{ ...thStyle, textAlign: 'right' }}>Acciones</th>
+              <th className="admin-th">Vista</th>
+              <th className="admin-th">Nombre</th>
+              {storeInfo?.hasStockControl && <th className="admin-th">Stock</th>}
+              <th className="admin-th">Categoría</th>
+              <th className="admin-th">Precio</th>
+              <th className="admin-th text-right">Acciones</th>
             </tr>
           </thead>
           <tbody>
             {filteredProducts.length > 0 ? (
               filteredProducts.map(p => (
-                <tr key={p.id} className="product-row" style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.2s' }}>
-                  <td style={tdStyle}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#f1f5f9', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0' }}>
-                      {p.imageUrl ? <img src={p.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <ImageIcon size={20} color="#94a3b8" />}
+                <tr key={p.id} className="product-row border-b border-slate-100 transition-colors hover:bg-slate-50">
+                  <td className="admin-td">
+                    <div className="admin-product-thumb">
+                      {p.imageUrl ? <img src={p.imageUrl} className="h-full w-full object-cover" alt="" /> : <ImageIcon size={20} color="#94a3b8" />}
                     </div>
                   </td>
-                  <td style={tdStyle}>
+                  <td className="admin-td">
                     <Stack gap={2}>
                       <Group gap="xs">
                         <Text fw={700} size="sm" color="#1e293b">{p.name}</Text>
                         {p.isBundle && <Badge color="green" size="xs" variant="filled">PROMO</Badge>}
                       </Group>
-                      {p.description && <Text size="xs" color="dimmed" lineClamp={1} style={{ maxWidth: '300px' }}>{p.description}</Text>}
+                      {p.description && <Text size="xs" color="dimmed" lineClamp={1} className="max-w-[300px]">{p.description}</Text>}
                       {p.barcode && <Group gap="xs"><Barcode size={12} color="#94a3b8" /><Text size="xs" color="dimmed">{p.barcode}</Text></Group>}
                     </Stack>
                   </td>
                   {storeInfo?.hasStockControl && (
-                    <td style={tdStyle}>
+                    <td className="admin-td">
                       {p.trackStock ? (
                         <Badge 
                           variant="dot" 
@@ -254,11 +254,11 @@ export default function Products() {
                       )}
                     </td>
                   )}
-                  <td style={tdStyle}>
+                  <td className="admin-td">
                     <Badge variant="light" color="blue" radius="md">{p.category?.name || 'Sin Categoría'}</Badge>
                   </td>
-                  <td style={{ ...tdStyle, color: '#0f172a', fontWeight: 800, fontSize: '1rem' }}>${p.price.toFixed(2)}</td>
-                  <td style={{ ...tdStyle, textAlign: 'right' }}>
+                  <td className="admin-td text-base font-extrabold text-slate-900">${p.price.toFixed(2)}</td>
+                  <td className="admin-td text-right">
                     <Group justify="flex-end" gap="xs">
                       <Tooltip label="Editar">
                         <ActionIcon variant="subtle" color="blue" radius="md" size="lg" onClick={() => setEditingProduct(p)}><Edit3 size={18} /></ActionIcon>
@@ -272,7 +272,7 @@ export default function Products() {
               ))
             ) : (
               <tr>
-                <td colSpan={6} style={{ padding: '4rem', textAlign: 'center' }}>
+                <td colSpan={6} className="py-16 text-center">
                   <Stack align="center" gap="sm">
                     <Boxes size={48} color="#cbd5e1" strokeWidth={1.5} />
                     <Text fw={600} color="dimmed">No se encontraron productos</Text>
@@ -409,7 +409,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
 
         <Box>
           <Text fw={500} size="sm" mb={4}>Imagen del Producto</Text>
-          <Box p="md" style={{ background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+          <Box p="md" className="admin-form-section">
              <FileUploader 
                label="" 
                defaultValue={imageUrl} 
@@ -433,7 +433,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
         )}
         
         {storeInfo?.hasStockControl && (
-          <Box p="md" style={{ background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+          <Box p="md" className="admin-form-section">
             <Group justify="space-between" mb="xs">
               <Stack gap={0}>
                 <Text fw={700} size="sm">Control de Inventario</Text>
@@ -464,7 +464,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
         )}
 
         {/* Sección de Promo / Combo */}
-        <Box p="md" style={{ background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+        <Box p="md" className="admin-form-section">
           <Group justify="space-between" mb="xs">
             <Stack gap={0}>
               <Text fw={700} size="sm">Es una Promo / Combo</Text>
@@ -509,7 +509,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
                     }}
                     min={1}
                     radius="md"
-                    style={{ maxWidth: '100px' }}
+                    className="max-w-[100px]"
                   />
                   <ActionIcon color="red" variant="subtle" onClick={() => setBundleItems(bundleItems.filter((_, i) => i !== index))}>
                     <Trash2 size={18} />
@@ -555,7 +555,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
             size="md" 
             radius="md" 
             onClick={() => onSubmit({ name, price, description, imageUrl, categoryId, modifierGroupIds, trackStock, stock, barcode, isBundle, bundleItems, notes })}
-            style={{ paddingLeft: '2rem', paddingRight: '2rem' }}
+            className="px-8"
           >
             {product ? 'Guardar Cambios' : 'Crear Producto'}
           </Button>
@@ -564,6 +564,3 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
     </Modal>
   );
 }
-
-const thStyle = { padding: '1.25rem 1.5rem', color: '#475569', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase' as const, textAlign: 'left' as const };
-const tdStyle = { padding: '1rem 1.5rem', verticalAlign: 'middle' };

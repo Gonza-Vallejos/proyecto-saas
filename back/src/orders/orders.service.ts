@@ -9,8 +9,8 @@ export class OrdersService {
     private eventsGateway: EventsGateway,
   ) {}
 
-  async create(storeId: string, waiterId: string | null, data: any) {
-    const { tableId, items, observations, customerName, customerPhone, origin, status } = data;
+  async create(storeId: string, data: any) {
+    const { items, observations, customerName, customerPhone, origin, status } = data;
 
     // Calcular total y preparar ítems
     let total = 0;
@@ -53,12 +53,10 @@ export class OrdersService {
       const order = await tx.order.create({
         data: {
           storeId,
-          waiterId,
-          tableId,
           observations,
           customerName,
           customerPhone,
-          origin: origin || 'TABLE',
+          origin: origin || 'POS',
           total,
           status: status || 'PENDING',
           items: {
@@ -67,7 +65,6 @@ export class OrdersService {
         },
         include: {
           items: true,
-          table: true,
         },
       });
 
@@ -139,10 +136,6 @@ export class OrdersService {
           include: {
             product: true
           }
-        },
-        table: true,
-        waiter: {
-          select: { name: true }
         }
       },
       orderBy: { createdAt: 'desc' },
@@ -157,10 +150,6 @@ export class OrdersService {
           include: {
             product: true
           }
-        },
-        table: true,
-        waiter: {
-          select: { name: true }
         }
       }
     });
@@ -182,7 +171,7 @@ export class OrdersService {
       const updatedOrder = await tx.order.update({
         where: { id },
         data: { status },
-        include: { items: true, table: true },
+        include: { items: true },
       });
 
       if (shouldDeductStock && order.origin !== 'WHATSAPP') {
@@ -203,7 +192,7 @@ export class OrdersService {
       if (shouldRestoreStock) {
         // Se reintegra si:
         // 1. Era WhatsApp o POS (descontó al inicio)
-        // 2. Era Table pero ya estaba en estado READY (descontó al pasar a READY)
+        // 2. Era pedido pero ya estaba en estado READY (descontó al pasar a READY)
         const wasAlreadyDeducted = order.origin === 'WHATSAPP' || order.origin === 'POS' || order.status === 'READY';
         
         if (wasAlreadyDeducted) {

@@ -185,7 +185,7 @@ export default function PointOfSale() {
   };
 
   return (
-    <div style={{ animation: 'fadeUp 0.5s ease-out' }}>
+    <div className="admin-page">
       <Group justify="space-between" mb="xl">
         <div>
           <Title order={2}>Punto de Venta</Title>
@@ -194,7 +194,7 @@ export default function PointOfSale() {
         <Badge size="lg" color="indigo" variant="outline">Caja Abierta</Badge>
       </Group>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
+      <div className="admin-pos-grid">
         {/* Lado Izquierdo: Escáner y Lista de Productos */}
         <Stack gap="md">
           <Card withBorder radius="md" p="md" shadow="sm">
@@ -211,31 +211,31 @@ export default function PointOfSale() {
             </form>
           </Card>
 
-          <Card withBorder radius="md" p={0} shadow="sm" style={{ flex: 1, minHeight: '400px' }}>
+          <Card withBorder radius="md" p={0} shadow="sm" className="min-h-[400px] flex-1">
             <Table verticalSpacing="md" highlightOnHover>
-              <Table.Thead style={{ background: '#f8fafc' }}>
+              <Table.Thead className="bg-slate-50">
                 <Table.Tr>
-                  <Table.Th style={{ paddingLeft: '1.5rem' }}>Producto</Table.Th>
+                  <Table.Th className="!pl-6">Producto</Table.Th>
                   <Table.Th>Cant.</Table.Th>
                   <Table.Th>Precio</Table.Th>
-                  <Table.Th style={{ textAlign: 'center' }}>X</Table.Th>
+                  <Table.Th className="text-center">X</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
                 {cart.length === 0 ? (
                   <Table.Tr>
-                    <Table.Td colSpan={4} style={{ textAlign: 'center', padding: '3rem' }}>
-                      <ShoppingCart size={48} color="#e2e8f0" style={{ margin: '0 auto', display: 'block', marginBottom: '1rem' }} />
+                    <Table.Td colSpan={4} className="py-12 text-center">
+                      <ShoppingCart size={48} color="#e2e8f0" className="mx-auto mb-4 block" />
                       <Text color="dimmed">El carrito está vacío. Escanea un producto.</Text>
                     </Table.Td>
                   </Table.Tr>
                 ) : (
                   cart.map((item, idx) => (
                     <Table.Tr key={idx}>
-                      <Table.Td style={{ paddingLeft: '1.5rem' }}>{item.name}</Table.Td>
+                      <Table.Td className="!pl-6">{item.name}</Table.Td>
                       <Table.Td>{item.quantity}</Table.Td>
                       <Table.Td>${item.price.toLocaleString()}</Table.Td>
-                      <Table.Td style={{ textAlign: 'center' }}>
+                      <Table.Td className="text-center">
                         <ActionIcon color="red" variant="subtle" onClick={() => handleRemove(idx)}>
                           <Trash2 size={16} />
                         </ActionIcon>
@@ -249,13 +249,13 @@ export default function PointOfSale() {
         </Stack>
 
         {/* Lado Derecho: Resumen y Cobro */}
-        <Card withBorder radius="md" p="xl" shadow="sm" style={{ height: 'fit-content' }}>
+        <Card withBorder radius="md" p="xl" shadow="sm" className="h-fit">
           <Stack gap="lg">
             <Title order={3}>Resumen</Title>
             
             <Group justify="space-between">
               <Text size="lg" color="dimmed">Total a Pagar</Text>
-              <Title order={1} style={{ color: '#0ea5e9' }}>${total.toLocaleString()}</Title>
+              <Title order={1} className="text-sky-500">${total.toLocaleString()}</Title>
             </Group>
 
             <Divider />
@@ -318,7 +318,7 @@ export default function PointOfSale() {
             </>
           ) : qrUrl ? (
             <>
-              <div style={{ padding: '1rem', background: 'white', borderRadius: '12px', border: '2px solid #e2e8f0' }}>
+              <div className="rounded-xl border-2 border-slate-200 bg-white p-4">
                 <QRCodeSVG value={qrUrl} size={200} />
               </div>
               <Text ta="center" size="sm" color="dimmed">

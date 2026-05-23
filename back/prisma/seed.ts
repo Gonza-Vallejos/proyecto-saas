@@ -61,16 +61,6 @@ async function main() {
     ]
   });
 
-  // 5. Crear Mesas base
-  await prisma.table.createMany({
-    data: [
-      { number: '1', storeId: demoStore.id },
-      { number: '2', storeId: demoStore.id },
-      { number: '3', storeId: demoStore.id },
-      { number: '4', storeId: demoStore.id },
-    ]
-  });
-
   console.log('🚀 Seeding completado con datos de prueba.');
 }
 

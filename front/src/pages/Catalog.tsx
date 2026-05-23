@@ -40,6 +40,9 @@ import {
   TextInput
 } from '@mantine/core';
 import { socket } from '../utils/socket';
+import { cn } from '../lib/cn';
+import StoreThemeRoot from '../components/StoreThemeRoot';
+import { themeFromStore } from '../lib/storeTheme';
 
 interface Category {
   id: string;
@@ -146,12 +149,10 @@ const CategoryButton = ({ active, children, onClick, id }: any) => (
     color={active ? 'var(--primary-color)' : 'gray'}
     radius="xl"
     onClick={onClick}
-    style={{ 
-      transition: 'all 0.3s ease',
-      transform: active ? 'scale(1.05)' : 'scale(1)',
-      flexShrink: 0,
-      boxShadow: active ? '0 4px 12px rgba(0,0,0,0.1)' : 'none'
-    }}
+    className={cn(
+      'shrink-0 transition-all duration-300',
+      active ? 'scale-105 shadow-md' : 'scale-100 shadow-none',
+    )}
   >
     {children}
   </Button>
@@ -656,7 +657,7 @@ export default function Catalog() {
 
 
   if (loading) return (
-    <Center style={{ height: '100vh', backgroundColor: '#f8fafc' }}>
+    <Center className="catalog-fullscreen-center">
       <Stack align="center" gap="md">
         <Loader size="xl" color="var(--primary-color)" type="bars" />
         <Text fw={700} size="lg" color="blue">Preparando catálogo...</Text>
@@ -665,10 +666,10 @@ export default function Catalog() {
   );
 
   if (error || !store) return (
-    <Center style={{ height: '100vh', background: '#fff' }}>
+    <Center className="catalog-404-bg">
       <Stack align="center" gap="xl">
-        <Box style={{ textAlign: 'center' }}>
-            <Title order={1} size={isMobile ? 40 : 80} style={{ opacity: 0.1, marginBottom: '-40px' }}>404</Title>
+        <Box className="text-center">
+            <Title order={1} size={isMobile ? 40 : 80} className="catalog-404-watermark">404</Title>
             <Title order={2}>Tienda no encontrada</Title>
         </Box>
         <Text color="dimmed" maw={400} ta="center">Lo sentimos, pero el catálogo que buscas no está disponible en este momento.</Text>
@@ -680,28 +681,17 @@ export default function Catalog() {
 
 
   return (
-    <Box style={{ 
-      minHeight: '100vh', 
-      backgroundColor: 'var(--bg-color)',
-      color: 'var(--text-color)',
-      fontFamily: store.fontFamily || 'Inter'
-    }}>
+    <StoreThemeRoot theme={themeFromStore(store)} className="catalog-page min-h-screen">
       
-      <Box component="header" style={{ 
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 1000,
-        backgroundColor: scrolled ? 'var(--bg-color)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(10px)' : 'none',
-        height: isMobile ? '60px' : '76px',
-        display: 'flex',
-        alignItems: 'center',
-        transition: 'all 0.3s ease',
-        borderBottom: scrolled ? '1px solid rgba(0,0,0,0.05)' : 'none'
-      }}>
-        <Container size="xl" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+      <Box
+        component="header"
+        className={cn(
+          'catalog-fixed-header',
+          isMobile ? 'h-[60px]' : 'h-[76px]',
+          scrolled && 'catalog-fixed-header--solid',
+        )}
+      >
+        <Container size="xl" className="catalog-header-inner">
             <Group gap="xs">
               {store.hasConnectivity && store.wifiSSID && (
                 <ActionIcon 
@@ -732,25 +722,19 @@ export default function Catalog() {
                 </ActionIcon>
               )}
               
-              <Group gap="sm" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ cursor: 'pointer' }}>
-                <Box style={{
-                  width: isMobile ? '32px' : '42px',
-                  height: isMobile ? '32px' : '42px',
-                  borderRadius: '10px',
-                  overflow: 'hidden',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                  backgroundColor: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
+              <Group gap="sm" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="catalog-logo-click">
+                <Box className={cn('catalog-logo-box', isMobile ? 'h-8 w-8' : 'h-[42px] w-[42px]')}>
                   {store.logoUrl ? (
                     <Image src={fixUrl(store.logoUrl)} w="100%" h="100%" />
                   ) : (
-                    <Text fw={900} color="var(--primary-color)" size={isMobile ? 'sm' : 'xl'}>{store.name.charAt(0)}</Text>
+                    <Text fw={900} className="text-store-primary" size={isMobile ? 'sm' : 'xl'}>{store.name.charAt(0)}</Text>
                   )}
                 </Box>
-                <Title order={3} size={isMobile ? '1rem' : '1.2rem'} style={{ color: scrolled ? 'var(--text-color)' : (store.heroImageUrl ? '#fff' : 'var(--text-color)') }}>
+                <Title
+                  order={3}
+                  size={isMobile ? '1rem' : '1.2rem'}
+                  className={cn(scrolled || !store.heroImageUrl ? 'text-store' : 'text-white')}
+                >
                   {store.name}
                 </Title>
               </Group>
@@ -761,65 +745,61 @@ export default function Catalog() {
                 variant="subtle"
                 size={isMobile ? 'sm' : 'md'} 
                 radius="xl" 
-                style={{ color: 'var(--icon-color)' }}
-                className="cart-button"
+                className="cart-button text-store-icon"
                 onClick={() => setCartOpened(true)}
               >
-                  <Box style={{ position: 'relative' }}>
+                  <Box className="catalog-cart-badge-wrap">
                      <ShoppingCart size={isMobile ? 24 : 28} color="var(--icon-color)" />
                      {cart.length > 0 && (
                        <Badge 
                          size="xs" 
                          circle 
                          color="var(--secondary-color)" 
-                         style={{ position: 'absolute', top: -5, right: -5, border: '2px solid white' }}
+                         className="catalog-cart-badge"
                        >
                          {cart.reduce((acc, item) => acc + item.quantity, 0)}
                        </Badge>
                      )}
                   </Box>
-                  <Text size="sm" ml="xs" style={{ display: isMobile ? 'none' : 'block' }}>Carrito</Text>
+                  <Text size="sm" ml="xs" className={cn(isMobile && 'hidden', !isMobile && 'block')}>Carrito</Text>
               </Button>
             )}
         </Container>
       </Box>
 
       {/* Stunning Hero Section */}
-      <Box style={{ 
-        position: 'relative', 
-        height: isMobile ? '300px' : '450px', 
-        display: 'flex', 
-        alignItems: 'center', 
-        paddingTop: isMobile ? '40px' : '76px',
-        backgroundImage: store.heroImageUrl 
-          ? `linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 100%), url(${fixUrl(store.heroImageUrl)})` 
-          : 'none',
-        backgroundColor: store.heroImageUrl ? 'transparent' : '#f8fafc',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        clipPath: store.heroStyle === 'curve' ? (isMobile ? 'none' : 'ellipse(150% 100% at 50% 0%)') : 'none',
-        opacity: Math.max(0, 1 - scrollY / 500),
-        transition: 'opacity 0.1s ease-out'
-      }}>
-        <Container size="xl" style={{ width: '100%', zIndex: 10 }}>
-          <Stack gap={0} align="center" style={{ textAlign: 'center', color: store.heroImageUrl ? '#fff' : '#0f172a' }}>
+      <Box
+        className={cn(
+          'catalog-hero-panel',
+          isMobile ? 'h-[300px] pt-10' : 'h-[450px] pt-[76px]',
+          store.heroImageUrl && 'catalog-hero-panel--image',
+          store.heroStyle === 'curve' && !isMobile && '[clip-path:ellipse(150%_100%_at_50%_0%)]',
+        )}
+        style={{
+          backgroundImage: store.heroImageUrl
+            ? `linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 100%), url(${fixUrl(store.heroImageUrl)})`
+            : undefined,
+          opacity: Math.max(0, 1 - scrollY / 500),
+        }}
+      >
+        <Container size="xl" className="z-10 w-full">
+          <Stack gap={0} align="center" className={cn('text-center', store.heroImageUrl ? 'text-white' : 'text-slate-900')}>
               <Transition mounted={true} transition="fade" duration={1000} timingFunction="ease">
                 {(styles) => (
                   <Title 
                     order={1} 
-                    style={{ 
-                      ...styles, 
-                      fontSize: isMobile ? '2.2rem' : '4rem', 
-                      fontWeight: 900, 
-                      lineHeight: 1.1,
-                      color: store.heroImageUrl ? 'white' : 'var(--text-color)'
-                    }}
+                    className={cn(
+                      'font-black leading-tight',
+                      isMobile ? 'text-[2.2rem]' : 'text-6xl',
+                      store.heroImageUrl ? 'text-white' : 'text-store',
+                    )}
+                    style={styles}
                   >
                      {store.name}
                   </Title>
                 )}
               </Transition>
-              <Text size={isMobile ? 'md' : 'xl'} fw={500} opacity={0.9} style={{ color: store.heroImageUrl ? 'white' : 'var(--text-color)', marginTop: '1rem' }}>
+              <Text size={isMobile ? 'md' : 'xl'} fw={500} opacity={0.9} className={cn('mt-4', store.heroImageUrl ? 'text-white' : 'text-store')}>
                  {store.description || 'Descubre lo mejor de nuestro catálogo digital diseñado exclusivamente para ti.'}
               </Text>
              
@@ -829,17 +809,13 @@ export default function Catalog() {
       </Box>
 
       {/* Category Nav - Sticky Filter */}
-      <Box style={{ 
-        position: 'sticky', 
-        top: isMobile ? '60px' : '76px', 
-        zIndex: 900, 
-        backgroundColor: 'var(--bg-color)', 
-        opacity: 0.98, 
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(0,0,0,0.05)',
-        transition: 'all 0.3s ease',
-        boxShadow: scrolled ? '0 4px 12px rgba(0,0,0,0.05)' : 'none'
-      }}>
+      <Box
+        className={cn(
+          'catalog-sticky-nav',
+          isMobile ? 'top-[60px]' : 'top-[76px]',
+          scrolled && 'catalog-sticky-nav--shadow',
+        )}
+      >
         <Container size="xl">
           <Stack gap={0}>
             {/* Fila 1: Categorías Principales */}
@@ -848,14 +824,7 @@ export default function Catalog() {
               justify={isMobile ? 'flex-start' : 'center'} 
               gap="xs" 
               py="sm"
-              style={{ 
-                flexWrap: 'nowrap', 
-                overflowX: 'auto', 
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-                paddingLeft: '1rem',
-                paddingRight: '1rem'
-              }}
+              className="catalog-nav-scroll"
             >
               <CategoryButton 
                 active={selectedCategory === 'all'} 
@@ -876,21 +845,12 @@ export default function Catalog() {
 
             {/* Fila 2: Subcategorías (Solo si hay una categoría padre seleccionada y tiene hijos) */}
             {currentSubCategories.length > 0 && (
-              <Box style={{ 
-                borderTop: '1px solid rgba(0,0,0,0.03)',
-                backgroundColor: 'rgba(0,0,0,0.02)',
-                padding: '8px 0'
-              }}>
+              <Box className="catalog-subnav-bar">
                 <Group 
                   justify={isMobile ? 'flex-start' : 'center'} 
                   gap="sm" 
                   px="md"
-                  style={{ 
-                    flexWrap: 'nowrap', 
-                    overflowX: 'auto', 
-                    scrollbarWidth: 'none',
-                    msOverflowStyle: 'none'
-                  }}
+                  className="catalog-nav-scroll"
                 >
                   {currentSubCategories.map(sub => (
                     <Button
@@ -900,15 +860,10 @@ export default function Catalog() {
                       radius="xl"
                       color={selectedCategory === sub.id ? 'var(--primary-color)' : 'gray'}
                       onClick={() => scrollToCategory(sub.id)}
-                      style={{
-                        height: '28px',
-                        padding: '0 12px',
-                        fontSize: '0.75rem',
-                        fontWeight: selectedCategory === sub.id ? 700 : 500,
-                        whiteSpace: 'nowrap',
-                        flexShrink: 0,
-                        transition: 'all 0.2s'
-                      }}
+                      className={cn(
+                        'catalog-sub-pill',
+                        selectedCategory === sub.id && 'catalog-sub-pill--active',
+                      )}
                     >
                       {sub.name}
                     </Button>
@@ -923,21 +878,21 @@ export default function Catalog() {
       {/* Main Catalog Area */}
       <Container size="xl" py="4rem">
         {groupedProducts.length === 0 ? (
-          <Center py="6rem" style={{ flexDirection: 'column', gap: '1rem', opacity: 0.5 }}>
+          <Center py="6rem" className="catalog-empty">
             <Title order={3}>No se encontraron productos</Title>
             <Text>Intenta con otra categoría o vuelve más tarde.</Text>
           </Center>
         ) : (
           <Stack gap="4rem">
             {groupedProducts.map(group => (
-              <Box key={group.id} id={`section-${group.id}`} className="category-section" style={{ scrollMarginTop: '160px' }}>
-                <Group gap="xs" mb="xl" style={{ borderLeft: `4px solid var(--primary-color)`, paddingLeft: '1rem' }}>
+              <Box key={group.id} id={`section-${group.id}`} className="category-section catalog-section">
+                <Group gap="xs" mb="xl" className="catalog-section-title">
                    {group.parentId && (
-                     <Text color="dimmed" fw={500} size="sm" tt="uppercase" style={{ letterSpacing: '1px' }}>
+                     <Text color="dimmed" fw={500} size="sm" tt="uppercase" className="catalog-section-subtitle">
                        {store?.categories.find(c => c.id === group.parentId)?.name} › 
                      </Text>
                    )}
-                   <Title order={2} style={{ color: 'var(--text-color)' }}>
+                   <Title order={2} className="text-[var(--text-color)]">
                      {group.name}
                    </Title>
                 </Group>
@@ -964,34 +919,35 @@ export default function Catalog() {
       </Container>
 
       {/* Footer using Secondary Color as per user preference for closure */}
-      <Box component="footer" style={{ 
-        backgroundColor: 'var(--primary-color)', 
-        color: 'var(--text-color)', 
-        padding: isMobile ? '3rem 0 2rem 0' : '5rem 0 2rem 0',
-        borderTop: `1px solid rgba(255,255,255,0.1)`
-      }}>
+      <Box
+        component="footer"
+        className={cn(
+          'border-t border-white/10 bg-store-primary text-store',
+          isMobile ? 'py-12 pb-8' : 'py-20 pb-8',
+        )}
+      >
         <Container size="xl">
           <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing={40} mb={isMobile ? 30 : 60}>
-            <Stack gap="md" align={isMobile ? 'center' : 'flex-start'} style={{ textAlign: isMobile ? 'center' : 'left' }}>
+            <Stack gap="md" align={isMobile ? 'center' : 'flex-start'} className={cn(isMobile ? 'text-center' : 'text-left')}>
               <Title order={3} size={isMobile ? 'h3' : 'h2'} c={footerTextColor}>{store.name}</Title>
-              <Text size="sm" c={footerTextColor} style={{ lineHeight: 1.6, maxWidth: isMobile ? '300px' : 'none', opacity: 0.8 }}>
+              <Text size="sm" c={footerTextColor} className={cn('leading-relaxed opacity-80', isMobile && 'max-w-[300px]')}>
                 {store.description || 'Calidad y servicio excepcional para todos nuestros clientes registrados.'}
               </Text>
             </Stack>
 
-            <Stack gap="md" align={isMobile ? 'center' : 'flex-start'} style={{ textAlign: isMobile ? 'center' : 'left', order: isMobile ? 2 : 2 }}>
-              <Title order={4} size="xs" tt="uppercase" c={footerTextColor} fw={700} style={{ opacity: 0.9 }}>Encuéntranos</Title>
+            <Stack gap="md" align={isMobile ? 'center' : 'flex-start'} className={cn(isMobile ? 'order-2 text-center' : 'text-left')}>
+              <Title order={4} size="xs" tt="uppercase" c={footerTextColor} fw={700} className="opacity-90">Encuéntranos</Title>
                 <Stack gap="sm" align={isMobile ? 'center' : 'flex-start'}>
                   {store.address && (
                     <Group gap="md" justify={isMobile ? 'center' : 'flex-start'} wrap="nowrap">
-                      <Image src={UbicacionPng} w={24} h={24} style={{ filter: footerTextColor === '#1e293b' ? 'brightness(0)' : 'brightness(0) invert(1)' }} />
+                      <Image src={UbicacionPng} w={24} h={24} className={footerTextColor === '#1e293b' ? 'catalog-footer-icon-dark' : 'catalog-footer-icon-invert'} />
                       <Box 
                         component="a" 
                         href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.address)}`} 
                         target="_blank" 
-                        style={{ textDecoration: 'none', color: 'inherit' }}
+                        className="no-underline text-inherit"
                       >
-                        <Text size="sm" c={footerTextColor} fw={500} style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>{store.address}</Text>
+                        <Text size="sm" c={footerTextColor} fw={500} className="catalog-footer-link">{store.address}</Text>
                       </Box>
                     </Group>
                   )}
@@ -1003,7 +959,7 @@ export default function Catalog() {
                         component="a" 
                         href={`https://wa.me/${store.whatsapp}`} 
                         target="_blank" 
-                        style={{ textDecoration: 'none', color: 'inherit' }}
+                        className="no-underline text-inherit"
                       >
                         <Text size="sm" c={footerTextColor} fw={500}>{store.whatsapp}</Text>
                       </Box>
@@ -1017,7 +973,7 @@ export default function Catalog() {
                         component="a" 
                         href={store.instagram.startsWith('http') ? store.instagram : `https://instagram.com/${store.instagram}`} 
                         target="_blank" 
-                        style={{ textDecoration: 'none', color: 'inherit' }}
+                        className="no-underline text-inherit"
                       >
                         <Text size="sm" c={footerTextColor} fw={500}>@{store.instagram.split('?')[0].replace(/\/+$/, '').split('/').pop()}</Text>
                       </Box>
@@ -1026,8 +982,8 @@ export default function Catalog() {
                 </Stack>
              </Stack>
 
-            <Stack gap="md" align={isMobile ? 'center' : 'flex-start'} style={{ textAlign: isMobile ? 'center' : 'left', order: isMobile ? 3 : 4 }}>
-              <Title order={4} size="xs" tt="uppercase" c={footerTextColor} fw={700} style={{ opacity: 0.9 }}>Horarios</Title>
+            <Stack gap="md" align={isMobile ? 'center' : 'flex-start'} className={cn(isMobile ? 'order-3 text-center' : 'order-4 text-left')}>
+              <Title order={4} size="xs" tt="uppercase" c={footerTextColor} fw={700} className="opacity-90">Horarios</Title>
               {store.businessHours && (() => {
                 const hours = JSON.parse(store.businessHours);
                 const weekDays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
@@ -1039,12 +995,12 @@ export default function Catalog() {
                 );
 
                 const renderRow = (label: string, config: any) => (
-                  <Group key={label} justify="space-between" wrap="nowrap" style={{ width: '100%', marginBottom: '6px' }}>
+                  <Group key={label} justify="space-between" wrap="nowrap" className="mb-1.5 w-full">
                     <Group gap="xs">
-                       <Box style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--secondary-color)' }} />
-                       <Text size="xs" fw={700} c={footerTextColor} style={{ minWidth: '70px' }}>{label}:</Text>
+                       <Box className="preview-footer-dot" />
+                       <Text size="xs" fw={700} c={footerTextColor} className="min-w-[70px]">{label}:</Text>
                     </Group>
-                    <Text size="xs" c={footerTextColor} style={{ opacity: 0.8 }} fs={config.isOpen ? "normal" : "italic"}>
+                    <Text size="xs" c={footerTextColor} className="opacity-80" fs={config.isOpen ? "normal" : "italic"}>
                       {config.isOpen ? `${config.open} - ${config.close}` : 'Cerrado'}
                     </Text>
                   </Group>
@@ -1052,7 +1008,7 @@ export default function Catalog() {
 
                 if (allSame) {
                   return (
-                    <Stack gap={2} mt="sm" style={{ width: '100%', maxWidth: '280px', margin: isMobile ? '0 auto' : '0' }}>
+                    <Stack gap={2} mt="sm" className={cn('w-full max-w-[280px]', isMobile && 'mx-auto')}>
                       {renderRow('Lunes a Viernes', firstDay)}
                       {renderRow('Sábado', hours['Sábado'])}
                       {renderRow('Domingo', hours['Domingo'])}
@@ -1062,7 +1018,7 @@ export default function Catalog() {
 
                 // Si no todos son iguales, usar diseño de dos columnas para escritorio
                 return (
-                  <Box mt="sm" style={{ width: '100%', maxWidth: isMobile ? '280px' : '500px', margin: isMobile ? '0 auto' : '0' }}>
+                  <Box mt="sm" className={cn('w-full', isMobile ? 'mx-auto max-w-[280px]' : 'max-w-[500px]')}>
                     <SimpleGrid cols={isMobile ? 1 : 2} spacing={isMobile ? "xs" : "xl"} verticalSpacing={0}>
                       {Object.entries(hours).map(([day, config]: [any, any]) => renderRow(day, config))}
                     </SimpleGrid>
@@ -1086,7 +1042,7 @@ export default function Catalog() {
         opened={cartOpened}
         onClose={() => setCartOpened(false)}
         title={
-          <Group justify="space-between" style={{ width: '100%', paddingRight: '1rem' }}>
+          <Group justify="space-between" className="w-full pr-4">
             <Title order={3}>Tu Pedido</Title>
             <Button variant="subtle" size="xs" radius="xl" onClick={() => setCartOpened(false)}>
               Seguir Comprando
@@ -1111,17 +1067,8 @@ export default function Catalog() {
         }}
       >
         {cart.length === 0 ? (
-          <Center style={{ height: '70vh', flexDirection: 'column', gap: '1.5rem', textAlign: 'center' }}>
-            <Box style={{ 
-              width: 120, 
-              height: 120, 
-              borderRadius: '50%', 
-              background: '#f1f5f9', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              animation: 'pulse 2s infinite'
-            }}>
+          <Center className="flex h-[70vh] flex-col gap-6 text-center">
+            <Box className="flex h-[120px] w-[120px] animate-pulse items-center justify-center rounded-full bg-slate-100">
               <ShoppingCart size={48} color="#94a3b8" />
             </Box>
             <div>
@@ -1139,14 +1086,11 @@ export default function Catalog() {
             </Button>
           </Center>
         ) : (
-          <Box style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            height: isMobile ? 'calc(100svh - 100px)' : 'calc(100vh - 100px)', 
-            position: 'relative',
-            marginTop: '-1rem' // Compensar el margen del header
-          }}>
-            <ScrollArea style={{ flex: 1 }} h="100%" offsetScrollbars scrollHideDelay={0}>
+          <Box className={cn(
+            'relative -mt-4 flex flex-col',
+            isMobile ? 'h-[calc(100svh-100px)]' : 'h-[calc(100vh-100px)]',
+          )}>
+            <ScrollArea className="flex-1" h="100%" offsetScrollbars scrollHideDelay={0}>
                <Stack gap="md" pt="3.5rem" pb="2rem" px="xs">
                  {cart.map((item, idx) => (
                    <Paper 
@@ -1155,10 +1099,7 @@ export default function Catalog() {
                      radius="lg" 
                      p="md" 
                      shadow="xs"
-                     style={{ 
-                       borderColor: '#f1f5f9', 
-                       transition: 'transform 0.2s ease',
-                     }}
+                     className="border-slate-100 transition-transform duration-200"
                    >
                      <Group align="flex-start" gap="md" wrap="nowrap">
                        {/* Imagen del Producto */}
@@ -1168,17 +1109,12 @@ export default function Catalog() {
                          w={70} 
                          h={70} 
                          radius="md" 
-                         style={{ objectFit: 'cover', flexShrink: 0 }}
+                         className="shrink-0 object-cover"
                        />
 
                        {/* Información Principal */}
-                       <Box style={{ flex: 1, minWidth: 0 }}>
-                         <Text fw={700} size="sm" style={{ 
-                            display: '-webkit-box',
-                            WebkitLineClamp: 1,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden'
-                         }}>
+                       <Box className="min-w-0 flex-1">
+                         <Text fw={700} size="sm" className="line-clamp-1">
                            {item.product.name}
                          </Text>
                          <Text size="xs" color="dimmed" mb={4}>$ {formatPrice(item.product.price)} c/u</Text>
@@ -1194,7 +1130,7 @@ export default function Catalog() {
                                      variant="light" 
                                      size="xs" 
                                      color="var(--secondary-color)" 
-                                     style={{ textTransform: 'none', height: '18px', border: '1px solid rgba(0,0,0,0.05)' }}
+                                     className="h-[18px] border border-black/5 normal-case"
                                    >
                                      +{opt.name}
                                    </Badge>
@@ -1205,7 +1141,7 @@ export default function Catalog() {
                          )}
 
                          {item.observations && (
-                           <Text size="xs" fs="italic" color="blue.6" mt={4} style={{ borderLeft: '2px solid #3b82f6', paddingLeft: '6px' }}>
+                           <Text size="xs" fs="italic" color="blue.6" mt={4} className="border-l-2 border-blue-500 pl-1.5">
                              "{item.observations}"
                            </Text>
                          )}
@@ -1227,23 +1163,18 @@ export default function Catalog() {
 
                      {/* Fila Inferior: Controles y Total por ítem */}
                      <Group justify="space-between" align="center">
-                       <Group gap={4} style={{ 
-                         background: '#f8fafc', 
-                         padding: '2px', 
-                         borderRadius: '24px', 
-                         border: '1px solid #f1f5f9' 
-                       }}>
+                       <Group gap={4} className="rounded-full border border-slate-100 bg-slate-50 p-0.5">
                          <ActionIcon 
                            variant="filled" 
                            color="white" 
                            size="sm" 
                            radius="xl" 
                            onClick={() => updateQuantity(idx, -1)}
-                           style={{ color: '#64748b', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
+                           className="text-slate-500 shadow-sm"
                          >
                            <Text size="xs" fw={900}>-</Text>
                          </ActionIcon>
-                         <Text size="sm" fw={800} style={{ minWidth: '24px', textAlign: 'center', color: '#1e293b' }}>
+                         <Text size="sm" fw={800} className="min-w-6 text-center text-slate-900">
                            {item.quantity}
                          </Text>
                          <ActionIcon 
@@ -1252,7 +1183,7 @@ export default function Catalog() {
                            size="sm" 
                            radius="xl" 
                            onClick={() => updateQuantity(idx, 1)}
-                           style={{ color: '#64748b', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
+                           className="text-slate-500 shadow-sm"
                          >
                            <Text size="xs" fw={900}>+</Text>
                          </ActionIcon>
@@ -1268,10 +1199,10 @@ export default function Catalog() {
             </ScrollArea>
             
             {/* Footer fijo del carrito - siempre visible al final del drawer */}
-            <Box py="xl" px="md" style={{ borderTop: '1px solid #eee', backgroundColor: '#fff', flexShrink: 0, boxShadow: '0 -10px 20px rgba(0,0,0,0.02)' }}>
+            <Box py="xl" px="md" className="catalog-cart-drawer-footer">
                <Group justify="space-between" mb="xs">
                  <Text fw={700}>Total a Pagar:</Text>
-                 <Text fw={900} size="xl" color="var(--primary-color)">
+                 <Text fw={900} size="xl" className="text-store-primary">
                    $ {formatPrice(cart.reduce((acc, item) => {
                       const basePrice = item.product.price;
                       const extrasPrice = item.selectedModifiers.reduce((sum, g) => sum + g.options.reduce((s, o) => s + o.price, 0), 0);
@@ -1480,30 +1411,7 @@ export default function Catalog() {
         showObservations={store.showObservations}
       />
 
-      {/* Global CSS for System Design and Color Mapping */}
-      <style>{`
-        :root {
-          --primary-color: ${store.primaryColor || '#0ea5e9'};
-          --secondary-color: ${store.secondaryColor || '#6366f1'};
-          --bg-color: ${store.bgColor || '#F8F9FA'};
-          --bg-card: #ffffff;
-          --text-color: ${store.textColor || '#1e293b'};
-          --icon-color: ${store.iconColor || '#64748b'};
-          --font-family: ${store.fontFamily || 'Inter'};
-        }
-
-        .cart-button { transition: transform 0.2s; }
-        .cart-button:hover { transform: scale(1.05); }
-        .product-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
-        .product-card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
-        
-        /* Aplicar la fuente a todo incluyendo modales Mantine */
-        .mantine-Modal-body, .mantine-Drawer-body, .mantine-Modal-title, .mantine-Drawer-title,
-        .mantine-Button-label, .mantine-Text-root, .mantine-Title-root {
-          font-family: var(--font-family), sans-serif !important;
-        }
-      `}</style>
-    </Box>
+    </StoreThemeRoot>
   );
 }
 
@@ -1558,18 +1466,18 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMob
       className="product-card"
       style={getCardStyle()}
     >
-      <Box style={{ 
-        width: styleType === 'horizontal' ? (isMobile ? '110px' : '180px') : '100%', 
-        position: 'relative',
-        height: styleType === 'horizontal' ? 'auto' : (isMobile ? '180px' : '260px'),
-        minHeight: styleType === 'horizontal' ? (isMobile ? '110px' : '180px') : 'auto',
-        overflow: 'hidden',
-        flexShrink: 0
-      }}>
+      <Box
+        className={cn(
+          'relative shrink-0 overflow-hidden',
+          styleType === 'horizontal'
+            ? cn(isMobile ? 'min-h-[110px] w-[110px]' : 'min-h-[180px] w-[180px]')
+            : cn('w-full', isMobile ? 'h-[180px]' : 'h-[260px]'),
+        )}
+      >
         <img 
           src={product.imageUrl ? fixUrl(product.imageUrl) : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600'} 
           alt={product.name}
-          style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', backgroundColor: '#f1f5f9' }}
+          className="block h-full w-full bg-slate-100 object-contain"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.onerror = null; // Previene bucle infinito si placehold falla
@@ -1577,20 +1485,20 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMob
           }}
         />
         {isOut && (
-          <Badge variant="filled" color="red" style={{ position: 'absolute', top: 10, right: 10, fontSize: '10px' }}>AGOTADO</Badge>
+          <Badge variant="filled" color="red" className="absolute right-2.5 top-2.5 text-[10px]">AGOTADO</Badge>
         )}
         {product.isBundle && (
-          <Badge variant="filled" color="green" style={{ position: 'absolute', top: 10, left: 10, fontSize: '10px' }}>PROMO</Badge>
+          <Badge variant="filled" color="green" className="absolute left-2.5 top-2.5 text-[10px]">PROMO</Badge>
         )}
       </Box>
 
-      <Stack p={styleType === 'horizontal' ? 'md' : 'xl'} gap="sm" style={{ flex: 1, justifyContent: 'space-between' }}>
+      <Stack p={styleType === 'horizontal' ? 'md' : 'xl'} gap="sm" className="flex flex-1 flex-col justify-between">
         <Box>
           <Group gap="sm" align="center" mb={4}>
-            <Title order={3} size="1.1rem" style={{ fontFamily: 'inherit', lineHeight: 1.2, color: 'var(--text-color)' }}>{product.name}</Title>
-            <Text fw={900} size="md" color="var(--primary-color)" style={{ backgroundColor: 'color-mix(in srgb, var(--primary-color) 10%, transparent)', padding: '2px 8px', borderRadius: '6px' }}>${formatPrice(product.price)}</Text>
+            <Title order={3} size="1.1rem" className="leading-tight text-store">{product.name}</Title>
+            <Text fw={900} size="md" className="rounded-md bg-store-price-muted px-2 py-0.5 text-store-primary">${formatPrice(product.price)}</Text>
           </Group>
-          <Text size="xs" color="dimmed" lineClamp={2} style={{ fontFamily: 'inherit' }}>
+          <Text size="xs" color="dimmed" lineClamp={2}>
             {product.description || 'Calidad superior garantizada en cada detalle de este producto.'}
           </Text>
           {product.notes && product.notes.length > 0 && (
@@ -1603,7 +1511,7 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMob
                   size="sm" 
                   radius="xl"
                   styles={{ label: { textTransform: 'uppercase', fontSize: '9px', fontWeight: 700 } }}
-                  leftSection={<Box style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#f59e0b' }} />}
+                  leftSection={<Box className="h-1.5 w-1.5 rounded-full bg-amber-500" />}
                 >
                   {note}
                 </Badge>
@@ -1751,7 +1659,7 @@ function ProductSelectionModal({ product, onClose, onAdd, isMobile, showObservat
           const selectedForGroup = selectedMods[group.id] || [];
           
           return (
-            <Box key={group.id} p="md" style={{ background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+            <Box key={group.id} p="md" className="admin-form-section">
               <Group justify="space-between" mb="xs">
                  <Box>
                     <Text fw={700} size="sm" color="var(--text-color)">{group.name}</Text>

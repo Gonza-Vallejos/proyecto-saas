@@ -18,7 +18,6 @@ model User {
   // Relaciones
   storeId   String?  // Opcional porque un superadmin no pertenece a 'una' tienda
   store     Store?   @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  orders    Order[]  // Relación con los pedidos tomados (si es mozo)
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -73,7 +72,6 @@ model Store {
   products     Product[]
   categories   Category[]
   modifierGroups ModifierGroup[]
-  tables       Table[]
   orders       Order[]
   
   createdAt    DateTime @default(now())
@@ -191,21 +189,6 @@ model ProductModifierGroup {
   @@id([productId, modifierGroupId])
 }
 
-model Table {
-  id        String   @id @default(uuid())
-  number    String   // Ej: "Mesa 1", "Barra", "VIP"
-  capacity  Int      @default(2)
-  isActive  Boolean  @default(true)
-  
-  // Relaciones
-  storeId   String
-  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  orders    Order[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 model Order {
   id           String      @id @default(uuid())
   status       String      @default("PENDING") // PENDING, PREPARING, READY, DELIVERED, PAID, CANCELLED
@@ -213,17 +196,12 @@ model Order {
   total        Float       @default(0)
   observations String?
   
-  // Relaciones
-  tableId      String?
-  table        Table?      @relation(fields: [tableId], references: [id])
-  waiterId     String?     // Usuario que tomó el pedido
-  waiter       User?       @relation(fields: [waiterId], references: [id])
   storeId      String
   
-  // Datos del Cliente (para pedidos externos/WhatsApp)
+  // Datos del Cliente (para pedidos externos/WhatsApp/POS)
   customerName  String?
   customerPhone String?
-  origin        String      @default("TABLE") // TABLE, WHATSAPP
+  origin        String      @default("POS") // POS, WHATSAPP, CATALOG
   store        Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
   items        OrderItem[]
 

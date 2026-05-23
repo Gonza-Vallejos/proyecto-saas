@@ -6,39 +6,33 @@ export default function NotFound() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Intentar extraer el slug de la tienda si estamos en una ruta de tienda
   const pathParts = location.pathname.split('/');
   const sIndex = pathParts.indexOf('s');
   const storeSlug = sIndex !== -1 && pathParts[sIndex + 1] ? pathParts[sIndex + 1] : null;
 
   return (
-    <Container style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <Container className="flex h-screen items-center justify-center">
       <Stack align="center" gap="xl">
-        <Box style={{ textAlign: 'center', position: 'relative' }}>
-          <Title 
-            style={{ 
-              fontSize: 'min(150px, 20vw)', 
-              fontWeight: 900, 
-              lineHeight: 1, 
-              marginBottom: '-30px', 
-              opacity: 0.05,
-              userSelect: 'none'
-            }}
+        <Box className="relative text-center">
+          <Title
+            className="mb-[-30px] select-none text-[min(150px,20vw)] font-black leading-none opacity-5"
           >
             404
           </Title>
-          <Title order={1} size="h1" style={{ fontSize: 'min(2.5rem, 8vw)' }}>Página no encontrada</Title>
+          <Title order={1} size="h1" className="text-[min(2.5rem,8vw)]">
+            Página no encontrada
+          </Title>
         </Box>
 
-        <Text color="dimmed" size="lg" ta="center" maw={500}>
+        <Text c="dimmed" size="lg" ta="center" maw={500}>
           Lo sentimos, el enlace al que intentas acceder no existe o fue movido temporalmente.
         </Text>
 
         <Group gap="md">
           {storeSlug ? (
-            <Button 
-              size="lg" 
-              radius="xl" 
+            <Button
+              size="lg"
+              radius="xl"
               leftSection={<Store size={20} />}
               onClick={() => navigate(`/s/${storeSlug}`)}
               variant="filled"
@@ -47,9 +41,9 @@ export default function NotFound() {
               Volver a la Tienda
             </Button>
           ) : (
-            <Button 
-              size="lg" 
-              radius="xl" 
+            <Button
+              size="lg"
+              radius="xl"
               leftSection={<Home size={20} />}
               onClick={() => navigate('/')}
               variant="filled"
@@ -58,11 +52,11 @@ export default function NotFound() {
               Ir al Inicio
             </Button>
           )}
-          
-          <Button 
-            size="lg" 
-            radius="xl" 
-            variant="light" 
+
+          <Button
+            size="lg"
+            radius="xl"
+            variant="light"
             onClick={() => navigate(-1)}
           >
             Regresar

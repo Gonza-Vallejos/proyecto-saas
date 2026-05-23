@@ -140,7 +140,7 @@ export default function Modifiers() {
   if (loading) return <div className="loader-container">Cargando Modificadores...</div>;
 
   return (
-    <div style={{ animation: 'fadeUp 0.5s ease-out' }}>
+    <div className="admin-page">
       <Group justify="space-between" mb="3rem">
         <div>
           <Title order={1}>Experiencias Gastronómicas</Title>
@@ -153,19 +153,19 @@ export default function Modifiers() {
 
       <Card withBorder radius="md" p={0} shadow="sm">
         <Table verticalSpacing="md" highlightOnHover>
-          <Table.Thead style={{ background: '#f8fafc' }}>
+          <Table.Thead className="bg-slate-50">
             <Table.Tr>
-              <Table.Th style={{ paddingLeft: '1.5rem' }}>Nombre del Grupo</Table.Th>
+              <Table.Th className="!pl-6">Nombre del Grupo</Table.Th>
               <Table.Th>Opciones</Table.Th>
               <Table.Th>Reglas</Table.Th>
-              <Table.Th style={{ textAlign: 'center' }}>Acciones</Table.Th>
+              <Table.Th className="text-center">Acciones</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
             {modifiers.length === 0 ? (
               <Table.Tr>
-                <Table.Td colSpan={4} align="center" style={{ padding: '2rem' }}>
-                  <Sandwich size={40} color="#cbd5e1" style={{ marginBottom: '1rem' }} />
+                <Table.Td colSpan={4} align="center" className="py-8">
+                  <Sandwich size={40} color="#cbd5e1" className="mx-auto mb-4 block" />
                   <Text color="dimmed">No tienes grupos de personalización.</Text>
                   <Button variant="light" mt="sm" onClick={openAddModal}>Añadir el primero</Button>
                 </Table.Td>
@@ -173,7 +173,7 @@ export default function Modifiers() {
             ) : (
               modifiers.map(mod => (
                 <Table.Tr key={mod.id}>
-                  <Table.Td style={{ paddingLeft: '1.5rem', fontWeight: 600 }}>{mod.name}</Table.Td>
+                  <Table.Td className="!pl-6 font-semibold">{mod.name}</Table.Td>
                   <Table.Td>
                     <Group gap={5}>
                       {mod.options.map((opt, i) => (
@@ -189,7 +189,7 @@ export default function Modifiers() {
                       <Text size="xs" color="dimmed">Mín: {mod.minSelected} / Máx: {mod.maxSelected}</Text>
                     </Stack>
                   </Table.Td>
-                  <Table.Td style={{ textAlign: 'center' }}>
+                  <Table.Td className="text-center">
                     <Group justify="center" gap="sm">
                       <ActionIcon variant="light" color="blue" onClick={() => openEditModal(mod)}>
                         <Edit3 size={18} />
@@ -224,9 +224,9 @@ export default function Modifiers() {
             <Stack gap="xs">
               {options.map((opt, idx) => (
                 <Group key={idx} grow align="flex-end">
-                  <TextInput style={{ flex: 2 }} label={idx === 0 ? "Nombre" : ""} placeholder="Ej: Mayonesa" value={opt.name} onChange={e => handleUpdateOption(idx, 'name', e.target.value)} />
-                  <NumberInput style={{ flex: 1 }} label={idx === 0 ? "Costo Adicional ($)" : ""} value={opt.price} onChange={v => handleUpdateOption(idx, 'price', Number(v) || 0)} min={0} />
-                  <ActionIcon color="red" variant="subtle" size="lg" mb="4px" style={{ flex: 0 }} onClick={() => handleRemoveOption(idx)} disabled={options.length === 1}>
+                  <TextInput className="flex-[2]" label={idx === 0 ? "Nombre" : ""} placeholder="Ej: Mayonesa" value={opt.name} onChange={e => handleUpdateOption(idx, 'name', e.target.value)} />
+                  <NumberInput className="flex-1" label={idx === 0 ? "Costo Adicional ($)" : ""} value={opt.price} onChange={v => handleUpdateOption(idx, 'price', Number(v) || 0)} min={0} />
+                  <ActionIcon color="red" variant="subtle" size="lg" mb="4px" className="shrink-0" onClick={() => handleRemoveOption(idx)} disabled={options.length === 1}>
                     <Trash2 size={18} />
                   </ActionIcon>
                 </Group>

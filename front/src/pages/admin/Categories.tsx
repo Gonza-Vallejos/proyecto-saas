@@ -102,7 +102,7 @@ export default function Categories() {
   };
 
   if (loading) return (
-    <Center style={{ height: '60vh' }}>
+    <Center className="h-[60vh]">
       <Stack align="center">
         <Loader size="lg" />
         <Text color="dimmed">Cargando tus categorías...</Text>
@@ -117,7 +117,7 @@ export default function Categories() {
     .map(c => ({ value: c.id, label: c.name }));
 
   return (
-    <Box style={{ maxWidth: '800px', animation: 'fadeUp 0.5s ease-out' }}>
+    <Box className="admin-page mx-auto max-w-[800px]">
       <Group justify="space-between" mb="2.5rem" align="flex-end">
         <div>
           <Group gap="xs" mb={4}>
@@ -147,7 +147,7 @@ export default function Categories() {
                 placeholder="Ej. Hamburguesas, Cervezas, Entradas..."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                style={{ flex: 1 }}
+                className="flex-1"
                 required
                 size="md"
                 radius="md"
@@ -158,7 +158,7 @@ export default function Categories() {
                 data={potentialParents}
                 value={parentId}
                 onChange={(val) => setParentId(val)}
-                style={{ flex: 1 }}
+                className="flex-1"
                 clearable
                 size="md"
                 radius="md"
@@ -195,20 +195,20 @@ export default function Categories() {
       </Card>
 
       {/* Tabla de Resultados */}
-      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+      <div className="admin-table-shell">
+        <table className="admin-table">
+          <thead className="admin-table-head">
             <tr>
-              <th style={thStyle}>Nombre de Categoría</th>
-              <th style={thStyle}>Tipo</th>
-              <th style={{ ...thStyle, textAlign: 'center' }}>Acciones</th>
+              <th className="admin-th">Nombre de Categoría</th>
+              <th className="admin-th">Tipo</th>
+              <th className="admin-th text-center">Acciones</th>
             </tr>
           </thead>
           <tbody>
             {categories.length === 0 ? (
               <tr>
-                <td colSpan={3} style={{ padding: '3rem', textAlign: 'center' }}>
-                  <Center style={{ flexDirection: 'column', gap: '1rem' }}>
+                <td colSpan={3} className="py-12 text-center">
+                  <Center className="flex flex-col gap-4">
                     <AlertCircle size={32} color="#94a3b8" />
                     <Text color="dimmed">No tienes categorías creadas todavía.</Text>
                   </Center>
@@ -218,14 +218,14 @@ export default function Categories() {
               // Mostrar primero padres, luego sus hijos
               [...categories.filter(c => !c.parentId)].map(parent => (
                 <Fragment key={parent.id}>
-                  <tr style={{ borderBottom: '1px solid #f1f5f9', background: editingId === parent.id ? '#f0f9ff' : '#fcfcfc' }}>
-                    <td style={tdStyle}>
+                  <tr className={`border-b border-slate-100 ${editingId === parent.id ? 'bg-sky-50' : 'bg-[#fcfcfc]'}`}>
+                    <td className="admin-td">
                       <Text fw={700} color="#0f172a">{parent.name}</Text>
                     </td>
-                    <td style={tdStyle}>
+                    <td className="admin-td">
                        <Badge color="blue" variant="light" radius="sm">Principal</Badge>
                     </td>
-                    <td style={{ ...tdStyle, textAlign: 'center' }}>
+                    <td className="admin-td text-center">
                       <Group gap="xs" justify="center">
                         <ActionIcon 
                           variant="subtle" 
@@ -247,17 +247,17 @@ export default function Categories() {
                     </td>
                   </tr>
                   {categories.filter(c => c.parentId === parent.id).map(child => (
-                    <tr key={child.id} style={{ borderBottom: '1px solid #f1f5f9', background: editingId === child.id ? '#f0f9ff' : undefined }}>
-                      <td style={{ ...tdStyle, paddingLeft: '3rem' }}>
+                    <tr key={child.id} className={`border-b border-slate-100 ${editingId === child.id ? 'bg-sky-50' : ''}`}>
+                      <td className="admin-td pl-12">
                         <Group gap="xs">
                           <ChevronRight size={14} color="#94a3b8" />
                           <Text fw={500} color="#475569">{child.name}</Text>
                         </Group>
                       </td>
-                      <td style={tdStyle}>
+                      <td className="admin-td">
                          <Badge color="gray" variant="outline" radius="sm">Subcategoría</Badge>
                       </td>
-                      <td style={{ ...tdStyle, textAlign: 'center' }}>
+                      <td className="admin-td text-center">
                         <Group gap="xs" justify="center">
                           <ActionIcon 
                             variant="subtle" 
@@ -288,6 +288,3 @@ export default function Categories() {
     </Box>
   );
 }
-
-const thStyle = { padding: '1.25rem 1.5rem', color: '#475569', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase' as const, textAlign: 'left' as const };
-const tdStyle = { padding: '1rem 1.5rem', verticalAlign: 'middle' };

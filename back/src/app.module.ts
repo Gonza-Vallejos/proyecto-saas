@@ -11,7 +11,6 @@ import { StoresModule } from './stores/stores.module';
 import { ProductsModule } from './products/products.module';
 import { ModifiersModule } from './modifiers/modifiers.module';
 import { CategoriesModule } from './categories/categories.module';
-import { TablesModule } from './tables/tables.module';
 import { OrdersModule } from './orders/orders.module';
 import { UsersModule } from './users/users.module';
 import { UploadsController } from './uploads/uploads.controller';
@@ -38,7 +37,6 @@ import { MercadoPagoModule } from './mercado-pago/mercado-pago.module';
     ProductsModule, 
     CategoriesModule,
     ModifiersModule,
-    TablesModule,
     OrdersModule,
     UsersModule,
     EventsModule,

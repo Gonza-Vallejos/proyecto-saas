@@ -114,7 +114,7 @@ export default function QRGenerator() {
   const qrLogoUrl = fixUrl(store.logoUrl);
 
   return (
-    <div style={{ animation: 'fadeUp 0.5s ease-out' }}>
+    <div className="admin-page">
       <Group justify="space-between" mb="2.5rem">
         <div>
           <Title order={2}>Código QR de tu Tienda</Title>
@@ -128,7 +128,7 @@ export default function QRGenerator() {
           <Card withBorder radius="md" p="xl" shadow="sm">
             <Group mb="lg" justify="space-between">
               <Group>
-                <Box bg="blue.0" p="xs" style={{ borderRadius: '8px' }}>
+                <Box bg="blue.0" p="xs" className="rounded-lg">
                   <QrCode size={20} color="#0ea5e9" />
                 </Box>
                 <Title order={4}>Catálogo Público</Title>
@@ -188,7 +188,7 @@ export default function QRGenerator() {
             <Card withBorder radius="md" p="xl" shadow="sm">
               <Group mb="lg" justify="space-between">
                 <Group>
-                  <Box bg="cyan.0" p="xs" style={{ borderRadius: '8px' }}>
+                  <Box bg="cyan.0" p="xs" className="rounded-lg">
                     <Wifi size={20} color="#06b6d4" />
                   </Box>
                   <Title order={4}>Acceso WiFi para Clientes</Title>
@@ -223,9 +223,9 @@ export default function QRGenerator() {
                 <Divider my="sm" variant="dashed" label="Vista Previa y Descarga" labelPosition="center" />
                 
                 {wifiSSID && wifiPassword ? (
-                  <Box p="md" style={{ backgroundColor: '#f0f9ff', borderRadius: '12px', border: '1px solid #e0f2fe' }}>
+                  <Box p="md" className="rounded-xl border border-sky-100 bg-sky-50">
                     <Stack align="center" gap="sm">
-                      <Box p="sm" bg="white" style={{ borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
+                      <Box p="sm" bg="white" className="rounded-lg shadow-md">
                         <QRCodeCanvas 
                           id="wifi-qr-canvas"
                           value={`WIFI:S:${wifiSSID};T:WPA;P:${wifiPassword};;`}
@@ -257,13 +257,13 @@ export default function QRGenerator() {
         </Stack>
 
         <Stack gap="md">
-          <Card withBorder radius="md" p="xl" shadow="sm" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '400px', backgroundColor: '#f8fafc' }}>
-            <Paper shadow="xl" p="md" radius="lg" style={{ background: 'white' }}>
-              <div ref={qrRef} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <Card withBorder radius="md" p="xl" shadow="sm" className="flex min-h-[400px] flex-col items-center justify-center bg-slate-50">
+            <Paper shadow="xl" p="md" radius="lg" className="bg-white">
+              <div ref={qrRef} className="flex items-center justify-center">
                 <QRCodeCanvas
                   value={storeUrl}
                   size={300} // Fijo en UI para que no rompa el diseño, pero al render en canvas le pasamos otro o solo escala en CSS
-                  style={{ height: 'auto', maxWidth: '100%', width: '100%' }} // responsiveness visual
+                  className="h-auto w-full max-w-full"
                   bgColor={bgColor}
                   fgColor={fgColor}
                   level="H" // Corrección de error alta para que soporte el logo en el medio
@@ -282,7 +282,7 @@ export default function QRGenerator() {
                   }
                 />
                 {/* Generador oculto con la resolucion completa para descargas */}
-                <div style={{ display: 'none' }}>
+                <div className="hidden">
                   <QRCodeCanvas
                     value={storeUrl}
                     size={qrSize}

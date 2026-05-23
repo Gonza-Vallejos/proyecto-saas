@@ -181,7 +181,7 @@ export default function Settings() {
   if (loading) return <div className="loader-container">Cargando configuración maestra...</div>;
 
   return (
-    <div style={{ animation: 'fadeUp 0.5s ease-out' }}>
+    <div className="admin-page">
       <Group justify="space-between" mb="2.5rem">
         <div>
           <Title order={2}>Configuración General</Title>
@@ -195,7 +195,7 @@ export default function Settings() {
           <Card withBorder radius="md" p="xl" shadow="sm">
             <Group mb="lg" justify="space-between">
               <Group>
-                <Box bg="blue.0" p="xs" style={{ borderRadius: '8px' }}>
+                <Box bg="blue.0" p="xs" className="rounded-lg">
                   <SettingsIcon size={20} color="#0ea5e9" />
                 </Box>
                 <Title order={4}>Información de la Tienda</Title>
@@ -238,7 +238,7 @@ export default function Settings() {
           <Card withBorder radius="md" p="xl" shadow="sm">
             <Group mb="lg" justify="space-between">
               <Group>
-                <Box bg="orange.0" p="xs" style={{ borderRadius: '8px' }}>
+                <Box bg="orange.0" p="xs" className="rounded-lg">
                   <Clock size={20} color="#f59e0b" />
                 </Box>
                 <Title order={4}>Horarios de Atención</Title>
@@ -263,8 +263,8 @@ export default function Settings() {
 
             <Stack gap="xs">
               {Object.entries(businessHours).map(([day, config]: [string, any]) => (
-                <Group key={day} justify="space-between" p="xs" style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <Group gap="md" style={{ width: '120px' }}>
+                <Group key={day} justify="space-between" className="admin-row-divider">
+                  <Group gap="md" className="admin-day-label">
                     <Switch 
                       checked={config.isOpen} 
                       onChange={(e) => setBusinessHours({
@@ -285,7 +285,7 @@ export default function Settings() {
                           ...businessHours,
                           [day]: { ...config, open: e.target.value }
                         })}
-                        style={{ width: '100px' }}
+                        className="admin-time-input"
                       />
                       <Text size="xs" color="dimmed">a</Text>
                       <TextInput 
@@ -296,7 +296,7 @@ export default function Settings() {
                           ...businessHours,
                           [day]: { ...config, close: e.target.value }
                         })}
-                        style={{ width: '100px' }}
+                        className="admin-time-input"
                       />
                     </Group>
                   ) : (
@@ -313,7 +313,7 @@ export default function Settings() {
           <Card withBorder radius="md" p="xl" shadow="sm">
             <Group mb="lg" justify="space-between">
               <Group>
-                <Box bg="green.0" p="xs" style={{ borderRadius: '8px' }}>
+                <Box bg="green.0" p="xs" className="rounded-lg">
                   <UserIcon size={20} color="#10b981" />
                 </Box>
                 <Title order={4}>Mi Cuenta (Dueño)</Title>
@@ -356,7 +356,7 @@ export default function Settings() {
             <Card withBorder radius="md" p="xl" shadow="sm">
               <Group mb="lg" justify="space-between">
                 <Group>
-                  <Box bg="blue.0" p="xs" style={{ borderRadius: '8px' }}>
+                  <Box bg="blue.0" p="xs" className="rounded-lg">
                     <CreditCard size={20} color="#3b82f6" />
                   </Box>
                   <Title order={4}>Integración Mercado Pago</Title>
@@ -368,7 +368,7 @@ export default function Settings() {
                   Vincula tu cuenta de Mercado Pago de forma segura (OAuth) para recibir el dinero de tus ventas online y en mostrador directamente en tu cuenta.
                 </Text>
                 
-                <Paper withBorder p="md" radius="md" style={{ background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Paper withBorder p="md" radius="md" className="admin-panel-muted">
                   <div>
                     <Text fw={700}>Estado de Vinculación</Text>
                     {isMercadoPagoLinked ? (
@@ -387,7 +387,7 @@ export default function Settings() {
                 </Paper>
 
                 {isMercadoPagoLinked && (
-                  <Paper withBorder p="md" radius="md" style={{ background: '#f8fafc' }}>
+                  <Paper withBorder p="md" radius="md" className="bg-slate-50">
                     <Switch
                       label="Permitir cobrar online en el catálogo"
                       description="Si se desactiva, los clientes podrán ver tus productos y enviar pedidos por WhatsApp, pero no podrán pagarlos online directamente desde la web."

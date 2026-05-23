@@ -6,6 +6,7 @@ import MobilePreview from '../../components/MobilePreview';
 import FileUploader from '../../components/FileUploader';
 import { api } from '../../utils/api';
 import Swal from 'sweetalert2';
+import { cn } from '../../lib/cn';
 
 const GOOGLE_FONTS = [
   { value: 'Inter', label: 'Inter (Moderna y Limpia)' },
@@ -168,7 +169,7 @@ export default function Appearance() {
   if (loading) return <div className="loader-container">Cargando estudio de diseño...</div>;
 
   return (
-    <div style={{ animation: 'fadeUp 0.5s ease-out' }}>
+    <div className="admin-page">
       <Group justify="space-between" mb="2.5rem">
         <div>
           <Title order={2}>Personalización Visual</Title>
@@ -185,18 +186,13 @@ export default function Appearance() {
         </Button>
       </Group>
 
-      <Box style={{ 
-        position: 'relative', 
-        paddingRight: isMobile ? '0' : '400px',
-        display: isMobile ? 'flex' : 'block',
-        flexDirection: isMobile ? 'column-reverse' : 'row'
-      } as any}>
+      <Box className={cn('relative', isMobile ? 'flex flex-col-reverse' : 'block pr-[400px]')}>
         <Box>
           <Stack gap="xl">
           {/* SECCION PRESETS */}
           <Card withBorder radius="md" p="xl" shadow="sm">
             <Group mb="lg">
-              <Box bg="teal.0" p="xs" style={{ borderRadius: '8px' }}>
+              <Box bg="teal.0" p="xs" className="rounded-lg">
                 <Palette size={20} color="#0d9488" />
               </Box>
               <Title order={4}>Estilos Prediseñados (Themes)</Title>
@@ -215,7 +211,7 @@ export default function Appearance() {
           {/* SECCION 1: IDENTIDAD DE MARCA */}
           <Card withBorder radius="md" p="xl" shadow="sm">
             <Group mb="lg">
-              <Box bg="blue.0" p="xs" style={{ borderRadius: '8px' }}>
+              <Box bg="blue.0" p="xs" className="rounded-lg">
                 <ImageIcon size={20} color="#0ea5e9" />
               </Box>
               <Title order={4}>Identidad de Marca</Title>
@@ -247,7 +243,7 @@ export default function Appearance() {
           {/* SECCION 2: COLORES Y CARDS */}
           <Card withBorder radius="md" p="xl" shadow="sm">
             <Group mb="lg">
-              <Box bg="violet.0" p="xs" style={{ borderRadius: '8px' }}>
+              <Box bg="violet.0" p="xs" className="rounded-lg">
                 <Palette size={20} color="#8b5cf6" />
               </Box>
               <Title order={4}>Paleta de Colores y Estilos</Title>
@@ -270,7 +266,7 @@ export default function Appearance() {
               </Group>
 
               {/* Visual guidance for color mapping */}
-              <Box p="md" style={{ backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+              <Box p="md" className="admin-form-section">
                 <Text size="xs" fw={700} mb="xs" color="gray.7">Guía de Aplicación:</Text>
                 <Group gap="xl">
                   <Stack gap={4}>
@@ -334,17 +330,16 @@ export default function Appearance() {
           </Stack>
         </Box>
 
-        <Box style={{ 
-          position: isMobile ? 'relative' : 'fixed', 
-          top: isMobile ? '0' : '160px', 
-          right: isMobile ? 'auto' : '40px',
-          zIndex: isMobile ? 1 : 100,
-          margin: isMobile ? '2rem auto' : '0',
-          width: isMobile ? '100%' : '340px'
-        } as any}>
+        <Box
+          className={cn(
+            isMobile
+              ? 'relative z-[1] mx-auto my-8 w-full'
+              : 'fixed right-10 top-40 z-[100] w-[340px]',
+          )}
+        >
           {/* Simulador Móvil */}
-          <Stack align="center" gap="md" style={{ transform: 'scale(0.8)', transformOrigin: 'top center' }}>
-            <Text fw={700} size="sm" color="dimmed" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Stack align="center" gap="md" className="origin-top scale-[0.8]">
+            <Text fw={700} size="sm" color="dimmed" className="flex items-center gap-2">
               <Smartphone size={16} /> Previsualización en Tiempo Real
             </Text>
             <MobilePreview 

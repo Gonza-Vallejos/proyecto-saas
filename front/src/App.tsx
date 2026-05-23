@@ -9,13 +9,10 @@ import StoreManagement from './pages/admin/StoreManagement';
 import Appearance from './pages/admin/Appearance';
 import QRGenerator from './pages/admin/QRGenerator';
 import Modifiers from './pages/admin/Modifiers';
-import TablesManager from './pages/admin/TablesManager';
-import KitchenDashboard from './pages/admin/KitchenDashboard';
 import WhatsAppOrders from './pages/admin/WhatsAppOrders';
 import OrderHistory from './pages/admin/OrderHistory';
 import StaffManagement from './pages/admin/StaffManagement';
 import PointOfSale from './pages/admin/PointOfSale';
-import WaiterView from './pages/WaiterView';
 import Register from './pages/Register';
 import NotFound from './pages/NotFound';
 
@@ -82,8 +79,6 @@ function App() {
           <Route path="settings" element={<Settings />} />
           <Route path="qr" element={<QRGenerator />} />
           <Route path="modifiers" element={<Modifiers />} />
-          <Route path="tables" element={<TablesManager />} />
-          <Route path="kitchen" element={<KitchenDashboard />} />
           <Route path="orders-online" element={<WhatsAppOrders />} />
           <Route path="orders-history" element={<OrderHistory />} />
           <Route path="staff" element={<StaffManagement />} />
@@ -92,8 +87,6 @@ function App() {
 
         {/* Redirección inteligente de /admin */}
         <Route path="/admin" element={<Navigate to={`/admin/${localStorage.getItem('last_active_slug') || 'login'}`} replace />} />
-
-        <Route path="/waiter" element={<WaiterView />} />
 
         {/* Fallback general */}
         <Route path="*" element={<NotFound />} />
