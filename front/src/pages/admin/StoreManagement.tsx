@@ -53,6 +53,14 @@ export default function StoreManagement() {
 
   const handleCreate = async (values: any) => {
     try {
+      if (!values.ownerPassword || String(values.ownerPassword).trim().length < 6) {
+        Swal.fire('Error', 'La contraseña del dueño debe tener al menos 6 caracteres.', 'error');
+        return;
+      }
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(values.slug)) {
+        Swal.fire('Error', 'El slug solo puede tener minúsculas, números y guiones (ej: mi-tienda).', 'error');
+        return;
+      }
       await api.post('/stores', values);
       setShowAddModal(false);
       fetchStores();
@@ -451,15 +459,23 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
         <Group justify="flex-end" mt="md">
           <Button variant="light" color="gray" onClick={onClose}>Cancelar</Button>
           <Button onClick={() => {
+            const normalizedSlug = slug.trim().toLowerCase().replace(/\s+/g, '-');
             const payload: any = { 
-              name, slug, ownerName, ownerEmail,
+              name: name.trim(), slug: normalizedSlug, ownerName: ownerName.trim(), ownerEmail: ownerEmail.trim(),
               businessType, hasStockControl, hasPayments, hasCart, 
               isCatalogOnly, hasModifiers, showObservations,
               hasConnectivity, hasOrderManagement, hasWhatsAppOrders,
               hasPOS, hasMercadoPago
             };
-            // Solo enviar la contraseña si tiene contenido
-            if (ownerPassword && ownerPassword.trim().length > 0) {
+            if (store) {
+              if (ownerPassword && ownerPassword.trim().length > 0) {
+                if (ownerPassword.trim().length < 6) {
+                  Swal.fire('Error', 'La contraseña debe tener al menos 6 caracteres.', 'error');
+                  return;
+                }
+                payload.ownerPassword = ownerPassword;
+              }
+            } else {
               payload.ownerPassword = ownerPassword;
             }
             onSubmit(payload);

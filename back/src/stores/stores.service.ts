@@ -183,7 +183,15 @@ export class StoresService {
     const store = await this.prisma.store.findUnique({ where: { id } });
     if (!store) throw new BadRequestException('Tienda no encontrada');
 
-    await this.prisma.store.delete({ where: { id } });
+    // Los OrderItem referencian Product sin onDelete; hay que borrar pedidos antes que productos
+    await this.prisma.$transaction(async (tx) => {
+      await tx.orderItem.deleteMany({
+        where: { order: { storeId: id } },
+      });
+      await tx.order.deleteMany({ where: { storeId: id } });
+      await tx.store.delete({ where: { id } });
+    });
+
     return { message: `Tienda "${store.name}" eliminada correctamente junto con todos sus datos.` };
   }
 

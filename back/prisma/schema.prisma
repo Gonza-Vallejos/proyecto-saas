@@ -92,7 +92,7 @@ model Category {
 
   // Relación para subcategorías
   parentId  String?
-  parent    Category?  @relation("SubCategories", fields: [parentId], references: [id])
+  parent    Category?  @relation("SubCategories", fields: [parentId], references: [id], onDelete: Cascade)
   children  Category[] @relation("SubCategories")
   
   createdAt DateTime  @default(now())
@@ -211,8 +211,8 @@ model Order {
 
 model OrderItem {
   id              String   @id @default(uuid())
-  productId       String
-  product         Product  @relation(fields: [productId], references: [id])
+  productId       String?
+  product         Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
   quantity        Int
   priceAtTime     Float    // Precio al momento de la compra
   observations    String?
