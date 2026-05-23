@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Title, Text, Button, Card, Group, Stack, Table, ActionIcon, Tooltip, Modal, TextInput, PasswordInput, Select, Badge, Box, SimpleGrid, Paper } from '@mantine/core';
-import { Plus, Trash2, User, ShieldCheck } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { api } from '../../utils/api';
-import { useOutletContext } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 interface StaffUser {
@@ -13,7 +12,6 @@ interface StaffUser {
 }
 
 export default function StaffManagement() {
-  const { storeData } = useOutletContext<{ storeData: any }>();
   const [staff, setStaff] = useState<StaffUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpened, setModalOpened] = useState(false);
