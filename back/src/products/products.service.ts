@@ -139,14 +139,33 @@ export class ProductsService {
     }
   }
 
+  async searchByName(storeId: string, term: string) {
+    return this.prisma.product.findMany({
+      where: {
+        storeId,
+        name: { contains: term, mode: 'insensitive' },
+      },
+      include: {
+        category: true,
+        modifierGroups: {
+          include: { modifierGroup: true }
+        },
+        bundleItems: {
+          include: { product: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
+
   async findByBarcode(storeId: string, barcode: string) {
     const product = await this.prisma.product.findUnique({
       where: {
         storeId_barcode: {
           storeId,
-          barcode
-        }
-      }
+          barcode,
+        },
+      },
     });
 
     if (!product) throw new NotFoundException('Producto no encontrado con ese código');

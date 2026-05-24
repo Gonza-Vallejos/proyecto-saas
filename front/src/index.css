@@ -582,6 +582,10 @@ body {
 
   .catalog-nav-scroll {
     @apply flex flex-nowrap gap-2 overflow-x-auto px-4 py-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden;
+    scroll-snap-type: x mandatory;
+  }
+  .catalog-nav-scroll > * {
+    scroll-snap-align: start;
   }
 
   .catalog-subnav-bar {

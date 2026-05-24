@@ -21,6 +21,13 @@ export class ProductsController {
     return this.productsService.findAllForAdmin(req.user.storeId);
   }
 
+  @Get('search/:term')
+  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN', 'CASHIER'])
+  searchByName(@Request() req: any, @Param('term') term: string) {
+    return this.productsService.searchByName(req.user.storeId, term);
+  }
+
+
   @Delete(':id')
   remove(@Request() req: any, @Param('id') id: string) {
     return this.productsService.remove(req.user.storeId, id);
