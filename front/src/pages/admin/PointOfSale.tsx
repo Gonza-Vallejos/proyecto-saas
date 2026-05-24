@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { Title, Text, Card, Group, Stack, TextInput, Button, Table, ActionIcon, Divider, Badge, Modal, Loader, Paper } from '@mantine/core';
+import { useState, useEffect } from 'react';
+import { Title, Text, Card, Group, Stack, TextInput, Button, Table, ActionIcon, Divider, Badge, Modal, Loader, Paper, Popover } from '@mantine/core';
 import { ShoppingCart, Search, Trash2, CreditCard, Banknote, X } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { QRCodeSVG } from 'qrcode.react';
@@ -10,7 +10,6 @@ export default function PointOfSale() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
   const [cart, setCart] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
 
@@ -43,7 +42,7 @@ export default function PointOfSale() {
         } catch (e) {
           console.error('Error polling order status', e);
         }
-      }, 3000); // Poll cada 3 segundos
+      }, 3000);
     }
     return () => clearInterval(interval);
   }, [qrModalOpen, pendingOrderId]);
@@ -70,17 +69,6 @@ export default function PointOfSale() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  // Cerrar dropdown al hacer click fuera
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-        setShowDropdown(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   const addProductToCart = (product: any) => {
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
@@ -99,7 +87,6 @@ export default function PointOfSale() {
     setShowDropdown(false);
   };
 
-
   const handleRemove = (index: number) => {
     const newCart = [...cart];
     const removed = newCart.splice(index, 1)[0];
@@ -112,7 +99,7 @@ export default function PointOfSale() {
       await api.post('/orders', {
         customerName: 'Cliente Mostrador',
         origin: 'POS',
-        status: 'PAID', // In real life, MP should be PENDING until webhook confirms, but for UX simplicity in POS without WebSockets yet we can assume paid or wait.
+        status: 'PAID',
         items: cart.map(item => ({
           productId: item.id,
           quantity: item.quantity,
@@ -136,12 +123,11 @@ export default function PointOfSale() {
 
   const handleCheckout = async (method: 'Efectivo' | 'Mercado Pago') => {
     if (cart.length === 0) return;
-    
+
     if (method === 'Mercado Pago') {
       setLoadingQr(true);
       setQrModalOpen(true);
       try {
-        // 1. Crear la orden PENDING
         const orderRes = await api.post('/orders', {
           customerName: 'Cliente Mostrador',
           origin: 'POS',
@@ -155,13 +141,12 @@ export default function PointOfSale() {
 
         setPendingOrderId(orderRes.id);
 
-        // 2. Generar Preferencia
         const res = await api.post('/mercado-pago/preference', {
           items: cart,
-          returnUrl: window.location.href, // No importa mucho en POS, pero es obligatorio
+          returnUrl: window.location.href,
           orderId: orderRes.id
         });
-        
+
         setQrUrl(res.init_point);
       } catch (e: any) {
         setQrModalOpen(false);
@@ -202,7 +187,7 @@ export default function PointOfSale() {
       });
 
       if (!secondConfirmed) return;
-      
+
       processOrder();
     }
   };
@@ -220,43 +205,39 @@ export default function PointOfSale() {
       <div className="admin-pos-grid">
         {/* Lado Izquierdo: Escáner y Lista de Productos */}
         <Stack gap="md">
-          {/* Búsqueda por nombre */}
+
+          {/* Búsqueda por nombre con Popover */}
           <Card withBorder radius="md" p="md" shadow="sm">
-            <div ref={searchRef} style={{ position: 'relative' }}>
-              <TextInput
-                label="Buscar producto por nombre"
-                placeholder="Escribí el nombre del producto..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
-                leftSection={loadingSearch ? <Loader size={16} /> : <Search size={18} />}
-                rightSection={
-                  searchInput ? (
-                    <ActionIcon variant="subtle" onClick={() => { setSearchInput(''); setShowDropdown(false); }}>
-                      <X size={16} />
-                    </ActionIcon>
-                  ) : null
-                }
-                size="lg"
-                autoFocus
-              />
-              {/* Dropdown de resultados */}
-              {showDropdown && searchResults.length > 0 && (
-                <Paper
-                  shadow="md"
-                  withBorder
-                  style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: 0,
-                    right: 0,
-                    zIndex: 200,
-                    maxHeight: 300,
-                    overflowY: 'auto',
-                    marginTop: 4,
-                  }}
-                >
-                  {searchResults.map((product: any) => (
+            <Popover
+              opened={showDropdown && (searchResults.length > 0 || (!loadingSearch && searchInput.trim() !== ''))}
+              withinPortal
+              width="target"
+              position="bottom-start"
+              shadow="md"
+            >
+              <Popover.Target>
+                <TextInput
+                  label="Buscar producto por nombre"
+                  placeholder="Escribí el nombre del producto..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
+                  leftSection={loadingSearch ? <Loader size={16} /> : <Search size={18} />}
+                  rightSection={
+                    searchInput ? (
+                      <ActionIcon variant="subtle" onClick={() => { setSearchInput(''); setShowDropdown(false); }}>
+                        <X size={16} />
+                      </ActionIcon>
+                    ) : null
+                  }
+                  size="lg"
+                  autoFocus
+                />
+              </Popover.Target>
+
+              <Popover.Dropdown p={0}>
+                {searchResults.length > 0 ? (
+                  searchResults.map((product: any) => (
                     <div
                       key={product.id}
                       onClick={() => addProductToCart(product)}
@@ -272,17 +253,17 @@ export default function PointOfSale() {
                         <Text size="sm" fw={700} color="blue">${product.price.toLocaleString()}</Text>
                       </Group>
                     </div>
-                  ))}
-                </Paper>
-              )}
-              {showDropdown && searchResults.length === 0 && !loadingSearch && searchInput.trim() && (
-                <Paper shadow="md" withBorder p="md" style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 200, marginTop: 4 }}>
-                  <Text size="sm" color="dimmed" ta="center">No se encontraron productos</Text>
-                </Paper>
-              )}
-            </div>
+                  ))
+                ) : (
+                  <Text size="sm" color="dimmed" ta="center" p="md">
+                    No se encontraron productos
+                  </Text>
+                )}
+              </Popover.Dropdown>
+            </Popover>
           </Card>
 
+          {/* Tabla del carrito */}
           <Card withBorder radius="md" p={0} shadow="sm" className="min-h-[400px] flex-1">
             <Table verticalSpacing="md" highlightOnHover>
               <Table.Thead className="bg-slate-50">
@@ -324,7 +305,7 @@ export default function PointOfSale() {
         <Card withBorder radius="md" p="xl" shadow="sm" className="h-fit">
           <Stack gap="lg">
             <Title order={3}>Resumen</Title>
-            
+
             <Group justify="space-between">
               <Text size="lg" color="dimmed">Total a Pagar</Text>
               <Title order={1} className="text-sky-500">${total.toLocaleString()}</Title>
@@ -333,20 +314,20 @@ export default function PointOfSale() {
             <Divider />
 
             <Stack gap="sm">
-              <Button 
-                size="xl" 
-                radius="md" 
-                color="green" 
+              <Button
+                size="xl"
+                radius="md"
+                color="green"
                 leftSection={<Banknote size={24} />}
                 disabled={cart.length === 0}
                 onClick={() => handleCheckout('Efectivo')}
               >
                 Cobrar en Efectivo
               </Button>
-              <Button 
-                size="xl" 
-                radius="md" 
-                color="blue" 
+              <Button
+                size="xl"
+                radius="md"
+                color="blue"
                 variant="light"
                 leftSection={<CreditCard size={24} />}
                 disabled={cart.length === 0}
@@ -360,8 +341,8 @@ export default function PointOfSale() {
       </div>
 
       {/* Modal para Código QR de Mercado Pago */}
-      <Modal 
-        opened={qrModalOpen} 
+      <Modal
+        opened={qrModalOpen}
         onClose={async () => {
           setQrModalOpen(false);
           if (pendingOrderId) {
@@ -396,10 +377,10 @@ export default function PointOfSale() {
               <Text ta="center" size="sm" color="dimmed">
                 Pídele al cliente que escanee este código desde la app de Mercado Pago o con su cámara.
               </Text>
-              <Button 
-                fullWidth 
-                color="green" 
-                size="md" 
+              <Button
+                fullWidth
+                color="green"
+                size="md"
                 onClick={async () => {
                   if (!pendingOrderId) return;
                   try {
