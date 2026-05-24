@@ -821,10 +821,12 @@ export default function Catalog() {
             {/* Fila 1: Categorías Principales */}
             <Group 
               ref={navRef}
-              justify={isMobile ? 'flex-start' : 'center'} 
+              justify="flex-start"
+              wrap="nowrap"
               gap="xs" 
               py="sm"
               className="catalog-nav-scroll"
+              style={{ overflowX: 'auto', flexWrap: 'nowrap', WebkitOverflowScrolling: 'touch' }}
             >
               <CategoryButton 
                 active={selectedCategory === 'all'} 
@@ -847,10 +849,12 @@ export default function Catalog() {
             {currentSubCategories.length > 0 && (
               <Box className="catalog-subnav-bar">
                 <Group 
-                  justify={isMobile ? 'flex-start' : 'center'} 
+                  justify="flex-start"
+                  wrap="nowrap"
                   gap="sm" 
                   px="md"
                   className="catalog-nav-scroll"
+                  style={{ overflowX: 'auto', flexWrap: 'nowrap', WebkitOverflowScrolling: 'touch' }}
                 >
                   {currentSubCategories.map(sub => (
                     <Button
@@ -1214,7 +1218,9 @@ export default function Catalog() {
                 fullWidth 
                 size="lg" 
                 radius="xl" 
-                color="green" 
+                color="green"
+                c="white"
+                styles={{ label: { color: 'white' } }}
                 leftSection={<Image src={WhatsAppPng} w={18} h={18} />}
                 onClick={() => {
                   setCartOpened(false);
@@ -1223,7 +1229,7 @@ export default function Catalog() {
                 }}
                 loading={isOrdering}
                >
-                 Enviar Pedido por WhatsApp
+                 Enviar pedido
                </Button>
                {store.mercadoPagoAccessToken && store.allowCatalogPayments !== false && (
                  <Button 
@@ -1232,7 +1238,8 @@ export default function Catalog() {
                   radius="xl" 
                   color="blue" 
                   mt="sm"
-                  variant="light"
+                  c="white"
+                  styles={{ label: { color: 'white' } }}
                   leftSection={<CreditCard size={18} />}
                   onClick={() => {
                     setCartOpened(false);
@@ -1241,7 +1248,7 @@ export default function Catalog() {
                   }}
                   loading={isOrdering}
                  >
-                   Pagar online con Mercado Pago
+                   Comprar
                  </Button>
                )}
             </Box>
