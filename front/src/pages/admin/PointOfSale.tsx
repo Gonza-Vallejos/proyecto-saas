@@ -39,6 +39,7 @@ export default function PointOfSale() {
               showConfirmButton: false
             });
           }
+
         } catch (e) {
           console.error('Error polling order status', e);
         }
