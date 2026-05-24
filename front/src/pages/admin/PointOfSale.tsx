@@ -1,12 +1,16 @@
-import { useState, useEffect } from 'react';
-import { Title, Text, Card, Group, Stack, TextInput, Button, Table, ActionIcon, Divider, Badge, Modal, Loader } from '@mantine/core';
-import { ShoppingCart, Barcode, Trash2, CreditCard, Banknote } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Title, Text, Card, Group, Stack, TextInput, Button, Table, ActionIcon, Divider, Badge, Modal, Loader, Paper } from '@mantine/core';
+import { ShoppingCart, Search, Trash2, CreditCard, Banknote, X } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { QRCodeSVG } from 'qrcode.react';
 import { api } from '../../utils/api';
 
 export default function PointOfSale() {
-  const [barcodeInput, setBarcodeInput] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [loadingSearch, setLoadingSearch] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
   const [cart, setCart] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
 
@@ -44,38 +48,57 @@ export default function PointOfSale() {
     return () => clearInterval(interval);
   }, [qrModalOpen, pendingOrderId]);
 
-  const handleScan = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!barcodeInput.trim()) return;
-
-    try {
-      const product = await api.get(`/admin/products/barcode/${barcodeInput.trim()}`);
-      
-      setCart(prev => {
-        const existing = prev.find(item => item.id === product.id);
-        if (existing) {
-          return prev.map(item => 
-            item.id === product.id 
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          );
-        }
-        return [...prev, { ...product, quantity: 1 }];
-      });
-      
-      setTotal(prev => prev + product.price);
-      setBarcodeInput('');
-    } catch (error: any) {
-      Swal.fire({
-        title: 'No encontrado',
-        text: 'El código escaneado no corresponde a ningún producto.',
-        icon: 'error',
-        timer: 1500,
-        showConfirmButton: false
-      });
-      setBarcodeInput('');
+  // Búsqueda de productos por nombre con debounce
+  useEffect(() => {
+    if (!searchInput.trim()) {
+      setSearchResults([]);
+      setShowDropdown(false);
+      return;
     }
+    const timer = setTimeout(async () => {
+      setLoadingSearch(true);
+      try {
+        const results = await api.get(`/admin/products/search/${encodeURIComponent(searchInput.trim())}`);
+        setSearchResults(results);
+        setShowDropdown(true);
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setLoadingSearch(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  // Cerrar dropdown al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const addProductToCart = (product: any) => {
+    setCart(prev => {
+      const existing = prev.find(item => item.id === product.id);
+      if (existing) {
+        return prev.map(item =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...prev, { ...product, quantity: 1 }];
+    });
+    setTotal(prev => prev + product.price);
+    setSearchInput('');
+    setSearchResults([]);
+    setShowDropdown(false);
   };
+
 
   const handleRemove = (index: number) => {
     const newCart = [...cart];
@@ -197,18 +220,67 @@ export default function PointOfSale() {
       <div className="admin-pos-grid">
         {/* Lado Izquierdo: Escáner y Lista de Productos */}
         <Stack gap="md">
+          {/* Búsqueda por nombre */}
           <Card withBorder radius="md" p="md" shadow="sm">
-            <form onSubmit={handleScan}>
+            <div ref={searchRef} style={{ position: 'relative' }}>
               <TextInput
-                label="Escanear Código de Barras"
-                placeholder="Haz clic aquí y usa el lector..."
-                value={barcodeInput}
-                onChange={(e) => setBarcodeInput(e.target.value)}
-                leftSection={<Barcode size={18} />}
+                label="Buscar producto por nombre"
+                placeholder="Escribí el nombre del producto..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
+                leftSection={loadingSearch ? <Loader size={16} /> : <Search size={18} />}
+                rightSection={
+                  searchInput ? (
+                    <ActionIcon variant="subtle" onClick={() => { setSearchInput(''); setShowDropdown(false); }}>
+                      <X size={16} />
+                    </ActionIcon>
+                  ) : null
+                }
                 size="lg"
                 autoFocus
               />
-            </form>
+              {/* Dropdown de resultados */}
+              {showDropdown && searchResults.length > 0 && (
+                <Paper
+                  shadow="md"
+                  withBorder
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    zIndex: 200,
+                    maxHeight: 300,
+                    overflowY: 'auto',
+                    marginTop: 4,
+                  }}
+                >
+                  {searchResults.map((product: any) => (
+                    <div
+                      key={product.id}
+                      onClick={() => addProductToCart(product)}
+                      style={{ cursor: 'pointer', padding: '10px 16px', borderBottom: '1px solid #f1f5f9' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = '#f8fafc')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'white')}
+                    >
+                      <Group justify="space-between">
+                        <div>
+                          <Text size="sm" fw={600}>{product.name}</Text>
+                          <Text size="xs" color="dimmed">{product.category?.name ?? 'Sin categoría'}</Text>
+                        </div>
+                        <Text size="sm" fw={700} color="blue">${product.price.toLocaleString()}</Text>
+                      </Group>
+                    </div>
+                  ))}
+                </Paper>
+              )}
+              {showDropdown && searchResults.length === 0 && !loadingSearch && searchInput.trim() && (
+                <Paper shadow="md" withBorder p="md" style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 200, marginTop: 4 }}>
+                  <Text size="sm" color="dimmed" ta="center">No se encontraron productos</Text>
+                </Paper>
+              )}
+            </div>
           </Card>
 
           <Card withBorder radius="md" p={0} shadow="sm" className="min-h-[400px] flex-1">
@@ -226,7 +298,7 @@ export default function PointOfSale() {
                   <Table.Tr>
                     <Table.Td colSpan={4} className="py-12 text-center">
                       <ShoppingCart size={48} color="#e2e8f0" className="mx-auto mb-4 block" />
-                      <Text color="dimmed">El carrito está vacío. Escanea un producto.</Text>
+                      <Text color="dimmed">El carrito está vacío. Buscá un producto por nombre.</Text>
                     </Table.Td>
                   </Table.Tr>
                 ) : (
