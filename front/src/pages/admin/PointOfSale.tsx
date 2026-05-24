@@ -202,68 +202,66 @@ export default function PointOfSale() {
         <Badge size="lg" color="indigo" variant="outline">Caja Abierta</Badge>
       </Group>
 
-      <div className="admin-pos-grid">
-        {/* Lado Izquierdo: Escáner y Lista de Productos */}
-        <Stack gap="md">
+      {/* 👇 Buscador FUERA del grid, arriba de todo */}
+      <Card withBorder radius="md" p="md" shadow="sm" mb="md">
+        <Popover
+          opened={showDropdown && (searchResults.length > 0 || (!loadingSearch && searchInput.trim() !== ''))}
+          withinPortal
+          width="target"
+          position="bottom-start"
+          shadow="md"
+        >
+          <Popover.Target>
+            <TextInput
+              label="Buscar producto por nombre"
+              placeholder="Escribí el nombre del producto..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
+              leftSection={loadingSearch ? <Loader size={16} /> : <Search size={18} />}
+              rightSection={
+                searchInput ? (
+                  <ActionIcon variant="subtle" onClick={() => { setSearchInput(''); setShowDropdown(false); }}>
+                    <X size={16} />
+                  </ActionIcon>
+                ) : null
+              }
+              size="lg"
+              autoFocus
+            />
+          </Popover.Target>
 
-          {/* Búsqueda por nombre con Popover */}
-          <Card withBorder radius="md" p="md" shadow="sm">
-            <Popover
-              opened={showDropdown && (searchResults.length > 0 || (!loadingSearch && searchInput.trim() !== ''))}
-              withinPortal
-              width="target"
-              position="bottom-start"
-              shadow="md"
-            >
-              <Popover.Target>
-                <TextInput
-                  label="Buscar producto por nombre"
-                  placeholder="Escribí el nombre del producto..."
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
-                  leftSection={loadingSearch ? <Loader size={16} /> : <Search size={18} />}
-                  rightSection={
-                    searchInput ? (
-                      <ActionIcon variant="subtle" onClick={() => { setSearchInput(''); setShowDropdown(false); }}>
-                        <X size={16} />
-                      </ActionIcon>
-                    ) : null
-                  }
-                  size="lg"
-                  autoFocus
-                />
-              </Popover.Target>
-
-              <Popover.Dropdown p={0}>
-                {searchResults.length > 0 ? (
-                  searchResults.map((product: any) => (
-                    <div
-                      key={product.id}
-                      onClick={() => addProductToCart(product)}
-                      style={{ cursor: 'pointer', padding: '10px 16px', borderBottom: '1px solid #f1f5f9' }}
-                      onMouseEnter={e => (e.currentTarget.style.background = '#f8fafc')}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'white')}
-                    >
-                      <Group justify="space-between">
-                        <div>
-                          <Text size="sm" fw={600}>{product.name}</Text>
-                          <Text size="xs" color="dimmed">{product.category?.name ?? 'Sin categoría'}</Text>
-                        </div>
-                        <Text size="sm" fw={700} color="blue">${product.price.toLocaleString()}</Text>
-                      </Group>
+          <Popover.Dropdown p={0}>
+            {searchResults.length > 0 ? (
+              searchResults.map((product: any) => (
+                <div
+                  key={product.id}
+                  onClick={() => addProductToCart(product)}
+                  style={{ cursor: 'pointer', padding: '10px 16px', borderBottom: '1px solid #f1f5f9' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = '#f8fafc')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'white')}
+                >
+                  <Group justify="space-between">
+                    <div>
+                      <Text size="sm" fw={600}>{product.name}</Text>
+                      <Text size="xs" color="dimmed">{product.category?.name ?? 'Sin categoría'}</Text>
                     </div>
-                  ))
-                ) : (
-                  <Text size="sm" color="dimmed" ta="center" p="md">
-                    No se encontraron productos
-                  </Text>
-                )}
-              </Popover.Dropdown>
-            </Popover>
-          </Card>
+                    <Text size="sm" fw={700} color="blue">${product.price.toLocaleString()}</Text>
+                  </Group>
+                </div>
+              ))
+            ) : (
+              <Text size="sm" color="dimmed" ta="center" p="md">
+                No se encontraron productos
+              </Text>
+            )}
+          </Popover.Dropdown>
+        </Popover>
+      </Card>
 
-          {/* Tabla del carrito */}
+      <div className="admin-pos-grid">
+        {/* Lado Izquierdo: solo la tabla */}
+        <Stack gap="md">
           <Card withBorder radius="md" p={0} shadow="sm" className="min-h-[400px] flex-1">
             <Table verticalSpacing="md" highlightOnHover>
               <Table.Thead className="bg-slate-50">
@@ -340,7 +338,7 @@ export default function PointOfSale() {
         </Card>
       </div>
 
-      {/* Modal para Código QR de Mercado Pago */}
+      {/* Modal QR Mercado Pago — sin cambios */}
       <Modal
         opened={qrModalOpen}
         onClose={async () => {
