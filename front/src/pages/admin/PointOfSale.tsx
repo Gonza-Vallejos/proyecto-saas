@@ -204,7 +204,7 @@ export default function PointOfSale() {
       </Group>
 
       {/* 👇 Buscador FUERA del grid, arriba de todo */}
-      <Card withBorder radius="md" p="md" shadow="sm" mb="md">
+      <Card withBorder radius="md" p="md" shadow="sm" mb="md" style={{ overflow: 'visible' }}>
         <Popover
           opened={showDropdown && (searchResults.length > 0 || (!loadingSearch && searchInput.trim() !== ''))}
           withinPortal
