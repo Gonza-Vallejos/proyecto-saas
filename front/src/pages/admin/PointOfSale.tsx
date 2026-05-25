@@ -208,6 +208,7 @@ export default function PointOfSale() {
         <Popover
           opened={showDropdown && (searchResults.length > 0 || (!loadingSearch && searchInput.trim() !== ''))}
           withinPortal
+          zIndex={1000}
           width="target"
           position="bottom-start"
           shadow="md"

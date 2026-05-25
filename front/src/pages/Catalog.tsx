@@ -2,27 +2,27 @@ import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import Swal from 'sweetalert2';
 import { useParams } from 'react-router-dom';
 import { useMediaQuery } from '@mantine/hooks';
-import { 
+import {
   ShoppingCart,
-  Package, 
-  Trash2, 
+  Package,
+  Trash2,
   Wifi,
   CreditCard
 } from 'lucide-react';
 import InstagramPng from '../assets/instagram.png';
 import WhatsAppPng from '../assets/whatsapp.png';
 import UbicacionPng from '../assets/ubicacion.png';
-import { 
-  Title, 
-  Text, 
-  Container, 
-  SimpleGrid, 
-  Card, 
-  Image, 
-  Badge, 
-  Button, 
-  Group, 
-  Center, 
+import {
+  Title,
+  Text,
+  Container,
+  SimpleGrid,
+  Card,
+  Image,
+  Badge,
+  Button,
+  Group,
+  Center,
   Loader,
   Box,
   Stack,
@@ -142,10 +142,10 @@ const formatPrice = (value: number) => {
 };
 
 const CategoryButton = ({ active, children, onClick, id }: any) => (
-  <Button 
+  <Button
     id={id}
     data-active={active}
-    variant={active ? 'filled' : 'light'} 
+    variant={active ? 'filled' : 'light'}
     color={active ? 'var(--primary-color)' : 'gray'}
     radius="xl"
     onClick={onClick}
@@ -169,7 +169,7 @@ export default function Catalog() {
   const navRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<string>('all');
 
-  
+
   // Cart State
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpened, setCartOpened] = useState(false);
@@ -187,7 +187,7 @@ export default function Catalog() {
     }
     return '#ffffff';
   }, [store?.primaryColor]);
-  
+
   // Customer Identity
   const [customerName, setCustomerName] = useState<string>('');
   const [customerPhone, setCustomerPhone] = useState<string>('');
@@ -247,7 +247,7 @@ export default function Catalog() {
   // Agrupar productos por categoría con filtrado jerárquico
   const groupedProducts = useMemo(() => {
     if (!store) return [];
-    
+
     // Base de categorías con sus productos
     const catsWithProducts = store.categories.map(cat => ({
       ...cat,
@@ -258,7 +258,7 @@ export default function Catalog() {
     const bundleProducts = store.products.filter(p => p.isBundle);
     const bundlesCategory = bundleProducts.length > 0 ? [{
       id: 'promos-virtual-cat',
-      name: '🔥 Promociones',
+      name: 'Promociones',
       slug: 'promociones',
       products: bundleProducts
     }] : [];
@@ -309,7 +309,7 @@ export default function Catalog() {
   // Categorías principales (Padres) que tienen contenido
   const parentCategories = useMemo(() => {
     if (!store) return [];
-    
+
     const baseParents = store.categories.filter(c => !c.parentId && (
       store.products.some(p => p.categoryId === c.id) ||
       store.categories.some(child => child.parentId === c.id && store.products.some(p => p.categoryId === child.id))
@@ -329,12 +329,12 @@ export default function Catalog() {
   // Subcategorías de la categoría actualmente activa (si es padre) o de su padre (si es hijo)
   const currentSubCategories = useMemo(() => {
     if (!store || activeTab === 'all') return [];
-    
+
     const activeCat = store.categories.find(c => c.id === activeTab);
     const parentId = activeCat?.parentId || activeCat?.id;
-    
+
     if (!parentId) return [];
-    
+
     return store.categories.filter(c => c.parentId === parentId && store.products.some(p => p.categoryId === c.id));
   }, [store, activeTab]);
 
@@ -342,7 +342,7 @@ export default function Catalog() {
   const scrollToCategory = (categoryId: string) => {
     setSelectedCategory(categoryId);
     setActiveTab(categoryId);
-    
+
     // Siempre scrolleamos arriba al cambiar el filtro para que se vea el inicio
     window.scrollTo({ top: isMobile ? 300 : 450, behavior: 'smooth' });
   };
@@ -359,7 +359,7 @@ export default function Catalog() {
 
       const sections = document.querySelectorAll('.category-section');
       let currentActive = 'all';
-      
+
       sections.forEach((section: any) => {
         const top = section.offsetTop;
         if (window.scrollY >= top - 200) {
@@ -381,9 +381,9 @@ export default function Catalog() {
       const res = await fetch(`${BASE_URL}/stores/public/${slug}/catalog`);
       if (!res.ok) throw new Error('Tienda no encontrada');
       const data: Store = await res.json();
-      
+
       setStore(data);
-      
+
       // Cargar la fuente de Google Fonts dinámicamente
       if (data.fontFamily && data.fontFamily !== 'Inter') {
         const fontLink = document.createElement('link');
@@ -434,8 +434,8 @@ export default function Catalog() {
     setCart(prev => {
       // Para modificadores, tratamos como ítem distinto si la combinación de extras es distinta
       // Pero para simplificar en esta versión, si tiene los mismos modificadores exactamente
-      const existingIdx = prev.findIndex(item => 
-        item.product.id === product.id && 
+      const existingIdx = prev.findIndex(item =>
+        item.product.id === product.id &&
         JSON.stringify(item.selectedModifiers) === JSON.stringify(selectedModifiers)
       );
 
@@ -467,7 +467,7 @@ export default function Catalog() {
   const handleSendOrder = async () => {
     if (!store) return;
     const savedName = localStorage.getItem('siit_customer_name');
-    
+
     // Si el módulo de pedidos no está activo, enviamos directamente a WhatsApp sin guardar en BD
     if (!store.hasWhatsAppOrders) {
       let message = `*Nuevo Pedido - ${store.name}*\n\n`;
@@ -475,7 +475,7 @@ export default function Catalog() {
         message += `• ${item.quantity}x *${item.product.name}*\n`;
       });
       message += `\n*Por favor, confírmame el total y el tiempo de entrega.*`;
-      
+
       const waUrl = `https://wa.me/${(store.whatsapp ?? '').replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
       if (isMobile) {
         window.location.assign(waUrl);
@@ -492,7 +492,7 @@ export default function Catalog() {
     if (!savedName) localStorage.setItem('siit_customer_name', nameToUse);
 
     setIsOrdering(true);
-    
+
     try {
       // 1. Guardar el pedido en la base de datos (Supabase) via API pública
       const orderData = {
@@ -525,7 +525,7 @@ export default function Catalog() {
       message += `Entrega: *${isDelivery ? 'Envío a domicilio' : 'Retiro en el local'}*\n`;
       if (isDelivery) message += `Dirección: *${customerAddress}*\n\n`;
       else message += `\n`;
-      
+
       let total = 0;
       cart.forEach(item => {
         let itemPrice = item.product.price;
@@ -542,12 +542,12 @@ export default function Catalog() {
         if (modifiersText) message += modifiersText;
         if (item.observations) message += `  _Petición: ${item.observations}_\n`;
       });
-      
+
       message += `\n*Total: $${formatPrice(total)}*\n`;
       message += `\n_Pedido registrado en el sistema_`;
 
       const waUrl = `https://wa.me/${(store.whatsapp ?? '').replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
-      
+
       // En móviles, window.open suele ser bloqueado después de un fetch (contexto perdido)
       // Usamos window.location.assign para asegurar que abra la app de WhatsApp
       if (isMobile) {
@@ -555,7 +555,7 @@ export default function Catalog() {
       } else {
         window.open(waUrl, '_blank');
       }
-      
+
       setCart([]);
       setCartOpened(false);
     } catch (e: any) {
@@ -574,7 +574,7 @@ export default function Catalog() {
   const handleMercadoPagoOrder = async () => {
     if (!store) return;
     const savedName = localStorage.getItem('siit_customer_name');
-    
+
     // Si faltan datos clave, abrimos el modal de checkout de Mercado Pago
     if (!customerPhone || !customerEmail || (isDelivery && !customerAddress) || (!savedName && !customerName)) {
       setCartOpened(false);
@@ -636,7 +636,7 @@ export default function Catalog() {
       });
 
       if (!res.ok) throw new Error('Error al generar link de pago');
-      
+
       const mpData = await res.json();
       window.location.href = mpData.init_point;
 
@@ -669,8 +669,8 @@ export default function Catalog() {
     <Center className="catalog-404-bg">
       <Stack align="center" gap="xl">
         <Box className="text-center">
-            <Title order={1} size={isMobile ? 40 : 80} className="catalog-404-watermark">404</Title>
-            <Title order={2}>Tienda no encontrada</Title>
+          <Title order={1} size={isMobile ? 40 : 80} className="catalog-404-watermark">404</Title>
+          <Title order={2}>Tienda no encontrada</Title>
         </Box>
         <Text color="dimmed" maw={400} ta="center">Lo sentimos, pero el catálogo que buscas no está disponible en este momento.</Text>
         <Button variant="light" radius="xl" onClick={() => window.location.href = '/'}>Ir al inicio</Button>
@@ -682,7 +682,7 @@ export default function Catalog() {
 
   return (
     <StoreThemeRoot theme={themeFromStore(store)} className="catalog-page min-h-screen">
-      
+
       <Box
         component="header"
         className={cn(
@@ -692,17 +692,17 @@ export default function Catalog() {
         )}
       >
         <Container size="xl" className="catalog-header-inner">
-            <Group gap="xs">
-              {store.hasConnectivity && store.wifiSSID && (
-                <ActionIcon 
-                  variant="subtle" 
-                  color={scrolled ? 'cyan' : (store.heroImageUrl ? 'white' : 'cyan')} 
-                  size="lg" 
-                  radius="xl"
-                  onClick={() => {
-                     Swal.fire({
-                       title: 'Conexión WiFi',
-                       html: `
+          <Group gap="xs">
+            {store.hasConnectivity && store.wifiSSID && (
+              <ActionIcon
+                variant="subtle"
+                color={scrolled ? 'cyan' : (store.heroImageUrl ? 'white' : 'cyan')}
+                size="lg"
+                radius="xl"
+                onClick={() => {
+                  Swal.fire({
+                    title: 'Conexión WiFi',
+                    html: `
                          <div style="text-align: left; padding: 10px;">
                            <p><strong>Red:</strong> ${store.wifiSSID}</p>
                            <p><strong>Contraseña:</strong> ${store.wifiPassword}</p>
@@ -713,57 +713,57 @@ export default function Catalog() {
                            </div>
                          </div>
                        `,
-                       confirmButtonText: 'Cerrar',
-                       confirmButtonColor: 'var(--primary-color)'
-                     });
-                  }}
-                >
-                  <Wifi size={24} />
-                </ActionIcon>
-              )}
-              
-              <Group gap="sm" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="catalog-logo-click">
-                <Box className={cn('catalog-logo-box', isMobile ? 'h-8 w-8' : 'h-[42px] w-[42px]')}>
-                  {store.logoUrl ? (
-                    <Image src={fixUrl(store.logoUrl)} w="100%" h="100%" />
-                  ) : (
-                    <Text fw={900} className="text-store-primary" size={isMobile ? 'sm' : 'xl'}>{store.name.charAt(0)}</Text>
-                  )}
-                </Box>
-                <Title
-                  order={3}
-                  size={isMobile ? '1rem' : '1.2rem'}
-                  className={cn(scrolled || !store.heroImageUrl ? 'text-store' : 'text-white')}
-                >
-                  {store.name}
-                </Title>
-              </Group>
-            </Group>
-
-            {store.hasCart && (
-              <Button 
-                variant="subtle"
-                size={isMobile ? 'sm' : 'md'} 
-                radius="xl" 
-                className="cart-button text-store-icon"
-                onClick={() => setCartOpened(true)}
+                    confirmButtonText: 'Cerrar',
+                    confirmButtonColor: 'var(--primary-color)'
+                  });
+                }}
               >
-                  <Box className="catalog-cart-badge-wrap">
-                     <ShoppingCart size={isMobile ? 24 : 28} color="var(--icon-color)" />
-                     {cart.length > 0 && (
-                       <Badge 
-                         size="xs" 
-                         circle 
-                         color="var(--secondary-color)" 
-                         className="catalog-cart-badge"
-                       >
-                         {cart.reduce((acc, item) => acc + item.quantity, 0)}
-                       </Badge>
-                     )}
-                  </Box>
-                  <Text size="sm" ml="xs" className={cn(isMobile && 'hidden', !isMobile && 'block')}>Carrito</Text>
-              </Button>
+                <Wifi size={24} />
+              </ActionIcon>
             )}
+
+            <Group gap="sm" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="catalog-logo-click">
+              <Box className={cn('catalog-logo-box', isMobile ? 'h-8 w-8' : 'h-[42px] w-[42px]')}>
+                {store.logoUrl ? (
+                  <Image src={fixUrl(store.logoUrl)} w="100%" h="100%" />
+                ) : (
+                  <Text fw={900} className="text-store-primary" size={isMobile ? 'sm' : 'xl'}>{store.name.charAt(0)}</Text>
+                )}
+              </Box>
+              <Title
+                order={3}
+                size={isMobile ? '1rem' : '1.2rem'}
+                className={cn(scrolled || !store.heroImageUrl ? 'text-store' : 'text-white')}
+              >
+                {store.name}
+              </Title>
+            </Group>
+          </Group>
+
+          {store.hasCart && (
+            <Button
+              variant="subtle"
+              size={isMobile ? 'sm' : 'md'}
+              radius="xl"
+              className="cart-button text-store-icon"
+              onClick={() => setCartOpened(true)}
+            >
+              <Box className="catalog-cart-badge-wrap">
+                <ShoppingCart size={isMobile ? 24 : 28} color="var(--icon-color)" />
+                {cart.length > 0 && (
+                  <Badge
+                    size="xs"
+                    circle
+                    color="var(--secondary-color)"
+                    className="catalog-cart-badge"
+                  >
+                    {cart.reduce((acc, item) => acc + item.quantity, 0)}
+                  </Badge>
+                )}
+              </Box>
+              <Text size="sm" ml="xs" className={cn(isMobile && 'hidden', !isMobile && 'block')}>Carrito</Text>
+            </Button>
+          )}
         </Container>
       </Box>
 
@@ -784,25 +784,25 @@ export default function Catalog() {
       >
         <Container size="xl" className="z-10 w-full">
           <Stack gap={0} align="center" className={cn('text-center', store.heroImageUrl ? 'text-white' : 'text-slate-900')}>
-              <Transition mounted={true} transition="fade" duration={1000} timingFunction="ease">
-                {(styles) => (
-                  <Title 
-                    order={1} 
-                    className={cn(
-                      'font-black leading-tight',
-                      isMobile ? 'text-[2.2rem]' : 'text-6xl',
-                      store.heroImageUrl ? 'text-white' : 'text-store',
-                    )}
-                    style={styles}
-                  >
-                     {store.name}
-                  </Title>
-                )}
-              </Transition>
-              <Text size={isMobile ? 'md' : 'xl'} fw={500} opacity={0.9} className={cn('mt-4', store.heroImageUrl ? 'text-white' : 'text-store')}>
-                 {store.description || 'Descubre lo mejor de nuestro catálogo digital diseñado exclusivamente para ti.'}
-              </Text>
-             
+            <Transition mounted={true} transition="fade" duration={1000} timingFunction="ease">
+              {(styles) => (
+                <Title
+                  order={1}
+                  className={cn(
+                    'font-black leading-tight',
+                    isMobile ? 'text-[2.2rem]' : 'text-6xl',
+                    store.heroImageUrl ? 'text-white' : 'text-store',
+                  )}
+                  style={styles}
+                >
+                  {store.name}
+                </Title>
+              )}
+            </Transition>
+            <Text size={isMobile ? 'md' : 'xl'} fw={500} opacity={0.9} className={cn('mt-4', store.heroImageUrl ? 'text-white' : 'text-store')}>
+              {store.description || 'Descubre lo mejor de nuestro catálogo digital diseñado exclusivamente para ti.'}
+            </Text>
+
 
           </Stack>
         </Container>
@@ -819,25 +819,25 @@ export default function Catalog() {
         <Container size="xl">
           <Stack gap={0}>
             {/* Fila 1: Categorías Principales */}
-            <Group 
+            <Group
               ref={navRef}
               justify="flex-start"
               wrap="nowrap"
-              gap="xs" 
+              gap="xs"
               py="sm"
               className="catalog-nav-scroll"
               style={{ overflowX: 'auto', flexWrap: 'nowrap', WebkitOverflowScrolling: 'touch' }}
             >
-              <CategoryButton 
-                active={selectedCategory === 'all'} 
+              <CategoryButton
+                active={selectedCategory === 'all'}
                 onClick={() => scrollToCategory('all')}
               >
                 Todos
               </CategoryButton>
               {parentCategories.map(cat => (
-                <CategoryButton 
+                <CategoryButton
                   key={cat.id}
-                  active={selectedCategory === cat.id || store.categories.find(c => c.id === selectedCategory)?.parentId === cat.id} 
+                  active={selectedCategory === cat.id || store.categories.find(c => c.id === selectedCategory)?.parentId === cat.id}
                   onClick={() => scrollToCategory(cat.id)}
                 >
                   {cat.name}
@@ -848,10 +848,10 @@ export default function Catalog() {
             {/* Fila 2: Subcategorías (Solo si hay una categoría padre seleccionada y tiene hijos) */}
             {currentSubCategories.length > 0 && (
               <Box className="catalog-subnav-bar">
-                <Group 
+                <Group
                   justify="flex-start"
                   wrap="nowrap"
-                  gap="sm" 
+                  gap="sm"
                   px="md"
                   className="catalog-nav-scroll"
                   style={{ overflowX: 'auto', flexWrap: 'nowrap', WebkitOverflowScrolling: 'touch' }}
@@ -891,25 +891,25 @@ export default function Catalog() {
             {groupedProducts.map(group => (
               <Box key={group.id} id={`section-${group.id}`} className="category-section catalog-section">
                 <Group gap="xs" mb="xl" className="catalog-section-title">
-                   {group.parentId && (
-                     <Text color="dimmed" fw={500} size="sm" tt="uppercase" className="catalog-section-subtitle">
-                       {store?.categories.find(c => c.id === group.parentId)?.name} › 
-                     </Text>
-                   )}
-                   <Title order={2} className="text-[var(--text-color)]">
-                     {group.name}
-                   </Title>
+                  {group.parentId && (
+                    <Text color="dimmed" fw={500} size="sm" tt="uppercase" className="catalog-section-subtitle">
+                      {store?.categories.find(c => c.id === group.parentId)?.name} ›
+                    </Text>
+                  )}
+                  <Title order={2} className="text-[var(--text-color)]">
+                    {group.name}
+                  </Title>
                 </Group>
-                <SimpleGrid 
-                  cols={store.cardStyle === 'horizontal' ? { base: 1, md: 2 } : { base: 1, sm: 2, lg: 3 }} 
+                <SimpleGrid
+                  cols={store.cardStyle === 'horizontal' ? { base: 1, md: 2 } : { base: 1, sm: 2, lg: 3 }}
                   spacing={isMobile ? "md" : "xl"}
                 >
                   {group.products.map((p: any) => (
-                    <RenderProductCard 
-                      key={p.id} 
-                      product={p} 
-                      styleType={store.cardStyle} 
-                      onOrder={(prod: any) => store.hasCart ? setAddingProduct(prod) : handleDirectOrder(prod)} 
+                    <RenderProductCard
+                      key={p.id}
+                      product={p}
+                      styleType={store.cardStyle}
+                      onOrder={(prod: any) => store.hasCart ? setAddingProduct(prod) : handleDirectOrder(prod)}
                       fixUrl={fixUrl}
                       hasCart={store.hasCart}
                       isMobile={isMobile}
@@ -941,50 +941,50 @@ export default function Catalog() {
 
             <Stack gap="md" align={isMobile ? 'center' : 'flex-start'} className={cn(isMobile ? 'order-2 text-center' : 'text-left')}>
               <Title order={4} size="xs" tt="uppercase" c={footerTextColor} fw={700} className="opacity-90">Encuéntranos</Title>
-                <Stack gap="sm" align={isMobile ? 'center' : 'flex-start'}>
-                  {store.address && (
-                    <Group gap="md" justify={isMobile ? 'center' : 'flex-start'} wrap="nowrap">
-                      <Image src={UbicacionPng} w={24} h={24} className={footerTextColor === '#1e293b' ? 'catalog-footer-icon-dark' : 'catalog-footer-icon-invert'} />
-                      <Box 
-                        component="a" 
-                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.address)}`} 
-                        target="_blank" 
-                        className="no-underline text-inherit"
-                      >
-                        <Text size="sm" c={footerTextColor} fw={500} className="catalog-footer-link">{store.address}</Text>
-                      </Box>
-                    </Group>
-                  )}
-                  
-                  {store.whatsapp && (
-                    <Group gap="md" justify={isMobile ? 'center' : 'flex-start'} wrap="nowrap">
-                      <Image src={WhatsAppPng} w={24} h={24} />
-                      <Box 
-                        component="a" 
-                        href={`https://wa.me/${store.whatsapp}`} 
-                        target="_blank" 
-                        className="no-underline text-inherit"
-                      >
-                        <Text size="sm" c={footerTextColor} fw={500}>{store.whatsapp}</Text>
-                      </Box>
-                    </Group>
-                  )}
+              <Stack gap="sm" align={isMobile ? 'center' : 'flex-start'}>
+                {store.address && (
+                  <Group gap="md" justify={isMobile ? 'center' : 'flex-start'} wrap="nowrap">
+                    <Image src={UbicacionPng} w={24} h={24} className={footerTextColor === '#1e293b' ? 'catalog-footer-icon-dark' : 'catalog-footer-icon-invert'} />
+                    <Box
+                      component="a"
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.address)}`}
+                      target="_blank"
+                      className="no-underline text-inherit"
+                    >
+                      <Text size="sm" c={footerTextColor} fw={500} className="catalog-footer-link">{store.address}</Text>
+                    </Box>
+                  </Group>
+                )}
 
-                  {store.instagram && (
-                    <Group gap="md" justify={isMobile ? 'center' : 'flex-start'} wrap="nowrap">
-                      <Image src={InstagramPng} w={24} h={24} />
-                      <Box 
-                        component="a" 
-                        href={store.instagram.startsWith('http') ? store.instagram : `https://instagram.com/${store.instagram}`} 
-                        target="_blank" 
-                        className="no-underline text-inherit"
-                      >
-                        <Text size="sm" c={footerTextColor} fw={500}>@{store.instagram.split('?')[0].replace(/\/+$/, '').split('/').pop()}</Text>
-                      </Box>
-                    </Group>
-                  )}
-                </Stack>
-             </Stack>
+                {store.whatsapp && (
+                  <Group gap="md" justify={isMobile ? 'center' : 'flex-start'} wrap="nowrap">
+                    <Image src={WhatsAppPng} w={24} h={24} />
+                    <Box
+                      component="a"
+                      href={`https://wa.me/${store.whatsapp}`}
+                      target="_blank"
+                      className="no-underline text-inherit"
+                    >
+                      <Text size="sm" c={footerTextColor} fw={500}>{store.whatsapp}</Text>
+                    </Box>
+                  </Group>
+                )}
+
+                {store.instagram && (
+                  <Group gap="md" justify={isMobile ? 'center' : 'flex-start'} wrap="nowrap">
+                    <Image src={InstagramPng} w={24} h={24} />
+                    <Box
+                      component="a"
+                      href={store.instagram.startsWith('http') ? store.instagram : `https://instagram.com/${store.instagram}`}
+                      target="_blank"
+                      className="no-underline text-inherit"
+                    >
+                      <Text size="sm" c={footerTextColor} fw={500}>@{store.instagram.split('?')[0].replace(/\/+$/, '').split('/').pop()}</Text>
+                    </Box>
+                  </Group>
+                )}
+              </Stack>
+            </Stack>
 
             <Stack gap="md" align={isMobile ? 'center' : 'flex-start'} className={cn(isMobile ? 'order-3 text-center' : 'order-4 text-left')}>
               <Title order={4} size="xs" tt="uppercase" c={footerTextColor} fw={700} className="opacity-90">Horarios</Title>
@@ -992,17 +992,17 @@ export default function Catalog() {
                 const hours = JSON.parse(store.businessHours);
                 const weekDays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
                 const firstDay = hours[weekDays[0]];
-                const allSame = weekDays.every(day => 
-                  hours[day].isOpen === firstDay.isOpen && 
-                  hours[day].open === firstDay.open && 
+                const allSame = weekDays.every(day =>
+                  hours[day].isOpen === firstDay.isOpen &&
+                  hours[day].open === firstDay.open &&
                   hours[day].close === firstDay.close
                 );
 
                 const renderRow = (label: string, config: any) => (
                   <Group key={label} justify="space-between" wrap="nowrap" className="mb-1.5 w-full">
                     <Group gap="xs">
-                       <Box className="preview-footer-dot" />
-                       <Text size="xs" fw={700} c={footerTextColor} className="min-w-[70px]">{label}:</Text>
+                      <Box className="preview-footer-dot" />
+                      <Text size="xs" fw={700} c={footerTextColor} className="min-w-[70px]">{label}:</Text>
                     </Group>
                     <Text size="xs" c={footerTextColor} className="opacity-80" fs={config.isOpen ? "normal" : "italic"}>
                       {config.isOpen ? `${config.open} - ${config.close}` : 'Cerrado'}
@@ -1031,7 +1031,7 @@ export default function Catalog() {
               })()}
             </Stack>
           </SimpleGrid>
-          
+
           <Divider color="gray.8" mb="xl" />
           <Center>
             <Stack gap={4} align="center">
@@ -1058,9 +1058,9 @@ export default function Catalog() {
         padding="xl"
         zIndex={3000}
         overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
-        styles={{ 
-          header: { 
-            borderBottom: '1px solid #eee', 
+        styles={{
+          header: {
+            borderBottom: '1px solid #eee',
             marginBottom: '1rem',
             backgroundColor: '#fff',
             zIndex: 3001
@@ -1079,10 +1079,10 @@ export default function Catalog() {
               <Title order={3} c="gray.8">Tu carrito está vacío</Title>
               <Text size="sm" color="dimmed" mt={4}>¡Parece que aún no has elegido nada!</Text>
             </div>
-            <Button 
-              variant="filled" 
-              radius="xl" 
-              size="md" 
+            <Button
+              variant="filled"
+              radius="xl"
+              size="md"
               color="var(--primary-color)"
               onClick={() => setCartOpened(false)}
             >
@@ -1095,129 +1095,129 @@ export default function Catalog() {
             isMobile ? 'h-[calc(100svh-100px)]' : 'h-[calc(100vh-100px)]',
           )}>
             <ScrollArea className="flex-1" h="100%" offsetScrollbars scrollHideDelay={0}>
-               <Stack gap="md" pt="3.5rem" pb="2rem" px="xs">
-                 {cart.map((item, idx) => (
-                   <Paper 
-                     key={idx} 
-                     withBorder 
-                     radius="lg" 
-                     p="md" 
-                     shadow="xs"
-                     className="border-slate-100 transition-transform duration-200"
-                   >
-                     <Group align="flex-start" gap="md" wrap="nowrap">
-                       {/* Imagen del Producto */}
-                       <Image 
-                         src={item.product.imageUrl ? fixUrl(item.product.imageUrl) : null} 
-                         fallbackSrc="https://placehold.co/100x100?text=Producto"
-                         w={70} 
-                         h={70} 
-                         radius="md" 
-                         className="shrink-0 object-cover"
-                       />
+              <Stack gap="md" pt="3.5rem" pb="2rem" px="xs">
+                {cart.map((item, idx) => (
+                  <Paper
+                    key={idx}
+                    withBorder
+                    radius="lg"
+                    p="md"
+                    shadow="xs"
+                    className="border-slate-100 transition-transform duration-200"
+                  >
+                    <Group align="flex-start" gap="md" wrap="nowrap">
+                      {/* Imagen del Producto */}
+                      <Image
+                        src={item.product.imageUrl ? fixUrl(item.product.imageUrl) : null}
+                        fallbackSrc="https://placehold.co/100x100?text=Producto"
+                        w={70}
+                        h={70}
+                        radius="md"
+                        className="shrink-0 object-cover"
+                      />
 
-                       {/* Información Principal */}
-                       <Box className="min-w-0 flex-1">
-                         <Text fw={700} size="sm" className="line-clamp-1">
-                           {item.product.name}
-                         </Text>
-                         <Text size="xs" color="dimmed" mb={4}>$ {formatPrice(item.product.price)} c/u</Text>
-                         
-                         {/* Modificadores */}
-                         {item.selectedModifiers.length > 0 && (
-                           <Stack gap={2} mt={4}>
-                             {item.selectedModifiers.map(group => (
-                               <Group key={group.groupId} gap={4} wrap="wrap">
-                                 {group.options.map(opt => (
-                                   <Badge 
-                                     key={opt.id} 
-                                     variant="light" 
-                                     size="xs" 
-                                     color="var(--secondary-color)" 
-                                     className="h-[18px] border border-black/5 normal-case"
-                                   >
-                                     +{opt.name}
-                                   </Badge>
-                                 ))}
-                               </Group>
-                             ))}
-                           </Stack>
-                         )}
+                      {/* Información Principal */}
+                      <Box className="min-w-0 flex-1">
+                        <Text fw={700} size="sm" className="line-clamp-1">
+                          {item.product.name}
+                        </Text>
+                        <Text size="xs" color="dimmed" mb={4}>$ {formatPrice(item.product.price)} c/u</Text>
 
-                         {item.observations && (
-                           <Text size="xs" fs="italic" color="blue.6" mt={4} className="border-l-2 border-blue-500 pl-1.5">
-                             "{item.observations}"
-                           </Text>
-                         )}
-                       </Box>
+                        {/* Modificadores */}
+                        {item.selectedModifiers.length > 0 && (
+                          <Stack gap={2} mt={4}>
+                            {item.selectedModifiers.map(group => (
+                              <Group key={group.groupId} gap={4} wrap="wrap">
+                                {group.options.map(opt => (
+                                  <Badge
+                                    key={opt.id}
+                                    variant="light"
+                                    size="xs"
+                                    color="var(--secondary-color)"
+                                    className="h-[18px] border border-black/5 normal-case"
+                                  >
+                                    +{opt.name}
+                                  </Badge>
+                                ))}
+                              </Group>
+                            ))}
+                          </Stack>
+                        )}
 
-                       {/* Eliminar (Arriba derecha dentro de la card) */}
-                       <ActionIcon 
-                         variant="subtle" 
-                         color="red.4" 
-                         radius="md"
-                         size="sm"
-                         onClick={() => removeFromCart(idx)}
-                       >
-                         <Trash2 size={16} />
-                       </ActionIcon>
-                     </Group>
+                        {item.observations && (
+                          <Text size="xs" fs="italic" color="blue.6" mt={4} className="border-l-2 border-blue-500 pl-1.5">
+                            "{item.observations}"
+                          </Text>
+                        )}
+                      </Box>
 
-                     <Divider my="sm" color="#f8fafc" />
+                      {/* Eliminar (Arriba derecha dentro de la card) */}
+                      <ActionIcon
+                        variant="subtle"
+                        color="red.4"
+                        radius="md"
+                        size="sm"
+                        onClick={() => removeFromCart(idx)}
+                      >
+                        <Trash2 size={16} />
+                      </ActionIcon>
+                    </Group>
 
-                     {/* Fila Inferior: Controles y Total por ítem */}
-                     <Group justify="space-between" align="center">
-                       <Group gap={4} className="rounded-full border border-slate-100 bg-slate-50 p-0.5">
-                         <ActionIcon 
-                           variant="filled" 
-                           color="white" 
-                           size="sm" 
-                           radius="xl" 
-                           onClick={() => updateQuantity(idx, -1)}
-                           className="text-slate-500 shadow-sm"
-                         >
-                           <Text size="xs" fw={900}>-</Text>
-                         </ActionIcon>
-                         <Text size="sm" fw={800} className="min-w-6 text-center text-slate-900">
-                           {item.quantity}
-                         </Text>
-                         <ActionIcon 
-                           variant="filled" 
-                           color="white" 
-                           size="sm" 
-                           radius="xl" 
-                           onClick={() => updateQuantity(idx, 1)}
-                           className="text-slate-500 shadow-sm"
-                         >
-                           <Text size="xs" fw={900}>+</Text>
-                         </ActionIcon>
-                       </Group>
+                    <Divider my="sm" color="#f8fafc" />
 
-                       <Text fw={800} size="md" color="blue.8">
-                         $ {formatPrice((item.product.price + item.selectedModifiers.reduce((acc, g) => acc + g.options.reduce((a, o) => a + o.price, 0), 0)) * item.quantity)}
-                       </Text>
-                     </Group>
-                   </Paper>
-                 ))}
-               </Stack>
+                    {/* Fila Inferior: Controles y Total por ítem */}
+                    <Group justify="space-between" align="center">
+                      <Group gap={4} className="rounded-full border border-slate-100 bg-slate-50 p-0.5">
+                        <ActionIcon
+                          variant="filled"
+                          color="white"
+                          size="sm"
+                          radius="xl"
+                          onClick={() => updateQuantity(idx, -1)}
+                          className="text-slate-500 shadow-sm"
+                        >
+                          <Text size="xs" fw={900}>-</Text>
+                        </ActionIcon>
+                        <Text size="sm" fw={800} className="min-w-6 text-center text-slate-900">
+                          {item.quantity}
+                        </Text>
+                        <ActionIcon
+                          variant="filled"
+                          color="white"
+                          size="sm"
+                          radius="xl"
+                          onClick={() => updateQuantity(idx, 1)}
+                          className="text-slate-500 shadow-sm"
+                        >
+                          <Text size="xs" fw={900}>+</Text>
+                        </ActionIcon>
+                      </Group>
+
+                      <Text fw={800} size="md" color="blue.8">
+                        $ {formatPrice((item.product.price + item.selectedModifiers.reduce((acc, g) => acc + g.options.reduce((a, o) => a + o.price, 0), 0)) * item.quantity)}
+                      </Text>
+                    </Group>
+                  </Paper>
+                ))}
+              </Stack>
             </ScrollArea>
-            
+
             {/* Footer fijo del carrito - siempre visible al final del drawer */}
             <Box py="xl" px="md" className="catalog-cart-drawer-footer">
-               <Group justify="space-between" mb="xs">
-                 <Text fw={700}>Total a Pagar:</Text>
-                 <Text fw={900} size="xl" className="text-store-primary">
-                   $ {formatPrice(cart.reduce((acc, item) => {
-                      const basePrice = item.product.price;
-                      const extrasPrice = item.selectedModifiers.reduce((sum, g) => sum + g.options.reduce((s, o) => s + o.price, 0), 0);
-                      return acc + (basePrice + extrasPrice) * item.quantity;
-                    }, 0))}
-                 </Text>
-               </Group>
-               <Button 
-                fullWidth 
-                size="lg" 
-                radius="xl" 
+              <Group justify="space-between" mb="xs">
+                <Text fw={700}>Total a Pagar:</Text>
+                <Text fw={900} size="xl" className="text-store-primary">
+                  $ {formatPrice(cart.reduce((acc, item) => {
+                    const basePrice = item.product.price;
+                    const extrasPrice = item.selectedModifiers.reduce((sum, g) => sum + g.options.reduce((s, o) => s + o.price, 0), 0);
+                    return acc + (basePrice + extrasPrice) * item.quantity;
+                  }, 0))}
+                </Text>
+              </Group>
+              <Button
+                fullWidth
+                size="lg"
+                radius="xl"
                 color="green"
                 c="white"
                 styles={{ label: { color: 'white' } }}
@@ -1228,15 +1228,15 @@ export default function Catalog() {
                   setCheckoutModalOpen(true);
                 }}
                 loading={isOrdering}
-               >
-                 Enviar pedido
-               </Button>
-               {store.mercadoPagoAccessToken && store.allowCatalogPayments !== false && (
-                 <Button 
-                  fullWidth 
-                  size="lg" 
-                  radius="xl" 
-                  color="blue" 
+              >
+                Enviar pedido
+              </Button>
+              {store.mercadoPagoAccessToken && store.allowCatalogPayments !== false && (
+                <Button
+                  fullWidth
+                  size="lg"
+                  radius="xl"
+                  color="blue"
                   mt="sm"
                   c="white"
                   styles={{ label: { color: 'white' } }}
@@ -1247,20 +1247,20 @@ export default function Catalog() {
                     setCheckoutModalOpen(true);
                   }}
                   loading={isOrdering}
-                 >
-                   Comprar
-                 </Button>
-               )}
+                >
+                  Comprar
+                </Button>
+              )}
             </Box>
           </Box>
         )}
       </Drawer>
 
       {/* Modal para pedir datos de contacto para Mercado Pago */}
-      <Modal 
-        opened={checkoutModalOpen} 
-        onClose={() => setCheckoutModalOpen(false)} 
-        title="Completa tus datos de envío y pago" 
+      <Modal
+        opened={checkoutModalOpen}
+        onClose={() => setCheckoutModalOpen(false)}
+        title="Completa tus datos de envío y pago"
         centered
         radius="lg"
         padding="xl"
@@ -1268,18 +1268,18 @@ export default function Catalog() {
       >
         <Stack gap="md">
           <Text size="sm" color="dimmed">Por favor, completa tus datos para procesar el pago y envío correctamente.</Text>
-          <TextInput 
-            label="Tu nombre" 
-            placeholder="Tu nombre completo" 
+          <TextInput
+            label="Tu nombre"
+            placeholder="Tu nombre completo"
             size="md"
             radius="md"
             value={customerName}
             onChange={(e) => setCustomerName(e.currentTarget.value)}
             required
           />
-          <TextInput 
-            label="Número de Teléfono" 
-            placeholder="Ej: 1123456789" 
+          <TextInput
+            label="Número de Teléfono"
+            placeholder="Ej: 1123456789"
             size="md"
             radius="md"
             type="tel"
@@ -1288,9 +1288,9 @@ export default function Catalog() {
             required
             maxLength={15}
           />
-          <TextInput 
-            label="Correo Electrónico" 
-            placeholder="correo@ejemplo.com" 
+          <TextInput
+            label="Correo Electrónico"
+            placeholder="correo@ejemplo.com"
             size="md"
             radius="md"
             type="email"
@@ -1298,9 +1298,9 @@ export default function Catalog() {
             onChange={(e) => setCustomerEmail(e.currentTarget.value)}
             required
           />
-          
+
           <Divider label="Tipo de Entrega" labelPosition="center" my="xs" />
-          
+
           <Radio.Group
             value={isDelivery ? 'delivery' : 'pickup'}
             onChange={(val) => setIsDelivery(val === 'delivery')}
@@ -1312,9 +1312,9 @@ export default function Catalog() {
           </Radio.Group>
 
           {isDelivery && (
-            <TextInput 
-              label="Dirección de Envío" 
-              placeholder="Calle, número, piso o aclaraciones" 
+            <TextInput
+              label="Dirección de Envío"
+              placeholder="Calle, número, piso o aclaraciones"
               size="md"
               radius="md"
               value={customerAddress}
@@ -1323,10 +1323,10 @@ export default function Catalog() {
             />
           )}
 
-          <Button 
-            fullWidth 
-            size="md" 
-            radius="md" 
+          <Button
+            fullWidth
+            size="md"
+            radius="md"
             mt="md"
             color={checkoutMethod === 'WHATSAPP' ? 'green' : 'blue'}
             loading={isOrdering}
@@ -1355,13 +1355,13 @@ export default function Catalog() {
                 return;
               }
               localStorage.setItem('siit_customer_name', customerName);
-              
+
               if (checkoutMethod === 'WHATSAPP') {
                 await handleSendOrder();
               } else {
                 await handleMercadoPagoOrder();
               }
-              
+
               setCheckoutModalOpen(false);
             }}
           >
@@ -1371,19 +1371,19 @@ export default function Catalog() {
       </Modal>
 
       {/* Modal para pedir nombre la primera vez */}
-      <Modal 
-        opened={showNamePrompt} 
-        onClose={() => setShowNamePrompt(false)} 
-        title="¿Cómo te llamas?" 
+      <Modal
+        opened={showNamePrompt}
+        onClose={() => setShowNamePrompt(false)}
+        title="¿Cómo te llamas?"
         centered
         radius="lg"
         padding="xl"
       >
         <Stack gap="md">
           <Text size="sm" color="dimmed">Para que la tienda sepa quién hace el pedido, por favor ingresa tu nombre.</Text>
-          <TextInput 
-            label="Tu nombre" 
-            placeholder="Tu nombre completo" 
+          <TextInput
+            label="Tu nombre"
+            placeholder="Tu nombre completo"
             size="md"
             radius="md"
             value={customerName}
@@ -1391,10 +1391,10 @@ export default function Catalog() {
             required
             autoFocus
           />
-          <Button 
-            fullWidth 
-            size="md" 
-            radius="md" 
+          <Button
+            fullWidth
+            size="md"
+            radius="md"
             onClick={() => {
               if (customerName.trim()) {
                 localStorage.setItem('siit_customer_name', customerName);
@@ -1409,9 +1409,9 @@ export default function Catalog() {
       </Modal>
 
       {/* Product Selection Modal (SaaS Modifiers Placeholder) */}
-      <ProductSelectionModal 
-        product={addingProduct} 
-        onClose={() => setAddingProduct(null)} 
+      <ProductSelectionModal
+        product={addingProduct}
+        onClose={() => setAddingProduct(null)}
         onAdd={addToCart}
         isMobile={isMobile}
         hasModifiers={store.hasModifiers}
@@ -1426,7 +1426,7 @@ export default function Catalog() {
 
 function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMobile }: any) {
   const isOut = product.trackStock && product.stock <= 0;
-  
+
   const getCardStyle = () => {
     const base = {
       display: (styleType === 'horizontal' ? 'flex' : 'block') as any,
@@ -1446,7 +1446,7 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMob
         borderRadius: '24px',
       };
     }
-    
+
     if (styleType === 'horizontal') {
       return {
         ...base,
@@ -1468,8 +1468,8 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMob
   };
 
   return (
-    <Card 
-      padding={0} 
+    <Card
+      padding={0}
       className="product-card"
       style={getCardStyle()}
     >
@@ -1481,8 +1481,8 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMob
             : cn('w-full', isMobile ? 'h-[180px]' : 'h-[260px]'),
         )}
       >
-        <img 
-          src={product.imageUrl ? fixUrl(product.imageUrl) : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600'} 
+        <img
+          src={product.imageUrl ? fixUrl(product.imageUrl) : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600'}
           alt={product.name}
           className="block h-full w-full bg-slate-100 object-contain"
           onError={(e) => {
@@ -1511,11 +1511,11 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMob
           {product.notes && product.notes.length > 0 && (
             <Group gap={4} mt="xs" wrap="wrap">
               {product.notes.map((note: string, idx: number) => (
-                <Badge 
-                  key={idx} 
-                  variant="outline" 
-                  color="orange" 
-                  size="sm" 
+                <Badge
+                  key={idx}
+                  variant="outline"
+                  color="orange"
+                  size="sm"
                   radius="xl"
                   styles={{ label: { textTransform: 'uppercase', fontSize: '9px', fontWeight: 700 } }}
                   leftSection={<Box className="h-1.5 w-1.5 rounded-full bg-amber-500" />}
@@ -1529,14 +1529,14 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMob
 
         <Stack gap="xs">
           {product.trackStock && !isOut && product.stock < 10 && (
-             <Badge variant="filled" color="var(--secondary-color)" size="sm" leftSection={<Package size={10} />}>
-               ¡Quedan {product.stock}!
-             </Badge>
+            <Badge variant="filled" color="var(--secondary-color)" size="sm" leftSection={<Package size={10} />}>
+              ¡Quedan {product.stock}!
+            </Badge>
           )}
-          <Button 
-            fullWidth 
-            radius="xl" 
-            size={isMobile ? "sm" : "md"} 
+          <Button
+            fullWidth
+            radius="xl"
+            size={isMobile ? "sm" : "md"}
             color={isOut ? 'gray' : 'var(--primary-color)'}
             disabled={isOut}
             leftSection={isOut ? null : (hasCart ? <ShoppingCart size={18} /> : <Image src={WhatsAppPng} w={18} h={18} />)}
@@ -1569,7 +1569,7 @@ function ProductSelectionModal({ product, onClose, onAdd, isMobile, showObservat
     setSelectedMods(prev => {
       const current = prev[group.id] || [];
       const isSelected = current.find(o => o.id === option.id);
-      
+
       let nextOptions = [...current];
 
       if (isSelected) {
@@ -1620,14 +1620,14 @@ function ProductSelectionModal({ product, onClose, onAdd, isMobile, showObservat
   };
 
   return (
-    <Modal 
-      opened={!!product} 
-      onClose={onClose} 
-      title={<Title order={4}>Personalizar Pedido</Title>} 
-      radius={isMobile ? 0 : 'lg'} 
-      size={isMobile ? '100%' : 'sm'} 
+    <Modal
+      opened={!!product}
+      onClose={onClose}
+      title={<Title order={4}>Personalizar Pedido</Title>}
+      radius={isMobile ? 0 : 'lg'}
+      size={isMobile ? '100%' : 'sm'}
       fullScreen={isMobile}
-      centered 
+      centered
       zIndex={3000}
       styles={{
         header: {
@@ -1645,18 +1645,18 @@ function ProductSelectionModal({ product, onClose, onAdd, isMobile, showObservat
         <Group align="center">
           <Image src={product.imageUrl} w={60} h={60} radius="md" />
           <Box>
-             <Text fw={700} size="sm" color="var(--text-color)">{product.name}</Text>
-             <Text size="xs" color="dimmed">$ {formatPrice(product.price)}</Text>
+            <Text fw={700} size="sm" color="var(--text-color)">{product.name}</Text>
+            <Text size="xs" color="dimmed">$ {formatPrice(product.price)}</Text>
           </Box>
         </Group>
 
         <Divider />
 
-        <NumberInput 
-          label="Cantidad" 
-          value={quantity} 
-          onChange={(val) => setQuantity(val)} 
-          min={1} 
+        <NumberInput
+          label="Cantidad"
+          value={quantity}
+          onChange={(val) => setQuantity(val)}
+          min={1}
           max={product.trackStock ? product.stock : 99}
           required
         />
@@ -1664,18 +1664,18 @@ function ProductSelectionModal({ product, onClose, onAdd, isMobile, showObservat
         {(product.modifierGroups || []).map((mg: any) => {
           const group = mg.modifierGroup;
           const selectedForGroup = selectedMods[group.id] || [];
-          
+
           return (
             <Box key={group.id} p="md" className="admin-form-section">
               <Group justify="space-between" mb="xs">
-                 <Box>
-                    <Text fw={700} size="sm" color="var(--text-color)">{group.name}</Text>
-                    <Text size="xs" color="dimmed">
-                      {group.isRequired ? 'Obligatorio' : 'Opcional'} • 
-                      Mín: {group.minSelected} / Máx: {group.maxSelected}
-                    </Text>
-                 </Box>
-                 {selectedForGroup.length < group.minSelected && <Badge color="var(--secondary-color)" size="xs">Requerido</Badge>}
+                <Box>
+                  <Text fw={700} size="sm" color="var(--text-color)">{group.name}</Text>
+                  <Text size="xs" color="dimmed">
+                    {group.isRequired ? 'Obligatorio' : 'Opcional'} •
+                    Mín: {group.minSelected} / Máx: {group.maxSelected}
+                  </Text>
+                </Box>
+                {selectedForGroup.length < group.minSelected && <Badge color="var(--secondary-color)" size="xs">Requerido</Badge>}
               </Group>
 
               <Stack gap="xs" mt="md">
@@ -1684,11 +1684,11 @@ function ProductSelectionModal({ product, onClose, onAdd, isMobile, showObservat
                   const canSelectMore = selectedForGroup.length < group.maxSelected;
 
                   return (
-                    <Group 
-                      key={opt.id} 
-                      justify="space-between" 
+                    <Group
+                      key={opt.id}
+                      justify="space-between"
                       onClick={() => handleOptionToggle(group, opt)}
-                      style={{ 
+                      style={{
                         cursor: 'pointer',
                         padding: '10px 14px',
                         borderRadius: '10px',
@@ -1699,19 +1699,19 @@ function ProductSelectionModal({ product, onClose, onAdd, isMobile, showObservat
                     >
                       <Group gap="sm">
                         {group.maxSelected === 1 ? (
-                          <Radio 
-                            checked={isChecked} 
-                            onChange={() => {}} 
-                            style={{ pointerEvents: 'none' }} 
-                            color="var(--primary-color)" 
+                          <Radio
+                            checked={isChecked}
+                            onChange={() => { }}
+                            style={{ pointerEvents: 'none' }}
+                            color="var(--primary-color)"
                           />
                         ) : (
-                          <Checkbox 
-                            checked={isChecked} 
-                            onChange={() => {}} 
-                            style={{ pointerEvents: 'none' }} 
-                            disabled={!isChecked && !canSelectMore} 
-                            color="var(--primary-color)" 
+                          <Checkbox
+                            checked={isChecked}
+                            onChange={() => { }}
+                            style={{ pointerEvents: 'none' }}
+                            disabled={!isChecked && !canSelectMore}
+                            color="var(--primary-color)"
                           />
                         )}
                         <Text size="sm" fw={isChecked ? 600 : 400}>{opt.name}</Text>
@@ -1726,18 +1726,18 @@ function ProductSelectionModal({ product, onClose, onAdd, isMobile, showObservat
         })}
 
         {showObservations && (
-          <Textarea 
-            label="Instrucciones Especiales" 
-            placeholder="Aclaraciones, detalles del producto, etc..." 
-            value={obs} 
+          <Textarea
+            label="Instrucciones Especiales"
+            placeholder="Aclaraciones, detalles del producto, etc..."
+            value={obs}
             onChange={(e) => setObs(e.currentTarget.value)}
           />
         )}
 
-        <Button 
-          fullWidth 
-          radius="xl" 
-          size={isMobile ? "md" : "lg"} 
+        <Button
+          fullWidth
+          radius="xl"
+          size={isMobile ? "md" : "lg"}
           disabled={!canConfirm()}
           onClick={handleAdd}
           mt="md"
