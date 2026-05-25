@@ -1107,14 +1107,15 @@ export default function Catalog() {
                   >
                     <Group align="flex-start" gap="md" wrap="nowrap">
                       {/* Imagen del Producto */}
-                      <Image
-                        src={item.product.imageUrl ? fixUrl(item.product.imageUrl) : null}
-                        fallbackSrc="https://placehold.co/100x100?text=Producto"
-                        w={70}
-                        h={70}
-                        radius="md"
-                        className="shrink-0 object-cover"
-                      />
+                      {item.product.imageUrl && (
+                        <Image
+                          src={fixUrl(item.product.imageUrl)}
+                          w={70}
+                          h={70}
+                          radius="md"
+                          className="shrink-0 object-cover"
+                        />
+                      )}
 
                       {/* Información Principal */}
                       <Box className="min-w-0 flex-1">
@@ -1416,6 +1417,7 @@ export default function Catalog() {
         isMobile={isMobile}
         hasModifiers={store.hasModifiers}
         showObservations={store.showObservations}
+        fixUrl={fixUrl}
       />
 
     </StoreThemeRoot>
@@ -1473,35 +1475,38 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMob
       className="product-card"
       style={getCardStyle()}
     >
-      <Box
-        className={cn(
-          'relative shrink-0 overflow-hidden',
-          styleType === 'horizontal'
-            ? cn(isMobile ? 'min-h-[110px] w-[110px]' : 'min-h-[180px] w-[180px]')
-            : cn('w-full', isMobile ? 'h-[180px]' : 'h-[260px]'),
-        )}
-      >
-        <img
-          src={product.imageUrl ? fixUrl(product.imageUrl) : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600'}
-          alt={product.name}
-          className="block h-full w-full bg-slate-100 object-contain"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.onerror = null; // Previene bucle infinito si placehold falla
-            target.src = 'https://placehold.co/600x400?text=Sin+Imagen';
-          }}
-        />
-        {isOut && (
-          <Badge variant="filled" color="red" className="absolute right-2.5 top-2.5 text-[10px]">AGOTADO</Badge>
-        )}
-        {product.isBundle && (
-          <Badge variant="filled" color="green" className="absolute left-2.5 top-2.5 text-[10px]">PROMO</Badge>
-        )}
-      </Box>
+      {product.imageUrl && (
+        <Box
+          className={cn(
+            'relative shrink-0 overflow-hidden',
+            styleType === 'horizontal'
+              ? cn(isMobile ? 'min-h-[110px] w-[110px]' : 'min-h-[180px] w-[180px]')
+              : cn('w-full', isMobile ? 'h-[180px]' : 'h-[260px]'),
+          )}
+        >
+          <img
+            src={fixUrl(product.imageUrl)}
+            alt={product.name}
+            className="block h-full w-full bg-slate-100 object-contain"
+          />
+          {isOut && (
+            <Badge variant="filled" color="red" className="absolute right-2.5 top-2.5 text-[10px]">AGOTADO</Badge>
+          )}
+          {product.isBundle && (
+            <Badge variant="filled" color="green" className="absolute left-2.5 top-2.5 text-[10px]">PROMO</Badge>
+          )}
+        </Box>
+      )}
 
       <Stack p={styleType === 'horizontal' ? 'md' : 'xl'} gap="sm" className="flex flex-1 flex-col justify-between">
         <Box>
           <Group gap="sm" align="center" mb={4}>
+            {!product.imageUrl && product.isBundle && (
+              <Badge variant="filled" color="green" size="xs">PROMO</Badge>
+            )}
+            {!product.imageUrl && isOut && (
+              <Badge variant="filled" color="red" size="xs">AGOTADO</Badge>
+            )}
             <Title order={3} size="1.1rem" className="leading-tight text-store">{product.name}</Title>
             <Text fw={900} size="md" className="rounded-md bg-store-price-muted px-2 py-0.5 text-store-primary">${formatPrice(product.price)}</Text>
           </Group>
@@ -1550,7 +1555,7 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMob
   );
 }
 
-function ProductSelectionModal({ product, onClose, onAdd, isMobile, showObservations }: any) {
+function ProductSelectionModal({ product, onClose, onAdd, isMobile, showObservations, fixUrl }: any) {
   const [quantity, setQuantity] = useState<number | string>(1);
   const [obs, setObs] = useState('');
   const [selectedMods, setSelectedMods] = useState<Record<string, ModifierOption[]>>({});
@@ -1643,7 +1648,9 @@ function ProductSelectionModal({ product, onClose, onAdd, isMobile, showObservat
     >
       <Stack gap="md">
         <Group align="center">
-          <Image src={product.imageUrl} w={60} h={60} radius="md" />
+          {product.imageUrl && (
+            <Image src={fixUrl(product.imageUrl)} w={60} h={60} radius="md" />
+          )}
           <Box>
             <Text fw={700} size="sm" color="var(--text-color)">{product.name}</Text>
             <Text size="xs" color="dimmed">$ {formatPrice(product.price)}</Text>
