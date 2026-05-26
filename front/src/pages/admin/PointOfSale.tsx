@@ -258,8 +258,8 @@ export default function PointOfSale() {
                           {product.name}
                         </Text>
                         {product.flavor && (
-                          <Badge variant="light" color="blue" size="xs" radius="sm" style={{ textTransform: 'none', fontWeight: 600 }}>
-                            {product.flavor}
+                          <Badge variant="light" color="blue" size="sm" radius="md" style={{ textTransform: 'none', fontWeight: 600 }}>
+                            Sabor {product.flavor}
                           </Badge>
                         )}
                       </Group>
@@ -306,8 +306,8 @@ export default function PointOfSale() {
                         <Group gap={6} align="center">
                           <Text size="sm">{item.name}</Text>
                           {item.flavor && (
-                            <Badge variant="light" color="blue" size="xs" radius="sm" style={{ textTransform: 'none', fontWeight: 600 }}>
-                              {item.flavor}
+                            <Badge variant="light" color="blue" size="sm" radius="md" style={{ textTransform: 'none', fontWeight: 600 }}>
+                              Sabor {item.flavor}
                             </Badge>
                           )}
                         </Group>

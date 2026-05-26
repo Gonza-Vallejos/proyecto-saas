@@ -1514,8 +1514,8 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMob
               {product.name}
             </Title>
             {product.flavor && (
-              <Badge variant="light" color="var(--primary-color)" size="xs" radius="sm" style={{ textTransform: 'none', fontWeight: 600 }}>
-                {product.flavor}
+              <Badge variant="light" color="var(--primary-color)" size="sm" radius="md" style={{ textTransform: 'none', fontWeight: 600 }}>
+                Sabor {product.flavor}
               </Badge>
             )}
             <Text fw={900} size="md" className="rounded-md bg-store-price-muted px-2 py-0.5 text-store-primary">${formatPrice(product.price)}</Text>
@@ -1667,8 +1667,8 @@ function ProductSelectionModal({ product, onClose, onAdd, isMobile, showObservat
                 {product.name}
               </Text>
               {product.flavor && (
-                <Badge variant="light" color="var(--primary-color)" size="xs" radius="sm" style={{ textTransform: 'none', fontWeight: 600 }}>
-                  {product.flavor}
+                <Badge variant="light" color="var(--primary-color)" size="sm" radius="md" style={{ textTransform: 'none', fontWeight: 600 }}>
+                  Sabor {product.flavor}
                 </Badge>
               )}
             </Group>
