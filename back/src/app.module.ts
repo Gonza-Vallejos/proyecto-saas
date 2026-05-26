@@ -16,8 +16,8 @@ import { UsersModule } from './users/users.module';
 import { UploadsController } from './uploads/uploads.controller';
 import { SupabaseService } from './uploads/supabase.service';
 import { EventsModule } from './events/events.module';
-
 import { MercadoPagoModule } from './mercado-pago/mercado-pago.module';
+import { CashRegistersModule } from './cash-registers/cash-registers.module';
 
 @Module({
   imports: [
@@ -40,7 +40,8 @@ import { MercadoPagoModule } from './mercado-pago/mercado-pago.module';
     OrdersModule,
     UsersModule,
     EventsModule,
-    MercadoPagoModule
+    MercadoPagoModule,
+    CashRegistersModule
   ],
   controllers: [AppController, UploadsController],
   providers: [

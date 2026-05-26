@@ -73,6 +73,7 @@ model Store {
   categories   Category[]
   modifierGroups ModifierGroup[]
   orders       Order[]
+  cashRegisters CashRegister[]
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -194,6 +195,7 @@ model Order {
   id           String      @id @default(uuid())
   status       String      @default("PENDING") // PENDING, PREPARING, READY, DELIVERED, PAID, CANCELLED
   paymentStatus String     @default("PENDING") // PENDING, PAID, FAILED
+  paymentMethod String?    @default("CASH")    // CASH, MERCADOPAGO
   total        Float       @default(0)
   observations String?
   
@@ -224,4 +226,20 @@ model OrderItem {
   order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   createdAt       DateTime @default(now())
+}
+
+model CashRegister {
+  id           String    @id @default(uuid())
+  storeId      String
+  store        Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  openedAt     DateTime  @default(now())
+  closedAt     DateTime?
+  
+  initialCash  Float     @default(0)
+  finalCash    Float?
+  expectedCash Float?
+  
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }

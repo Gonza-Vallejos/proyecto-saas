@@ -47,4 +47,15 @@ export class OrdersController {
   ) {
     return this.ordersService.updateStatus(id, req.user.storeId, status);
   }
+
+  @Post(':id/pay')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN', 'CASHIER'])
+  async payOrder(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Body('paymentMethod') paymentMethod: string,
+  ) {
+    return this.ordersService.payOrder(id, req.user.storeId, paymentMethod);
+  }
 }

@@ -10,7 +10,7 @@ export class OrdersService {
   ) {}
 
   async create(storeId: string, data: any) {
-    const { items, observations, customerName, customerPhone, origin, status } = data;
+    const { items, observations, customerName, customerPhone, origin, status, paymentMethod, paymentStatus } = data;
 
     // Calcular total y preparar ítems
     let total = 0;
@@ -59,6 +59,8 @@ export class OrdersService {
           origin: origin || 'POS',
           total,
           status: status || 'PENDING',
+          paymentStatus: paymentStatus || 'PENDING',
+          paymentMethod: paymentMethod || 'CASH',
           items: {
             create: orderItems,
           },
@@ -159,6 +161,24 @@ export class OrdersService {
     });
     if (!order) throw new BadRequestException('Pedido no encontrado');
     return order;
+  }
+
+  async payOrder(id: string, storeId: string, paymentMethod: string) {
+    const order = await this.prisma.order.findFirst({ where: { id, storeId } });
+    if (!order) throw new BadRequestException('Pedido no encontrado');
+    if (order.status === 'PAID') throw new BadRequestException('El pedido ya está pagado');
+
+    const updated = await this.prisma.order.update({
+      where: { id },
+      data: {
+        status: 'PAID',
+        paymentStatus: 'PAID',
+        paymentMethod
+      }
+    });
+    
+    this.eventsGateway.notifyStoreOrdersUpdate(storeId);
+    return updated;
   }
 
   async updateStatus(id: string, storeId: string, status: string) {

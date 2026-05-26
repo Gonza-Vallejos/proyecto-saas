@@ -196,7 +196,7 @@ export default function AdminLayout() {
         <History size={18} /> Historial de Pedidos
       </AdminNavLink>
 
-      {storeData?.hasOrderManagement && (
+      {(storeData?.hasOrderManagement || storeData?.hasPOS) && (
         <>
           <Divider label="Personal" labelPosition="center" my="sm" />
           <AdminNavLink to={`${adminPrefix}/staff`} active={isActive(`${adminPrefix}/staff`)}>
