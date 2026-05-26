@@ -1512,8 +1512,12 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMob
             )}
             <Title order={3} size="1.1rem" className="leading-tight text-store">
               {product.name}
-              {product.flavor && <Text component="span" size="sm" c="dimmed" ml="xs">({product.flavor})</Text>}
             </Title>
+            {product.flavor && (
+              <Badge variant="light" color="var(--primary-color)" size="xs" radius="sm" style={{ textTransform: 'none', fontWeight: 600 }}>
+                {product.flavor}
+              </Badge>
+            )}
             <Text fw={900} size="md" className="rounded-md bg-store-price-muted px-2 py-0.5 text-store-primary">${formatPrice(product.price)}</Text>
           </Group>
           <Text size="xs" color="dimmed" lineClamp={2}>
@@ -1658,11 +1662,17 @@ function ProductSelectionModal({ product, onClose, onAdd, isMobile, showObservat
             <Image src={fixUrl(product.imageUrl)} w={60} h={60} radius="md" />
           )}
           <Box>
-            <Text fw={700} size="sm" color="var(--text-color)">
-              {product.name}
-              {product.flavor && <Text component="span" size="xs" color="dimmed" ml="xs">({product.flavor})</Text>}
-            </Text>
-            <Text size="xs" color="dimmed">$ {formatPrice(product.price)}</Text>
+            <Group gap={6} align="center">
+              <Text fw={700} size="sm" color="var(--text-color)">
+                {product.name}
+              </Text>
+              {product.flavor && (
+                <Badge variant="light" color="var(--primary-color)" size="xs" radius="sm" style={{ textTransform: 'none', fontWeight: 600 }}>
+                  {product.flavor}
+                </Badge>
+              )}
+            </Group>
+            <Text size="xs" color="dimmed" mt={2}>$ {formatPrice(product.price)}</Text>
           </Box>
         </Group>
 

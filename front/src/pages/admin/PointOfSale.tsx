@@ -253,10 +253,16 @@ export default function PointOfSale() {
                 >
                   <Group justify="space-between">
                     <div>
-                      <Text size="sm" fw={600}>
-                        {product.name}
-                        {product.flavor && <Text component="span" size="xs" color="dimmed" ml="xs">({product.flavor})</Text>}
-                      </Text>
+                      <Group gap={6} align="center" mb={2}>
+                        <Text size="sm" fw={600}>
+                          {product.name}
+                        </Text>
+                        {product.flavor && (
+                          <Badge variant="light" color="blue" size="xs" radius="sm" style={{ textTransform: 'none', fontWeight: 600 }}>
+                            {product.flavor}
+                          </Badge>
+                        )}
+                      </Group>
                       <Text size="xs" color="dimmed">{product.category?.name ?? 'Sin categoría'}</Text>
                     </div>
                     <Text size="sm" fw={700} color="blue">${product.price.toLocaleString()}</Text>
@@ -297,8 +303,14 @@ export default function PointOfSale() {
                   cart.map((item, idx) => (
                     <Table.Tr key={idx}>
                       <Table.Td className="!pl-6">
-                        {item.name}
-                        {item.flavor && <Text size="xs" color="dimmed">Sabor: {item.flavor}</Text>}
+                        <Group gap={6} align="center">
+                          <Text size="sm">{item.name}</Text>
+                          {item.flavor && (
+                            <Badge variant="light" color="blue" size="xs" radius="sm" style={{ textTransform: 'none', fontWeight: 600 }}>
+                              {item.flavor}
+                            </Badge>
+                          )}
+                        </Group>
                       </Table.Td>
                       <Table.Td>
                         <Group gap={6} wrap="nowrap">
