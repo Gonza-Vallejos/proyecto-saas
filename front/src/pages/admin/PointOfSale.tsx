@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Title, Text, Card, Group, Stack, TextInput, Button, Table, ActionIcon, Divider, Badge, Modal, Loader, Popover, NumberInput, Grid } from '@mantine/core';
+import { Title, Text, Card, Group, Stack, TextInput, Button, Table, ActionIcon, Divider, Badge, Modal, Loader, Popover, NumberInput } from '@mantine/core';
 import { ShoppingCart, Search, Trash2, CreditCard, Banknote, X, Package, Lock } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { QRCodeSVG } from 'qrcode.react';
