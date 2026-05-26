@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
-import { Store, Package, LogOut, Settings, ExternalLink, LayoutGrid, Palette, Bell, User, KeyRound, Menu as MenuIcon, QrCode, Sandwich, UserCog, MessageSquare, History, MonitorSmartphone } from 'lucide-react';
+import { Store, Package, LogOut, Settings, ExternalLink, LayoutGrid, Palette, Bell, User, KeyRound, Menu as MenuIcon, QrCode, Sandwich, UserCog, MessageSquare, History, MonitorSmartphone, Archive } from 'lucide-react';
 import { Avatar, Text, Group, Badge, Indicator, Tooltip, Stack, ActionIcon, Menu, Modal, TextInput, PasswordInput, Button, Drawer, Divider } from '@mantine/core';
 import { api } from '../utils/api';
 import Swal from 'sweetalert2';
@@ -161,9 +161,14 @@ export default function AdminLayout() {
   ) : (
     <>
       {storeData?.hasPOS && (
-        <AdminNavLink to={`${adminPrefix}/pos`} active={isActive(`${adminPrefix}/pos`)}>
-          <MonitorSmartphone size={18} /> Punto de Venta
-        </AdminNavLink>
+        <>
+          <AdminNavLink to={`${adminPrefix}/pos`} active={isActive(`${adminPrefix}/pos`)}>
+            <MonitorSmartphone size={18} /> Punto de Venta
+          </AdminNavLink>
+          <AdminNavLink to={`${adminPrefix}/cash-registers`} active={isActive(`${adminPrefix}/cash-registers`)}>
+            <Archive size={18} /> Historial de Cajas
+          </AdminNavLink>
+        </>
       )}
       <AdminNavLink to={adminPrefix} active={isActive(adminPrefix)}>
         <Package size={18} /> Mis Productos

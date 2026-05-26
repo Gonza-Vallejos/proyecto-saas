@@ -551,8 +551,8 @@ export default function PointOfSale() {
       {/* Modal Apertura de Caja */}
       <Modal
         opened={openRegisterModal}
-        onClose={() => {}}
-        withCloseButton={false}
+        onClose={() => setOpenRegisterModal(false)}
+        withCloseButton={true}
         closeOnClickOutside={false}
         closeOnEscape={false}
         title={<Title order={3}>Apertura de Caja</Title>}

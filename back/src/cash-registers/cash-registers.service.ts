@@ -12,7 +12,7 @@ export class CashRegistersService {
     });
   }
 
-  async open(storeId: string, initialCash: number) {
+  async open(storeId: string, initialCash: number, openedById: string) {
     const current = await this.getCurrent(storeId);
     if (current) {
       throw new BadRequestException('La caja ya está abierta');
@@ -22,6 +22,7 @@ export class CashRegistersService {
       data: {
         storeId,
         initialCash,
+        openedById,
       },
     });
   }
@@ -93,5 +94,17 @@ export class CashRegistersService {
       expectedCash: current.initialCash + totalCash,
       totalSales: totalCash + totalMp,
     };
+  }
+
+  async getHistory(storeId: string) {
+    return this.prisma.cashRegister.findMany({
+      where: { storeId },
+      orderBy: { openedAt: 'desc' },
+      include: {
+        openedBy: {
+          select: { name: true, email: true },
+        },
+      },
+    });
   }
 }

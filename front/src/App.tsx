@@ -13,6 +13,7 @@ import WhatsAppOrders from './pages/admin/WhatsAppOrders';
 import OrderHistory from './pages/admin/OrderHistory';
 import StaffManagement from './pages/admin/StaffManagement';
 import PointOfSale from './pages/admin/PointOfSale';
+import CashRegistersHistory from './pages/admin/CashRegistersHistory';
 import Register from './pages/Register';
 import NotFound from './pages/NotFound';
 
@@ -83,6 +84,7 @@ function App() {
           <Route path="orders-history" element={<OrderHistory />} />
           <Route path="staff" element={<StaffManagement />} />
           <Route path="pos" element={<PointOfSale />} />
+          <Route path="cash-registers" element={<CashRegistersHistory />} />
         </Route>
 
         {/* Redirección inteligente de /admin */}

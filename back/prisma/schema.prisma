@@ -18,6 +18,7 @@ model User {
   // Relaciones
   storeId   String?  // Opcional porque un superadmin no pertenece a 'una' tienda
   store     Store?   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  cashRegisters CashRegister[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -235,6 +236,9 @@ model CashRegister {
   
   openedAt     DateTime  @default(now())
   closedAt     DateTime?
+  
+  openedById   String?
+  openedBy     User?     @relation(fields: [openedById], references: [id], onDelete: SetNull)
   
   initialCash  Float     @default(0)
   finalCash    Float?
