@@ -243,8 +243,6 @@ export default function PointOfSale() {
   const handleCheckout = async (method: 'Efectivo' | 'Mercado Pago') => {
     if (cart.length === 0) return;
 
-    const paymentMethodConst = method === 'Efectivo' ? 'CASH' : 'MERCADOPAGO';
-
     if (method === 'Mercado Pago') {
       setLoadingQr(true);
       setQrModalOpen(true);
@@ -337,9 +335,9 @@ export default function PointOfSale() {
         )}
       </Group>
 
-      <Grid gutter="md">
+      <div className="admin-pos-grid">
         {/* Lado Izquierdo: Buscador y Tabla */}
-        <Grid.Col span={{ base: 12, md: 8 }}>
+        <Stack gap="md">
           <Card withBorder radius="md" p="md" shadow="sm" mb="md" style={{ overflow: 'visible' }}>
             <Popover
               opened={showDropdown && (searchResults.length > 0 || (!loadingSearch && searchInput.trim() !== ''))}
@@ -485,11 +483,10 @@ export default function PointOfSale() {
               </Table.Tbody>
             </Table>
           </Card>
-        </Grid.Col>
+        </Stack>
 
         {/* Lado Derecho: Resumen y Pedidos Listos */}
-        <Grid.Col span={{ base: 12, md: 4 }}>
-          <Stack gap="md">
+        <Stack gap="md" className="h-fit">
             <Card withBorder radius="md" p="xl" shadow="sm">
               <Stack gap="lg">
                 <Title order={3}>Resumen</Title>
@@ -547,8 +544,8 @@ export default function PointOfSale() {
               </Card>
             )}
           </Stack>
-        </Grid.Col>
-      </Grid>
+        </Stack>
+      </div>
 
       {/* Modal Apertura de Caja */}
       <Modal
@@ -569,7 +566,7 @@ export default function PointOfSale() {
             label="Monto Inicial en Efectivo"
             placeholder="0"
             value={initialCashInput}
-            onChange={setInitialCashInput}
+            onChange={(val) => setInitialCashInput(Number(val) || '')}
             min={0}
             leftSection={<Text size="sm">$</Text>}
             size="md"
