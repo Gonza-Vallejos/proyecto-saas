@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, Image as ImageIcon, Edit3, Boxes, Search, Filter, X, Barcode } from 'lucide-react';
+import { Plus, Trash2, Edit3, Boxes, Search, Filter, X, Barcode } from 'lucide-react';
 import { Modal, Button, TextInput, NumberInput, Select, MultiSelect, Textarea, Group, ActionIcon, Tooltip, Switch, Badge, Text, Stack, Box, Title, Card, Transition, TagsInput } from '@mantine/core';
 import FileUploader from '../../components/FileUploader';
 import { api } from '../../utils/api';
