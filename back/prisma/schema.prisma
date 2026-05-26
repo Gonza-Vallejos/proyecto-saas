@@ -19,6 +19,7 @@ model User {
   storeId   String?  // Opcional porque un superadmin no pertenece a 'una' tienda
   store     Store?   @relation(fields: [storeId], references: [id], onDelete: Cascade)
   cashRegisters CashRegister[]
+  ordersAsSeller Order[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -208,6 +209,9 @@ model Order {
   origin        String      @default("POS") // POS, WHATSAPP, CATALOG
   store        Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
   items        OrderItem[]
+  
+  sellerId     String?
+  seller       User?       @relation(fields: [sellerId], references: [id], onDelete: SetNull)
 
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt

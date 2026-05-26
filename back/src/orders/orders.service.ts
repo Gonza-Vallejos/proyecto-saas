@@ -10,7 +10,7 @@ export class OrdersService {
   ) {}
 
   async create(storeId: string, data: any) {
-    const { items, observations, customerName, customerPhone, origin, status, paymentMethod, paymentStatus } = data;
+    const { items, observations, customerName, customerPhone, origin, status, paymentMethod, paymentStatus, sellerId } = data;
 
     // Calcular total y preparar ítems
     let total = 0;
@@ -61,6 +61,7 @@ export class OrdersService {
           status: status || 'PENDING',
           paymentStatus: paymentStatus || 'PENDING',
           paymentMethod: paymentMethod || 'CASH',
+          sellerId,
           items: {
             create: orderItems,
           },
@@ -104,7 +105,7 @@ export class OrdersService {
     return result;
   }
 
-  async findAllByStore(storeId: string, status?: string, origin?: string, startDate?: string, endDate?: string) {
+  async findAllByStore(storeId: string, status?: string, origin?: string, startDate?: string, endDate?: string, sellerId?: string) {
     const where: any = { storeId };
     
     if (status && status !== 'all') {
@@ -120,6 +121,10 @@ export class OrdersService {
 
     if (origin) {
       where.origin = origin;
+    }
+
+    if (sellerId) {
+      where.sellerId = sellerId;
     }
 
     if (startDate || endDate) {
@@ -138,6 +143,9 @@ export class OrdersService {
     return this.prisma.order.findMany({
       where,
       include: {
+        seller: {
+          select: { name: true, email: true }
+        },
         items: {
           include: {
             product: true
@@ -163,7 +171,7 @@ export class OrdersService {
     return order;
   }
 
-  async payOrder(id: string, storeId: string, paymentMethod: string) {
+  async payOrder(id: string, storeId: string, paymentMethod: string, sellerId?: string) {
     const order = await this.prisma.order.findFirst({ where: { id, storeId } });
     if (!order) throw new BadRequestException('Pedido no encontrado');
     if (order.status === 'PAID') throw new BadRequestException('El pedido ya está pagado');
@@ -173,7 +181,8 @@ export class OrdersService {
       data: {
         status: 'PAID',
         paymentStatus: 'PAID',
-        paymentMethod
+        paymentMethod,
+        ...(sellerId ? { sellerId } : {})
       }
     });
     

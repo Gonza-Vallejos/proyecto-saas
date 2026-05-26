@@ -26,6 +26,7 @@ interface Order {
   customerName?: string;
   customerPhone?: string;
   createdAt: string;
+  seller?: { name?: string; email?: string } | null;
   items: OrderItem[];
 }
 
@@ -39,6 +40,8 @@ export default function OrderHistory() {
   const [originFilter, setOriginFilter] = useState('all');
   const [startDate, setStartDate] = useState(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]); // Last 7 days
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [sellerFilter, setSellerFilter] = useState('all');
+  const [sellers, setSellers] = useState<{value: string, label: string}[]>([]);
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orderModalOpen, setOrderModalOpen] = useState(false);
@@ -49,6 +52,7 @@ export default function OrderHistory() {
       const currentStatus = activeTab === 'sales' ? 'PAID' : statusFilter;
       let url = `/orders?status=${currentStatus}`;
       if (originFilter !== 'all') url += `&origin=${originFilter}`;
+      if (sellerFilter !== 'all') url += `&sellerId=${sellerFilter}`;
       if (startDate) url += `&startDate=${startDate}T00:00:00Z`;
       if (endDate) url += `&endDate=${endDate}T23:59:59Z`;
 
@@ -59,11 +63,23 @@ export default function OrderHistory() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, originFilter, startDate, endDate, activeTab]);
+  }, [statusFilter, originFilter, sellerFilter, startDate, endDate, activeTab]);
 
   useEffect(() => {
     fetchHistory();
   }, [fetchHistory, activeTab]);
+
+  useEffect(() => {
+    const fetchSellers = async () => {
+      try {
+        const staff = await api.get('/users/staff');
+        setSellers(staff.map((s: any) => ({ value: s.id, label: s.name || s.email })));
+      } catch (e) {
+        console.error('Error fetching sellers', e);
+      }
+    };
+    fetchSellers();
+  }, []);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -167,6 +183,12 @@ export default function OrderHistory() {
             value={originFilter}
             onChange={(val) => setOriginFilter(val || 'all')}
           />
+          <Select 
+            label="Vendedor"
+            data={[{ value: 'all', label: 'Todos los vendedores' }, ...sellers]}
+            value={sellerFilter}
+            onChange={(val) => setSellerFilter(val || 'all')}
+          />
         </SimpleGrid>
       </Paper>
 
@@ -243,9 +265,25 @@ export default function OrderHistory() {
                   </Table.Td>
                   <Table.Td>{getOriginIcon(order.origin)}</Table.Td>
                   <Table.Td>
-                    <Text size="sm" fw={500}>
-                      {order.customerName || 'Cliente'}
-                    </Text>
+                    {order.origin === 'POS' ? (
+                      <Stack gap={0}>
+                        <Text size="sm" fw={700} color="indigo.9">Venta Mostrador</Text>
+                        <Text size="xs" color="dimmed">
+                          Vendió: {order.seller?.name || order.seller?.email || 'Desconocido'}
+                        </Text>
+                      </Stack>
+                    ) : (
+                      <Stack gap={0}>
+                        <Text size="sm" fw={500}>
+                          {order.customerName || 'Cliente Online'}
+                        </Text>
+                        {order.seller && (
+                          <Text size="xs" color="teal.7">
+                            Cobrado por: {order.seller.name || order.seller.email}
+                          </Text>
+                        )}
+                      </Stack>
+                    )}
                   </Table.Td>
                   <Table.Td>
                     <Tooltip label={order.items.map(i => `${i.quantity}x ${i.product?.name}`).join(', ')}>

@@ -19,15 +19,16 @@ export class OrdersController {
     return this.ordersService.create(req.user.storeId, { 
       ...body, 
       origin: body.origin || 'POS',
-      status: body.status || 'PENDING'
+      status: body.status || 'PENDING',
+      sellerId: req.user.id
     });
   }
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN', 'CASHIER'])
-  async findAll(@Request() req: any, @Query('status') status?: string, @Query('origin') origin?: string, @Query('startDate') startDate?: string, @Query('endDate') endDate?: string) {
-    return this.ordersService.findAllByStore(req.user.storeId, status, origin, startDate, endDate);
+  async findAll(@Request() req: any, @Query('status') status?: string, @Query('origin') origin?: string, @Query('startDate') startDate?: string, @Query('endDate') endDate?: string, @Query('sellerId') sellerId?: string) {
+    return this.ordersService.findAllByStore(req.user.storeId, status, origin, startDate, endDate, sellerId);
   }
 
   @Get(':id')
@@ -56,6 +57,6 @@ export class OrdersController {
     @Request() req: any,
     @Body('paymentMethod') paymentMethod: string,
   ) {
-    return this.ordersService.payOrder(id, req.user.storeId, paymentMethod);
+    return this.ordersService.payOrder(id, req.user.storeId, paymentMethod, req.user.id);
   }
 }
