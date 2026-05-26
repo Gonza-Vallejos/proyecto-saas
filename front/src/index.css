@@ -369,7 +369,7 @@ body {
   }
 
   .catalog-hero-panel {
-    @apply relative flex items-center bg-slate-50 bg-cover bg-center;
+    @apply relative flex items-center bg-slate-50 bg-cover bg-center bg-no-repeat;
   }
 
   .catalog-hero-panel--image {
