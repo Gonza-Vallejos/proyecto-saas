@@ -544,7 +544,6 @@ export default function PointOfSale() {
               </Card>
             )}
           </Stack>
-        </Stack>
       </div>
 
       {/* Modal Apertura de Caja */}
