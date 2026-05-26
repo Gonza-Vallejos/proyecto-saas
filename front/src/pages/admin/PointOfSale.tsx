@@ -11,7 +11,7 @@ export default function PointOfSale() {
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [cart, setCart] = useState<any[]>([]);
-  const [total, setTotal] = useState(0);
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   // Mercado Pago QR State
   const [qrModalOpen, setQrModalOpen] = useState(false);
@@ -29,7 +29,6 @@ export default function PointOfSale() {
           if (order.status === 'PAID') {
             setQrModalOpen(false);
             setCart([]);
-            setTotal(0);
             setPendingOrderId(null);
             Swal.fire({
               title: '¡Pago Confirmado!',
@@ -82,17 +81,27 @@ export default function PointOfSale() {
       }
       return [...prev, { ...product, quantity: 1 }];
     });
-    setTotal(prev => prev + product.price);
     setSearchInput('');
     setSearchResults([]);
     setShowDropdown(false);
   };
 
+  const updateQuantity = (index: number, change: number) => {
+    setCart(prev => {
+      const newCart = [...prev];
+      const item = newCart[index];
+      const newQty = item.quantity + change;
+      if (newQty <= 0) {
+        newCart.splice(index, 1);
+      } else {
+        newCart[index] = { ...item, quantity: newQty };
+      }
+      return newCart;
+    });
+  };
+
   const handleRemove = (index: number) => {
-    const newCart = [...cart];
-    const removed = newCart.splice(index, 1)[0];
-    setCart(newCart);
-    setTotal(prev => prev - removed.price);
+    setCart(prev => prev.filter((_, idx) => idx !== index));
   };
 
   const processOrder = async () => {
@@ -109,7 +118,6 @@ export default function PointOfSale() {
       });
 
       setCart([]);
-      setTotal(0);
       setQrModalOpen(false);
       Swal.fire({
         title: '¡Venta Registrada!',
@@ -286,8 +294,18 @@ export default function PointOfSale() {
                   cart.map((item, idx) => (
                     <Table.Tr key={idx}>
                       <Table.Td className="!pl-6">{item.name}</Table.Td>
-                      <Table.Td>{item.quantity}</Table.Td>
-                      <Table.Td>${item.price.toLocaleString()}</Table.Td>
+                      <Table.Td>
+                        <Group gap={6} wrap="nowrap">
+                          <ActionIcon size="sm" variant="light" color="gray" radius="xl" onClick={() => updateQuantity(idx, -1)}>
+                            <Text size="xs" fw={700}>-</Text>
+                          </ActionIcon>
+                          <Text fw={700} size="sm" style={{ minWidth: '16px', textAlign: 'center' }}>{item.quantity}</Text>
+                          <ActionIcon size="sm" variant="light" color="gray" radius="xl" onClick={() => updateQuantity(idx, 1)}>
+                            <Text size="xs" fw={700}>+</Text>
+                          </ActionIcon>
+                        </Group>
+                      </Table.Td>
+                      <Table.Td>${(item.price * item.quantity).toLocaleString()}</Table.Td>
                       <Table.Td className="text-center">
                         <ActionIcon color="red" variant="subtle" onClick={() => handleRemove(idx)}>
                           <Trash2 size={16} />
@@ -386,7 +404,6 @@ export default function PointOfSale() {
                   try {
                     await api.patch(`/orders/${pendingOrderId}/status`, { status: 'PAID' });
                     setCart([]);
-                    setTotal(0);
                     setQrModalOpen(false);
                     setPendingOrderId(null);
                     Swal.fire({

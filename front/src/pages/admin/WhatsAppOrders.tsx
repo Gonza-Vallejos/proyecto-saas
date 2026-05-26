@@ -97,7 +97,7 @@ export default function WhatsAppOrders() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'PENDING': return 'Nuevo';
-      case 'PREPARING': return 'En Proceso';
+      case 'PREPARING': return 'Pendiente';
       case 'READY': return 'Listo';
       default: return status;
     }
@@ -292,7 +292,7 @@ export default function WhatsAppOrders() {
 
         {preparing.length > 0 && (
           <Box>
-            <Badge color="orange" size="lg" mb="lg">EN PREPARACIÓN ({preparing.length})</Badge>
+            <Badge color="orange" size="lg" mb="lg">PENDIENTES ({preparing.length})</Badge>
             <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
               {preparing.map(order => renderOrderCard(order))}
             </SimpleGrid>
@@ -320,7 +320,7 @@ export default function WhatsAppOrders() {
           <Title order={2} className="admin-title-row">
             <ShoppingBag size={28} color="#25D366" /> Monitor de Pedidos
           </Title>
-          <Text color="dimmed" size="sm">Supervisa pedidos externos y gestiona estados de cocina.</Text>
+          <Text color="dimmed" size="sm">Supervisa pedidos externos y gestiona sus estados.</Text>
         </div>
         <Button variant="light" leftSection={<RefreshCw size={18} className={isRefreshing ? 'rotating' : ''} />} onClick={() => fetchOrders()}>
           Refrescar

@@ -106,7 +106,11 @@ export class OrdersService {
     const where: any = { storeId };
     
     if (status && status !== 'all') {
-      where.status = status;
+      if (status === 'PAID') {
+        where.status = { in: ['PAID', 'READY'] };
+      } else {
+        where.status = status;
+      }
     } else if (!status) {
       // Por defecto (monitores), traer pedidos no finalizados
       where.status = { notIn: ['PAID', 'CANCELLED'] };

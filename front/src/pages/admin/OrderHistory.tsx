@@ -67,8 +67,8 @@ export default function OrderHistory() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'PENDING': return <Badge color="blue" variant="light">Pendiente</Badge>;
-      case 'PREPARING': return <Badge color="orange" variant="light">En Cocina</Badge>;
+      case 'PENDING': return <Badge color="blue" variant="light">Nuevo</Badge>;
+      case 'PREPARING': return <Badge color="orange" variant="light">Pendiente</Badge>;
       case 'READY': return <Badge color="green" variant="light">Listo</Badge>;
       case 'PAID': return <Badge color="teal" variant="filled">Pagado</Badge>;
       case 'CANCELLED': return <Badge color="red" variant="filled">Cancelado</Badge>;
@@ -87,11 +87,11 @@ export default function OrderHistory() {
   const stats = {
     total: orders.filter(o => o.status !== 'CANCELLED').reduce((acc, o) => acc + o.total, 0),
     count: orders.length,
-    paid: orders.filter(o => o.status === 'PAID').length,
+    paid: orders.filter(o => o.status === 'PAID' || o.status === 'READY').length,
     cancelled: orders.filter(o => o.status === 'CANCELLED').length,
-    whatsappSales: orders.filter(o => o.status === 'PAID' && o.origin === 'WHATSAPP').reduce((acc, o) => acc + o.total, 0),
-    catalogSales: orders.filter(o => o.status === 'PAID' && o.origin === 'CATALOG').reduce((acc, o) => acc + o.total, 0),
-    posSales: orders.filter(o => o.status === 'PAID' && o.origin === 'POS').reduce((acc, o) => acc + o.total, 0),
+    whatsappSales: orders.filter(o => (o.status === 'PAID' || o.status === 'READY') && o.origin === 'WHATSAPP').reduce((acc, o) => acc + o.total, 0),
+    catalogSales: orders.filter(o => (o.status === 'PAID' || o.status === 'READY') && o.origin === 'CATALOG').reduce((acc, o) => acc + o.total, 0),
+    posSales: orders.filter(o => (o.status === 'PAID' || o.status === 'READY') && o.origin === 'POS').reduce((acc, o) => acc + o.total, 0),
   };
 
   return (
