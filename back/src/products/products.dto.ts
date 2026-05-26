@@ -49,6 +49,10 @@ export class CreateProductDto {
   @IsString({ each: true })
   @IsOptional()
   notes?: string[];
+
+  @IsString({ message: 'El sabor debe ser un texto.' })
+  @IsOptional()
+  flavor?: string;
 }
 
 export class UpdateProductDto {
@@ -102,4 +106,8 @@ export class UpdateProductDto {
   @IsString({ each: true })
   @IsOptional()
   notes?: string[];
+
+  @IsString({ message: 'El sabor debe ser un texto.' })
+  @IsOptional()
+  flavor?: string;
 }

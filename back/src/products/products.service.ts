@@ -22,6 +22,7 @@ export class ProductsService {
         storeId,
         isBundle: data.isBundle || false,
         notes: data.notes || [],
+        flavor: data.flavor || null,
         bundleItems: data.bundleItems && data.bundleItems.length > 0 
           ? {
               create: data.bundleItems.map(bi => ({
@@ -93,7 +94,8 @@ export class ProductsService {
           stock: data.stock,
           barcode: data.barcode || null,
           isBundle: data.isBundle,
-          notes: data.notes
+          notes: data.notes,
+          flavor: data.flavor
         }
       });
       

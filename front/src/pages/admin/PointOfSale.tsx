@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Title, Text, Card, Group, Stack, TextInput, Button, Table, ActionIcon, Divider, Badge, Modal, Loader, Popover } from '@mantine/core';
+import { Title, Text, Card, Group, Stack, TextInput, Button, Table, ActionIcon, Divider, Badge, Modal, Loader, Popover, NumberInput } from '@mantine/core';
 import { ShoppingCart, Search, Trash2, CreditCard, Banknote, X } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { QRCodeSVG } from 'qrcode.react';
@@ -253,7 +253,10 @@ export default function PointOfSale() {
                 >
                   <Group justify="space-between">
                     <div>
-                      <Text size="sm" fw={600}>{product.name}</Text>
+                      <Text size="sm" fw={600}>
+                        {product.name}
+                        {product.flavor && <Text component="span" size="xs" color="dimmed" ml="xs">({product.flavor})</Text>}
+                      </Text>
                       <Text size="xs" color="dimmed">{product.category?.name ?? 'Sin categoría'}</Text>
                     </div>
                     <Text size="sm" fw={700} color="blue">${product.price.toLocaleString()}</Text>
@@ -293,13 +296,26 @@ export default function PointOfSale() {
                 ) : (
                   cart.map((item, idx) => (
                     <Table.Tr key={idx}>
-                      <Table.Td className="!pl-6">{item.name}</Table.Td>
+                      <Table.Td className="!pl-6">
+                        {item.name}
+                        {item.flavor && <Text size="xs" color="dimmed">Sabor: {item.flavor}</Text>}
+                      </Table.Td>
                       <Table.Td>
                         <Group gap={6} wrap="nowrap">
                           <ActionIcon size="sm" variant="light" color="gray" radius="xl" onClick={() => updateQuantity(idx, -1)}>
                             <Text size="xs" fw={700}>-</Text>
                           </ActionIcon>
-                          <Text fw={700} size="sm" style={{ minWidth: '16px', textAlign: 'center' }}>{item.quantity}</Text>
+                          <NumberInput
+                            value={item.quantity}
+                            onChange={(val) => {
+                              const newCart = [...cart];
+                              newCart[idx].quantity = Number(val) || 1;
+                              setCart(newCart);
+                            }}
+                            min={1}
+                            hideControls
+                            styles={{ input: { width: '45px', textAlign: 'center', padding: '0 4px', height: '26px', minHeight: '26px' } }}
+                          />
                           <ActionIcon size="sm" variant="light" color="gray" radius="xl" onClick={() => updateQuantity(idx, 1)}>
                             <Text size="xs" fw={700}>+</Text>
                           </ActionIcon>

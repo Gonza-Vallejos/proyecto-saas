@@ -74,11 +74,14 @@ interface Product {
   categoryId: string | null;
   trackStock: boolean;
   stock: number;
+  barcode: string | null;
+  isBundle?: boolean;
+  bundleItems?: any[];
+  notes?: string[];
+  flavor?: string;
   modifierGroups?: {
     modifierGroup: ModifierGroup;
   }[];
-  isBundle?: boolean;
-  notes?: string[];
 }
 
 interface CartItem {
@@ -1507,7 +1510,10 @@ function RenderProductCard({ product, styleType, onOrder, fixUrl, hasCart, isMob
             {!product.imageUrl && isOut && (
               <Badge variant="filled" color="red" size="xs">AGOTADO</Badge>
             )}
-            <Title order={3} size="1.1rem" className="leading-tight text-store">{product.name}</Title>
+            <Title order={3} size="1.1rem" className="leading-tight text-store">
+              {product.name}
+              {product.flavor && <Text component="span" size="sm" c="dimmed" ml="xs">({product.flavor})</Text>}
+            </Title>
             <Text fw={900} size="md" className="rounded-md bg-store-price-muted px-2 py-0.5 text-store-primary">${formatPrice(product.price)}</Text>
           </Group>
           <Text size="xs" color="dimmed" lineClamp={2}>
@@ -1652,7 +1658,10 @@ function ProductSelectionModal({ product, onClose, onAdd, isMobile, showObservat
             <Image src={fixUrl(product.imageUrl)} w={60} h={60} radius="md" />
           )}
           <Box>
-            <Text fw={700} size="sm" color="var(--text-color)">{product.name}</Text>
+            <Text fw={700} size="sm" color="var(--text-color)">
+              {product.name}
+              {product.flavor && <Text component="span" size="xs" color="dimmed" ml="xs">({product.flavor})</Text>}
+            </Text>
             <Text size="xs" color="dimmed">$ {formatPrice(product.price)}</Text>
           </Box>
         </Group>

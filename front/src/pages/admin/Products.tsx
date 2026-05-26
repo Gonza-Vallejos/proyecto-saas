@@ -25,6 +25,7 @@ interface Product {
   isBundle?: boolean;
   bundleItems?: any[];
   notes?: string[];
+  flavor?: string;
 }
 
 export default function Products() {
@@ -225,9 +226,11 @@ export default function Products() {
               filteredProducts.map(p => (
                 <tr key={p.id} className="product-row border-b border-slate-100 transition-colors hover:bg-slate-50">
                   <td className="admin-td">
-                    <div className="admin-product-thumb">
-                      {p.imageUrl ? <img src={p.imageUrl} className="h-full w-full object-cover" alt="" /> : <ImageIcon size={20} color="#94a3b8" />}
-                    </div>
+                    {p.imageUrl && (
+                      <div className="admin-product-thumb">
+                        <img src={p.imageUrl} className="h-full w-full object-cover" alt="" />
+                      </div>
+                    )}
                   </td>
                   <td className="admin-td">
                     <Stack gap={2}>
@@ -311,6 +314,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
   const [isBundle, setIsBundle] = useState(false);
   const [bundleItems, setBundleItems] = useState<{ productId: string, quantity: number }[]>([]);
   const [notes, setNotes] = useState<string[]>([]);
+  const [flavor, setFlavor] = useState('');
 
   useEffect(() => {
     if (product) {
@@ -326,6 +330,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
       setIsBundle(product.isBundle || false);
       setBundleItems(product.bundleItems?.map((bi: any) => ({ productId: bi.productId, quantity: bi.quantity })) || []);
       setNotes(product.notes || []);
+      setFlavor(product.flavor || '');
     } else {
       setName('');
       setPrice(0);
@@ -339,6 +344,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
       setIsBundle(false);
       setBundleItems([]);
       setNotes([]);
+      setFlavor('');
     }
   }, [product, opened]);
 
@@ -365,6 +371,17 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
             placeholder="Ej: Hamburguesa con Queso" 
             radius="md"
           />
+          <TextInput 
+            label="Sabor" 
+            description="Ej: Pomelo, Naranja"
+            value={flavor} 
+            onChange={e => setFlavor(e.target.value)} 
+            placeholder="Sabor del producto" 
+            radius="md"
+          />
+        </Group>
+
+        <Group grow align="flex-start">
           <TextInput 
             label="Código de Barras" 
             description="Opcional. Para el escáner del mostrador"
@@ -554,7 +571,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
           <Button 
             size="md" 
             radius="md" 
-            onClick={() => onSubmit({ name, price, description, imageUrl, categoryId, modifierGroupIds, trackStock, stock, barcode, isBundle, bundleItems, notes })}
+            onClick={() => onSubmit({ name, price, description, imageUrl, categoryId, modifierGroupIds, trackStock, stock, barcode, isBundle, bundleItems, notes, flavor })}
             className="px-8"
           >
             {product ? 'Guardar Cambios' : 'Crear Producto'}
