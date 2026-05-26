@@ -331,7 +331,9 @@ export default function PointOfSale() {
             Cerrar Caja
           </Button>
         ) : (
-          <Badge size="lg" color="red" variant="filled">Caja Cerrada</Badge>
+          <Button color="blue" onClick={() => setOpenRegisterModal(true)}>
+            Abrir Caja
+          </Button>
         )}
       </Group>
 
