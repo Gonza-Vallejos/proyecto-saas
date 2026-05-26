@@ -25,7 +25,7 @@ export class OrdersController {
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN'])
+  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN', 'CASHIER'])
   async findAll(@Request() req: any, @Query('status') status?: string, @Query('origin') origin?: string, @Query('startDate') startDate?: string, @Query('endDate') endDate?: string) {
     return this.ordersService.findAllByStore(req.user.storeId, status, origin, startDate, endDate);
   }

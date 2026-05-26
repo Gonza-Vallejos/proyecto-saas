@@ -54,7 +54,7 @@ export default function PointOfSale() {
 
   const fetchReadyOrders = async () => {
     try {
-      const orders = await api.get('/admin/orders?status=READY');
+      const orders = await api.get('/orders?status=READY');
       setReadyOrders(orders);
     } catch (e) {
       console.error('Error fetching ready orders', e);
