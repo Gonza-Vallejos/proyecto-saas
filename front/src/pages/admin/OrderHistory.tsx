@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useOutletContext, Navigate } from 'react-router-dom';
 import { 
   Title, Text, Card, Group, Stack, Badge, 
   SimpleGrid, Paper, Table, ActionIcon, 
@@ -31,6 +32,12 @@ interface Order {
 }
 
 export default function OrderHistory() {
+  const { user } = useOutletContext<{ user: { role: string } }>();
+
+  if (user?.role === 'CASHIER') {
+    return <Navigate to="../pos" replace />;
+  }
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   

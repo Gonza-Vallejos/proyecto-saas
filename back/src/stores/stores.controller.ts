@@ -21,7 +21,7 @@ export class StoresController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN'])
+  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN', 'CASHIER'])
   @Get('my-store')
   async getMyStore(@Request() req: any) {
     return this.prisma.store.findUnique({ where: { id: req.user.storeId } });

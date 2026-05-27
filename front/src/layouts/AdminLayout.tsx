@@ -52,7 +52,7 @@ export default function AdminLayout() {
         const data = await res.json();
         setUser(data);
 
-        if (data.role === 'STORE_ADMIN' && storeSlug) {
+        if ((data.role === 'STORE_ADMIN' || data.role === 'CASHIER') && storeSlug) {
            fetchStoreInfo(token);
         }
       } else {
@@ -148,9 +148,6 @@ export default function AdminLayout() {
     <>
       <AdminNavLink to={`${adminPrefix}/pos`} active={isActive(`${adminPrefix}/pos`)}>
         <MonitorSmartphone size={18} /> Punto de Venta
-      </AdminNavLink>
-      <AdminNavLink to={`${adminPrefix}/orders-history`} active={isActive(`${adminPrefix}/orders-history`)}>
-        <History size={18} /> Historial de Pedidos
       </AdminNavLink>
       {storeData?.hasWhatsAppOrders && (
         <AdminNavLink to={`${adminPrefix}/orders-online`} active={isActive(`${adminPrefix}/orders-online`)}>

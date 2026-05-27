@@ -40,7 +40,7 @@ export class OrdersController {
 
   @Patch(':id/status')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN'])
+  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN', 'CASHIER'])
   async updateStatus(
     @Param('id') id: string,
     @Request() req: any,
