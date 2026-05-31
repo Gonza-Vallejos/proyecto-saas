@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, Edit3, Boxes, Search, Filter, X, Barcode } from 'lucide-react';
+import { Plus, Trash2, Edit3, Boxes, Search, Filter, X, Barcode, Package } from 'lucide-react';
 import { Modal, Button, TextInput, NumberInput, Select, MultiSelect, Textarea, Group, ActionIcon, Tooltip, Switch, Badge, Text, Stack, Box, Title, Card, Transition, TagsInput } from '@mantine/core';
 import FileUploader from '../../components/FileUploader';
 import { api } from '../../utils/api';
@@ -149,67 +149,83 @@ export default function Products() {
         </Button>
       </Group>
 
+      {/* Tarjeta de filtros en un grid responsivo adaptable */}
       <Card withBorder radius="md" p="md" mb="xl" className="bg-white/80 backdrop-blur-sm">
-        <Group align="flex-end" gap="md">
-          <TextInput
-            placeholder="Buscar por nombre o descripción..."
-            label="Buscar producto"
-            leftSection={<Search size={16} color="#94a3b8" />}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.currentTarget.value)}
-            className="flex-1"
-            radius="md"
-            rightSection={searchQuery && (
-              <ActionIcon variant="transparent" onClick={() => setSearchQuery('')}>
-                <X size={14} color="#94a3b8" />
-              </ActionIcon>
-            )}
-          />
-          <Select
-            label="Categoría"
-            placeholder="Todas"
-            leftSection={<Filter size={16} color="#94a3b8" />}
-            data={[
-              { value: 'all', label: 'Todas las categorías' },
-              ...categories
-                .filter(c => !c.parentId)
-                .flatMap(parent => [
-                  { value: parent.id, label: parent.name },
-                  ...categories
-                    .filter(child => child.parentId === parent.id)
-                    .map(child => ({ value: child.id, label: `↳ ${child.name}` }))
-                ])
-            ]}
-            value={categoryFilter}
-            onChange={(val) => setCategoryFilter(val)}
-            radius="md"
-            className="min-w-[220px]"
-            searchable
-          />
-          <Select
-            label="Disponibilidad"
-            placeholder="Todos"
-            leftSection={<Boxes size={16} color="#94a3b8" />}
-            data={[
-              { value: 'all', label: 'Todos' },
-              { value: 'in_stock', label: 'Con Stock' },
-              { value: 'out_of_stock', label: 'Sin Stock' },
-              { value: 'low_stock', label: 'Stock Bajo (≤10)' },
-            ]}
-            value={stockFilter}
-            onChange={(val) => setStockFilter(val)}
-            radius="md"
-            className="min-w-[180px]"
-          />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:flex lg:items-end lg:gap-4">
+          <div className="lg:flex-1">
+            <TextInput
+              placeholder="Buscar por nombre o descripción..."
+              label="Buscar producto"
+              leftSection={<Search size={16} color="#94a3b8" />}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.currentTarget.value)}
+              radius="md"
+              rightSection={searchQuery && (
+                <ActionIcon variant="transparent" onClick={() => setSearchQuery('')}>
+                  <X size={14} color="#94a3b8" />
+                </ActionIcon>
+              )}
+            />
+          </div>
+          
+          <div className="lg:w-[220px]">
+            <Select
+              label="Categoría"
+              placeholder="Todas"
+              leftSection={<Filter size={16} color="#94a3b8" />}
+              data={[
+                { value: 'all', label: 'Todas las categorías' },
+                ...categories
+                  .filter(c => !c.parentId)
+                  .flatMap(parent => [
+                    { value: parent.id, label: parent.name },
+                    ...categories
+                      .filter(child => child.parentId === parent.id)
+                      .map(child => ({ value: child.id, label: `↳ ${child.name}` }))
+                  ])
+              ]}
+              value={categoryFilter}
+              onChange={(val) => setCategoryFilter(val)}
+              radius="md"
+              searchable
+            />
+          </div>
+          
+          <div className="lg:w-[180px]">
+            <Select
+              label="Disponibilidad"
+              placeholder="Todos"
+              leftSection={<Boxes size={16} color="#94a3b8" />}
+              data={[
+                { value: 'all', label: 'Todos' },
+                { value: 'in_stock', label: 'Con Stock' },
+                { value: 'out_of_stock', label: 'Sin Stock' },
+                { value: 'low_stock', label: 'Stock Bajo (≤10)' },
+              ]}
+              value={stockFilter}
+              onChange={(val) => setStockFilter(val)}
+              radius="md"
+            />
+          </div>
+
           {(searchQuery || categoryFilter !== 'all' || stockFilter !== 'all') && (
-            <Button variant="light" color="gray" radius="md" onClick={() => { setSearchQuery(''); setCategoryFilter('all'); setStockFilter('all'); }}>
-              Limpiar
-            </Button>
+            <div className="sm:col-span-2 md:col-span-3 lg:col-auto lg:shrink-0">
+              <Button 
+                variant="light" 
+                color="gray" 
+                radius="md" 
+                onClick={() => { setSearchQuery(''); setCategoryFilter('all'); setStockFilter('all'); }}
+                className="w-full lg:w-auto"
+              >
+                Limpiar
+              </Button>
+            </div>
           )}
-        </Group>
+        </div>
       </Card>
 
-      <div className="admin-table-shell">
+      {/* Vista de Tabla (para Tablets y Computadoras) - Oculta en celulares */}
+      <div className="hidden md:block admin-table-shell">
         <table className="admin-table">
           <thead className="admin-table-head">
             <tr>
@@ -286,6 +302,93 @@ export default function Products() {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Vista de Tarjetas (para Celulares) - Oculta en pantallas medianas y grandes */}
+      <div className="block md:hidden space-y-4">
+        {filteredProducts.length > 0 ? (
+          filteredProducts.map(p => (
+            <Card key={p.id} withBorder radius="xl" p="md" className="bg-white shadow-sm border-slate-100">
+              <Group justify="space-between" align="flex-start" wrap="nowrap">
+                <Group gap="sm" wrap="nowrap">
+                  {p.imageUrl ? (
+                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-slate-100">
+                      <img src={p.imageUrl} className="h-full w-full object-cover" alt="" />
+                    </div>
+                  ) : (
+                    <div className="h-16 w-16 shrink-0 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400">
+                      <Package size={24} />
+                    </div>
+                  )}
+                  <Stack gap={2}>
+                    <Group gap="xs" wrap="wrap">
+                      <Text fw={700} size="sm" color="#1e293b" lineClamp={2}>{p.name}</Text>
+                      {p.isBundle && <Badge color="green" size="xs" variant="filled">PROMO</Badge>}
+                    </Group>
+                    <Badge variant="light" color="blue" radius="md" size="xs" className="w-fit">{p.category?.name || 'Sin Categoría'}</Badge>
+                    {p.barcode && (
+                      <Group gap="xs" className="mt-1">
+                        <Barcode size={12} color="#94a3b8" />
+                        <Text size="xs" color="dimmed">{p.barcode}</Text>
+                      </Group>
+                    )}
+                  </Stack>
+                </Group>
+
+                <Text className="text-base font-extrabold text-slate-900 shrink-0">${p.price.toFixed(2)}</Text>
+              </Group>
+
+              {/* Información de Stock y Acciones */}
+              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                {storeInfo?.hasStockControl && (
+                  <div>
+                    {p.trackStock ? (
+                      <Badge 
+                        variant="dot" 
+                        color={p.stock > 10 ? 'green' : p.stock > 0 ? 'orange' : 'red'}
+                        size="sm"
+                      >
+                        Stock: {p.stock} un.
+                      </Badge>
+                    ) : (
+                      <Badge variant="dot" color="gray" size="sm">Stock ilimitado</Badge>
+                    )}
+                  </div>
+                )}
+                
+                <Group gap="xs">
+                  <Button 
+                    variant="light" 
+                    color="blue" 
+                    size="xs" 
+                    radius="md" 
+                    leftSection={<Edit3 size={14} />} 
+                    onClick={() => setEditingProduct(p)}
+                  >
+                    Editar
+                  </Button>
+                  <ActionIcon 
+                    variant="light" 
+                    color="red" 
+                    radius="md" 
+                    size="md" 
+                    onClick={() => handleDelete(p.id)}
+                  >
+                    <Trash2 size={14} />
+                  </ActionIcon>
+                </Group>
+              </div>
+            </Card>
+          ))
+        ) : (
+          <Card withBorder radius="xl" p="xl" className="text-center py-16 bg-white border-slate-100">
+            <Stack align="center" gap="sm">
+              <Boxes size={48} color="#cbd5e1" strokeWidth={1.5} />
+              <Text fw={600} color="dimmed">No se encontraron productos</Text>
+              <Text size="xs" color="dimmed">Prueba ajustando los filtros o creando uno nuevo.</Text>
+            </Stack>
+          </Card>
+        )}
       </div>
 
       <ProductFormModal 
