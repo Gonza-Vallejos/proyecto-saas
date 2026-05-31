@@ -39,7 +39,7 @@ export default function StoreManagement() {
 
   // New subscription management fields (placed before handlers for proper scope)
   const [subscriptionExpiration, setSubscriptionExpiration] = useState<string>('');
-  const [isDisabled, setIsDisabled] = useState(false);
+
 
   const fetchStores = async () => {
     try {
@@ -70,7 +70,6 @@ export default function StoreManagement() {
       await api.post('/stores', {
         ...values,
         subscriptionExpiration,
-        disabled: isDisabled,
       });
       setShowAddModal(false);
       fetchStores();
@@ -85,7 +84,6 @@ export default function StoreManagement() {
       await api.patch(`/stores/${editingStore.id}`, {
         ...values,
         subscriptionExpiration,
-        disabled: isDisabled,
       });
       setEditingStore(null);
       fetchStores();
@@ -370,8 +368,6 @@ export default function StoreManagement() {
         title="Configurar Nueva Tienda"
         subscriptionExpiration={subscriptionExpiration}
         setSubscriptionExpiration={setSubscriptionExpiration}
-        isDisabled={isDisabled}
-        setIsDisabled={setIsDisabled}
       />
 
       <StoreFormModal 
@@ -382,14 +378,12 @@ export default function StoreManagement() {
         title="Editar Configuración Maestra"
         subscriptionExpiration={subscriptionExpiration}
         setSubscriptionExpiration={setSubscriptionExpiration}
-        isDisabled={isDisabled}
-        setIsDisabled={setIsDisabled}
       />
     </div>
   );
 }
 
-function StoreFormModal({ opened, onClose, onSubmit, store, title, subscriptionExpiration, setSubscriptionExpiration, isDisabled, setIsDisabled }: any) {
+function StoreFormModal({ opened, onClose, onSubmit, store, title, subscriptionExpiration, setSubscriptionExpiration }: any) {
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [ownerName, setOwnerName] = useState('');
@@ -417,10 +411,10 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title, subscriptionE
       // Initialize fields when editing a store
       if (store) {
         setSubscriptionExpiration(store.subscriptionExpiration || '');
-        setIsDisabled(store.disabled || false);
+  
       } else {
         setSubscriptionExpiration('');
-        setIsDisabled(false);
+
       }
       setBusinessType(store.businessType || 'retail');
       setHasStockControl(store.hasStockControl || false);
@@ -470,11 +464,6 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title, subscriptionE
             placeholder="Selecciona una fecha"
             value={subscriptionExpiration ? subscriptionExpiration.split('T')[0] : ''}
             onChange={e => setSubscriptionExpiration(e.target.value ? new Date(e.target.value).toISOString() : '')}
-          />
-          <Switch
-            label="Deshabilitar tienda"
-            checked={isDisabled}
-            onChange={e => setIsDisabled(e.currentTarget.checked)}
           />
         </SimpleGrid>
 
