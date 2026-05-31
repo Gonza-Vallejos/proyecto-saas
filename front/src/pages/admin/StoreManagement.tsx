@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Plus, Edit3, User, Globe, Store, BarChart3, Database, Package, LayoutGrid, Trash2, RefreshCw, X } from 'lucide-react';
-import { 
-  Title, Text, Button, Card, Group, Stack, Badge, Table, 
-  ActionIcon, Tooltip, SimpleGrid, Paper, Modal, TextInput, 
-  PasswordInput, Select, Switch, Box, Divider 
+import {
+  Title, Text, Button, Card, Group, Stack, Badge, Table,
+  ActionIcon, Tooltip, SimpleGrid, Paper, Modal, TextInput,
+  PasswordInput, Select, Switch, Box, Divider
 } from '@mantine/core';
 
 import { api } from '../../utils/api';
@@ -143,7 +143,7 @@ export default function StoreManagement() {
           </Group>
         </Paper>
         <Paper withBorder p="md" radius="md">
-           <Group>
+          <Group>
             <Box bg="green.0" p="xs" className="rounded-lg">
               <Database size={24} color="#10b981" />
             </Box>
@@ -221,50 +221,50 @@ export default function StoreManagement() {
                   </Table.Td>
                   <Table.Td className="text-center">
                     <Group justify="center" gap="sm">
-                       <Tooltip label="Ver Catálogo Público">
-                         <ActionIcon variant="light" color="teal" onClick={() => window.open(`/s/${store.slug}`, '_blank')}><Globe size={18} /></ActionIcon>
-                       </Tooltip>
-                       <Tooltip label="Ver Estadísticas Detalladas">
-                         <ActionIcon variant="subtle" color="blue"><BarChart3 size={18} /></ActionIcon>
-                       </Tooltip>
-                       <Tooltip label="Configuración Maestra">
-                         <ActionIcon variant="light" color="blue" onClick={() => setEditingStore(store)}><Edit3 size={18} /></ActionIcon>
-                       </Tooltip>
-                       <Tooltip label="Sincronizar Mercado Pago">
-                         <ActionIcon variant="light" color="green" onClick={async () => {
-                           try {
-                             await api.post(`/stores/${store.id}/mercado-pago/sync`, {});
-                             Swal.fire('Éxito', 'Cuenta de Mercado Pago sincronizada.', 'success');
-                           } catch (e: any) {
-                             Swal.fire('Error', e.message || 'No se pudo sincronizar', 'error');
-                           }
-                         }}><RefreshCw size={18} /></ActionIcon>
-                       </Tooltip>
-                       <Tooltip label="Deshabilitar Tienda">
-                          <ActionIcon variant="light" color="red" onClick={async () => {
-                            const confirm = await Swal.fire({
-                              title: 'Confirmar',
-                              text: '¿Desactivar esta tienda? perderá acceso al POS y al catálogo.',
-                              icon: 'warning',
-                              showCancelButton: true,
-                              confirmButtonColor: '#ef4444',
-                              cancelButtonColor: '#64748b',
-                              confirmButtonText: 'Sí, desactivar',
-                            });
-                            if (confirm.isConfirmed) {
-                              try {
-                                await api.patch(`/stores/${store.id}`, { disabled: true });
-                                Swal.fire('Éxito', 'Tienda deshabilitada.', 'success');
-                                fetchStores();
-                              } catch (e: any) {
-                                Swal.fire('Error', e.message || 'No se pudo desactivar', 'error');
-                              }
+                      <Tooltip label="Ver Catálogo Público">
+                        <ActionIcon variant="light" color="teal" onClick={() => window.open(`/s/${store.slug}`, '_blank')}><Globe size={18} /></ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Ver Estadísticas Detalladas">
+                        <ActionIcon variant="subtle" color="blue"><BarChart3 size={18} /></ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Configuración Maestra">
+                        <ActionIcon variant="light" color="blue" onClick={() => setEditingStore(store)}><Edit3 size={18} /></ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Sincronizar Mercado Pago">
+                        <ActionIcon variant="light" color="green" onClick={async () => {
+                          try {
+                            await api.post(`/stores/${store.id}/mercado-pago/sync`, {});
+                            Swal.fire('Éxito', 'Cuenta de Mercado Pago sincronizada.', 'success');
+                          } catch (e: any) {
+                            Swal.fire('Error', e.message || 'No se pudo sincronizar', 'error');
+                          }
+                        }}><RefreshCw size={18} /></ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Deshabilitar Tienda">
+                        <ActionIcon variant="light" color="red" onClick={async () => {
+                          const confirm = await Swal.fire({
+                            title: 'Confirmar',
+                            text: '¿Desactivar esta tienda? perderá acceso al POS y al catálogo.',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#ef4444',
+                            cancelButtonColor: '#64748b',
+                            confirmButtonText: 'Sí, desactivar',
+                          });
+                          if (confirm.isConfirmed) {
+                            try {
+                              await api.patch(`/stores/${store.id}`, { disabled: true });
+                              Swal.fire('Éxito', 'Tienda deshabilitada.', 'success');
+                              fetchStores();
+                            } catch (e: any) {
+                              Swal.fire('Error', e.message || 'No se pudo desactivar', 'error');
                             }
-                          }}><X size={18} /></ActionIcon>
-                        </Tooltip>
-                       <Tooltip label="Eliminar Tienda">
-                         <ActionIcon variant="light" color="red" onClick={() => handleDelete(store)}><Trash2 size={18} /></ActionIcon>
-                       </Tooltip>
+                          }
+                        }}><X size={18} /></ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Eliminar Tienda">
+                        <ActionIcon variant="light" color="red" onClick={() => handleDelete(store)}><Trash2 size={18} /></ActionIcon>
+                      </Tooltip>
                     </Group>
                   </Table.Td>
                 </Table.Tr>
@@ -323,31 +323,31 @@ export default function StoreManagement() {
 
               <div className="flex justify-between items-center pt-2 gap-2">
                 {/* Botón para ver catálogo público */}
-                <Button 
-                  variant="light" 
-                  color="teal" 
-                  size="xs" 
-                  radius="md" 
+                <Button
+                  variant="light"
+                  color="teal"
+                  size="xs"
+                  radius="md"
                   leftSection={<Globe size={14} />}
                   onClick={() => window.open(`/s/${store.slug}`, '_blank')}
                   className="flex-1"
                 >
                   Ver Catálogo
                 </Button>
-                
+
                 <Group gap="xs" className="shrink-0">
-                  <ActionIcon 
-                    variant="light" 
-                    color="blue" 
+                  <ActionIcon
+                    variant="light"
+                    color="blue"
                     onClick={() => setEditingStore(store)}
                     size="md"
                     radius="md"
                   >
                     <Edit3 size={14} />
                   </ActionIcon>
-                  <ActionIcon 
-                    variant="light" 
-                    color="red" 
+                  <ActionIcon
+                    variant="light"
+                    color="red"
                     onClick={() => handleDelete(store)}
                     size="md"
                     radius="md"
@@ -361,19 +361,19 @@ export default function StoreManagement() {
         ))}
       </div>
 
-      <StoreFormModal 
-        opened={showAddModal} 
-        onClose={() => setShowAddModal(false)} 
-        onSubmit={handleCreate} 
+      <StoreFormModal
+        opened={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSubmit={handleCreate}
         title="Configurar Nueva Tienda"
         subscriptionExpiration={subscriptionExpiration}
         setSubscriptionExpiration={setSubscriptionExpiration}
       />
 
-      <StoreFormModal 
-        opened={!!editingStore} 
-        onClose={() => setEditingStore(null)} 
-        onSubmit={handleUpdate} 
+      <StoreFormModal
+        opened={!!editingStore}
+        onClose={() => setEditingStore(null)}
+        onSubmit={handleUpdate}
         store={editingStore}
         title="Editar Configuración Maestra"
         subscriptionExpiration={subscriptionExpiration}
@@ -411,7 +411,7 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title, subscriptionE
       // Initialize fields when editing a store
       if (store) {
         setSubscriptionExpiration(store.subscriptionExpiration || '');
-  
+
       } else {
         setSubscriptionExpiration('');
 
@@ -471,22 +471,22 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title, subscriptionE
           <Text size="xs" fw={700} color="dimmed" tt="uppercase">Datos del Dueño</Text>
           <TextInput label="Nombre Completo" value={ownerName} onChange={e => setOwnerName(e.target.value)} required placeholder="Raúl Ivanes" />
           <TextInput label="Email de Acceso" value={ownerEmail} onChange={e => setOwnerEmail(e.target.value)} required />
-          <PasswordInput 
-            label={store ? "Cambiar Contraseña (opcional)" : "Contraseña Inicial"} 
-            value={ownerPassword} 
-            onChange={e => setOwnerPassword(e.target.value)} 
+          <PasswordInput
+            label={store ? "Cambiar Contraseña (opcional)" : "Contraseña Inicial"}
+            value={ownerPassword}
+            onChange={e => setOwnerPassword(e.target.value)}
           />
         </Stack>
 
-        <Select 
-          label="Rubro del Negocio" 
-          data={['retail', 'gastronomia', 'servicios', 'kiosco', 'panaderia']} 
-          value={businessType} 
-          onChange={(val) => setBusinessType(val || 'retail')} 
+        <Select
+          label="Rubro del Negocio"
+          data={['retail', 'gastronomia', 'servicios', 'kiosco', 'panaderia']}
+          value={businessType}
+          onChange={(val) => setBusinessType(val || 'retail')}
         />
 
         <Divider label="Módulos SaaS Principales" labelPosition="center" />
-        
+
         <Stack gap="xs">
           <Paper withBorder p="sm" radius="md">
             <Group justify="space-between">
@@ -494,8 +494,8 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title, subscriptionE
                 <Text size="sm" fw={700}>Carrito de Compras</Text>
                 <Text size="xs" color="dimmed">Permite a los clientes seleccionar productos y gestionar un pedido.</Text>
               </Box>
-              <Switch 
-                checked={hasCart} 
+              <Switch
+                checked={hasCart}
                 onChange={(e) => {
                   const val = e.currentTarget.checked;
                   setHasCart(val);
@@ -504,27 +504,27 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title, subscriptionE
                     setHasPayments(false);
                   }
                   if (val) setIsCatalogOnly(false);
-                }} 
+                }}
               />
             </Group>
           </Paper>
 
           <Group grow>
             <Paper withBorder p="sm" radius="md" className={!hasCart ? 'opacity-50' : ''}>
-              <Switch 
-                label="Control de Stock" 
+              <Switch
+                label="Control de Stock"
                 disabled={!hasCart}
-                checked={hasStockControl} 
-                onChange={(e) => setHasStockControl(e.currentTarget.checked)} 
+                checked={hasStockControl}
+                onChange={(e) => setHasStockControl(e.currentTarget.checked)}
                 description="Requiere Carrito activo"
               />
             </Paper>
             <Paper withBorder p="sm" radius="md" className={!hasCart ? 'opacity-50' : ''}>
-              <Switch 
-                label="Pasarela de Pagos" 
+              <Switch
+                label="Pasarela de Pagos"
                 disabled={!hasCart}
-                checked={hasPayments} 
-                onChange={(e) => setHasPayments(e.currentTarget.checked)} 
+                checked={hasPayments}
+                onChange={(e) => setHasPayments(e.currentTarget.checked)}
                 description="Habilita Mercado Pago"
               />
             </Paper>
@@ -534,10 +534,10 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title, subscriptionE
         <Divider label="Operación y Experiencia" labelPosition="center" />
 
         <SimpleGrid cols={2}>
-           <Paper withBorder p="sm" radius="md">
-            <Switch 
-              label="Modo Catálogo Exclusivo" 
-              checked={isCatalogOnly} 
+          <Paper withBorder p="sm" radius="md">
+            <Switch
+              label="Modo Catálogo Exclusivo"
+              checked={isCatalogOnly}
               onChange={(e) => {
                 const val = e.currentTarget.checked;
                 setIsCatalogOnly(val);
@@ -546,25 +546,25 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title, subscriptionE
                   setHasStockControl(false);
                   setHasPayments(false);
                 }
-              }} 
+              }}
               description="Anula carrito y pagos"
             />
           </Paper>
           <Paper withBorder p="sm" radius="md">
-            <Switch 
-              label="Experiencia Gastronómica" 
-              checked={hasModifiers} 
-              onChange={(e) => setHasModifiers(e.currentTarget.checked)} 
+            <Switch
+              label="Experiencia Gastronómica"
+              checked={hasModifiers}
+              onChange={(e) => setHasModifiers(e.currentTarget.checked)}
               description="Habilita aderezos y extras"
             />
           </Paper>
         </SimpleGrid>
 
         <Paper withBorder p="sm" radius="md">
-          <Switch 
-            label="Permitir Observaciones Libres" 
-            checked={showObservations} 
-            onChange={(e) => setShowObservations(e.currentTarget.checked)} 
+          <Switch
+            label="Permitir Observaciones Libres"
+            checked={showObservations}
+            onChange={(e) => setShowObservations(e.currentTarget.checked)}
             description="Campo de texto para aclaraciones del cliente en el pedido"
           />
         </Paper>
@@ -572,43 +572,43 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title, subscriptionE
         <Divider label="Módulos Pro Externos" labelPosition="center" />
 
         <SimpleGrid cols={2}>
-           <Paper withBorder p="sm" radius="md">
-            <Switch 
-              label="Módulo de Conectividad (WiFi)" 
-              checked={hasConnectivity} 
-              onChange={(e) => setHasConnectivity(e.currentTarget.checked)} 
+          <Paper withBorder p="sm" radius="md">
+            <Switch
+              label="Módulo de Conectividad (WiFi)"
+              checked={hasConnectivity}
+              onChange={(e) => setHasConnectivity(e.currentTarget.checked)}
               description="Activa portal de WiFi y QR"
             />
           </Paper>
           <Paper withBorder p="sm" radius="md">
-            <Switch 
-              label="Módulo Gastro Pro" 
-              checked={hasOrderManagement} 
-              onChange={(e) => setHasOrderManagement(e.currentTarget.checked)} 
+            <Switch
+              label="Módulo Gastro Pro"
+              checked={hasOrderManagement}
+              onChange={(e) => setHasOrderManagement(e.currentTarget.checked)}
               description="Mesas, Mozos y Cocina"
             />
           </Paper>
           <Paper withBorder p="sm" radius="md">
-            <Switch 
-              label="Pedidos por WhatsApp" 
-              checked={hasWhatsAppOrders} 
-              onChange={(e) => setHasWhatsAppOrders(e.currentTarget.checked)} 
+            <Switch
+              label="Pedidos por WhatsApp"
+              checked={hasWhatsAppOrders}
+              onChange={(e) => setHasWhatsAppOrders(e.currentTarget.checked)}
               description="Habilita monitor de pedidos online"
             />
           </Paper>
           <Paper withBorder p="sm" radius="md">
-            <Switch 
-              label="Punto de Venta (POS)" 
-              checked={hasPOS} 
-              onChange={(e) => setHasPOS(e.currentTarget.checked)} 
+            <Switch
+              label="Punto de Venta (POS)"
+              checked={hasPOS}
+              onChange={(e) => setHasPOS(e.currentTarget.checked)}
               description="Terminal de cobro en mostrador"
             />
           </Paper>
           <Paper withBorder p="sm" radius="md">
-            <Switch 
-              label="Mercado Pago Online" 
-              checked={hasMercadoPago} 
-              onChange={(e) => setHasMercadoPago(e.currentTarget.checked)} 
+            <Switch
+              label="Mercado Pago Online"
+              checked={hasMercadoPago}
+              onChange={(e) => setHasMercadoPago(e.currentTarget.checked)}
               description="Cobros online automatizados"
             />
           </Paper>
@@ -618,9 +618,9 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title, subscriptionE
           <Button variant="light" color="gray" onClick={onClose}>Cancelar</Button>
           <Button onClick={() => {
             const normalizedSlug = slug.trim().toLowerCase().replace(/\s+/g, '-');
-            const payload: any = { 
+            const payload: any = {
               name: name.trim(), slug: normalizedSlug, ownerName: ownerName.trim(), ownerEmail: ownerEmail.trim(),
-              businessType, hasStockControl, hasPayments, hasCart, 
+              businessType, hasStockControl, hasPayments, hasCart,
               isCatalogOnly, hasModifiers, showObservations,
               hasConnectivity, hasOrderManagement, hasWhatsAppOrders,
               hasPOS, hasMercadoPago
@@ -645,3 +645,4 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title, subscriptionE
     </Modal>
   );
 }
+
