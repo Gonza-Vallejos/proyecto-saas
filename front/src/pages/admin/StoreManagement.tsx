@@ -36,12 +36,6 @@ export default function StoreManagement() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingStore, setEditingStore] = useState<any>(null);
 
-  // SaaS Subscription settings states
-  const [superadminMpAccessToken, setSuperadminMpAccessToken] = useState('');
-  const [superadminMpPublicKey, setSuperadminMpPublicKey] = useState('');
-  const [defaultSubscriptionPrice, setDefaultSubscriptionPrice] = useState(10000);
-
-
   const fetchStores = async () => {
     try {
       const data = await api.get('/stores');
@@ -53,16 +47,7 @@ export default function StoreManagement() {
     }
   };
 
-  const fetchSettings = async () => {
-    try {
-      const data = await api.get('/stores/master/system-settings');
-      setSuperadminMpAccessToken(data.superadminMpAccessToken || '');
-      setSuperadminMpPublicKey(data.superadminMpPublicKey || '');
-      setDefaultSubscriptionPrice(data.defaultSubscriptionPrice || 10000);
-    } catch (e) {
-      console.error('Error fetching system settings', e);
-    }
-  };
+
   useEffect(() => {
     fetchStores();
   }, []);
