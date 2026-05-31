@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Edit3, User, Globe, Store, BarChart3, Database, Package, LayoutGrid, Trash2 } from 'lucide-react';
+import { Plus, Edit3, User, Globe, Store, BarChart3, Database, Package, LayoutGrid, Trash2, RefreshCw } from 'lucide-react';
 import { 
   Title, Text, Button, Card, Group, Stack, Badge, Table, 
   ActionIcon, Tooltip, SimpleGrid, Paper, Modal, TextInput, 
@@ -218,6 +218,16 @@ export default function StoreManagement() {
                        </Tooltip>
                        <Tooltip label="Configuración Maestra">
                          <ActionIcon variant="light" color="blue" onClick={() => setEditingStore(store)}><Edit3 size={18} /></ActionIcon>
+                       </Tooltip>
+                       <Tooltip label="Sincronizar Mercado Pago">
+                         <ActionIcon variant="light" color="green" onClick={async () => {
+                           try {
+                             await api.post(`/stores/${store.id}/mercado-pago/sync`, {});
+                             Swal.fire('Éxito', 'Cuenta de Mercado Pago sincronizada.', 'success');
+                           } catch (e: any) {
+                             Swal.fire('Error', e.message || 'No se pudo sincronizar', 'error');
+                           }
+                         }}><RefreshCw size={18} /></ActionIcon>
                        </Tooltip>
                        <Tooltip label="Eliminar Tienda">
                          <ActionIcon variant="light" color="red" onClick={() => handleDelete(store)}><Trash2 size={18} /></ActionIcon>
