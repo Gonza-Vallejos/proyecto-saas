@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Edit3, User, Globe, Store, BarChart3, Database, Package, LayoutGrid, Trash2, Settings, X } from 'lucide-react';
+import { Plus, Edit3, User, Globe, Store, BarChart3, Database, Package, LayoutGrid, Trash2 } from 'lucide-react';
 import { 
   Title, Text, Button, Card, Group, Stack, Badge, Table, 
   ActionIcon, Tooltip, SimpleGrid, Paper, Modal, TextInput, 
@@ -40,8 +40,7 @@ export default function StoreManagement() {
   const [superadminMpAccessToken, setSuperadminMpAccessToken] = useState('');
   const [superadminMpPublicKey, setSuperadminMpPublicKey] = useState('');
   const [defaultSubscriptionPrice, setDefaultSubscriptionPrice] = useState(10000);
-  const [savingSettings, setSavingSettings] = useState(false);
-  const [showSettingsCard, setShowSettingsCard] = useState(false);
+
 
   const fetchStores = async () => {
     try {
@@ -64,34 +63,9 @@ export default function StoreManagement() {
       console.error('Error fetching system settings', e);
     }
   };
-
   useEffect(() => {
     fetchStores();
-    fetchSettings();
   }, []);
-
-  const handleSaveSettings = async () => {
-    setSavingSettings(true);
-    try {
-      await api.patch('/stores/master/system-settings', {
-        superadminMpAccessToken,
-        superadminMpPublicKey,
-        defaultSubscriptionPrice: Number(defaultSubscriptionPrice)
-      });
-      Swal.fire({
-        title: '¡Guardado!',
-        text: 'Configuración de plataforma guardada correctamente.',
-        icon: 'success',
-        timer: 1500,
-        showConfirmButton: false
-      });
-      setShowSettingsCard(false);
-    } catch (e: any) {
-      Swal.fire('Error', e.message || 'Error al guardar configuración', 'error');
-    } finally {
-      setSavingSettings(false);
-    }
-  };
 
   const handleCreate = async (values: any) => {
     try {
