@@ -154,7 +154,8 @@ export default function StoreManagement() {
         </Paper>
       </SimpleGrid>
 
-      <Card withBorder radius="md" p={0} shadow="sm">
+      {/* Vista de Tabla (para Tablets y Computadoras) - Oculta en celulares */}
+      <Card className="hidden md:block" withBorder radius="md" p={0} shadow="sm">
         <Table verticalSpacing="md" highlightOnHover>
           <Table.Thead className="bg-slate-50">
             <Table.Tr>
@@ -207,6 +208,9 @@ export default function StoreManagement() {
                 </Table.Td>
                 <Table.Td className="text-center">
                   <Group justify="center" gap="sm">
+                     <Tooltip label="Ver Catálogo Público">
+                       <ActionIcon variant="light" color="teal" onClick={() => window.open(`/s/${store.slug}`, '_blank')}><Globe size={18} /></ActionIcon>
+                     </Tooltip>
                      <Tooltip label="Ver Estadísticas Detalladas">
                        <ActionIcon variant="subtle" color="blue"><BarChart3 size={18} /></ActionIcon>
                      </Tooltip>
@@ -223,6 +227,93 @@ export default function StoreManagement() {
           </Table.Tbody>
         </Table>
       </Card>
+
+      {/* Vista de Tarjetas (para Celulares) - Oculta en pantallas medianas y grandes */}
+      <div className="block md:hidden space-y-4">
+        {stores.map(store => (
+          <Card key={store.id} withBorder radius="xl" p="md" className="bg-white shadow-sm border-slate-100">
+            <Group justify="space-between" align="center" mb="xs">
+              <Stack gap={2}>
+                <Text fw={800} size="md" color="#1e293b">{store.name}</Text>
+                <Group gap={4} wrap="nowrap">
+                  <Globe size={12} color="#94a3b8" />
+                  <Text size="xs" color="dimmed">{store.slug}</Text>
+                </Group>
+              </Stack>
+              <Badge variant="light" color="gray" size="sm">{store.businessType}</Badge>
+            </Group>
+
+            <div className="mt-3 space-y-2 border-t border-slate-50 pt-2">
+              <div className="flex justify-between items-start border-b border-slate-50 pb-2">
+                <Text size="xs" color="dimmed" fw={600}>Dueño:</Text>
+                <Stack gap={0} align="flex-end">
+                  <Text size="sm" fw={700} color="#0f172a">{store.users[0]?.name || 'N/A'}</Text>
+                  <Text size="10px" color="dimmed">{store.users[0]?.email || 'N/A'}</Text>
+                </Stack>
+              </div>
+
+              <div className="border-b border-slate-50 pb-2">
+                <Text size="xs" color="dimmed" fw={600} mb={6}>Módulos Activos:</Text>
+                <Group gap={4} wrap="wrap">
+                  {store.hasCart && <Badge color="blue" size="xs" variant="outline">Carrito</Badge>}
+                  {store.hasStockControl && <Badge color="orange" size="xs" variant="outline">Stock</Badge>}
+                  {store.hasPayments && <Badge color="green" size="xs" variant="outline">Pagos</Badge>}
+                  {store.isCatalogOnly && <Badge color="violet" size="xs" variant="outline">Sólo Catálogo</Badge>}
+                  {store.hasConnectivity && <Badge color="cyan" size="xs" variant="outline">WiFi</Badge>}
+                  {store.hasOrderManagement && <Badge color="pink" size="xs" variant="outline">Gastro Pro</Badge>}
+                  {store.hasWhatsAppOrders && <Badge color="teal" size="xs" variant="outline">Pedidos WA</Badge>}
+                  {store.hasPOS && <Badge color="indigo" size="xs" variant="outline">Punto Venta</Badge>}
+                  {store.hasMercadoPago && <Badge color="blue" size="xs" variant="outline">MP Online</Badge>}
+                </Group>
+              </div>
+
+              <div className="flex justify-between items-center border-b border-slate-50 pb-2">
+                <Text size="xs" color="dimmed" fw={600}>Contenido:</Text>
+                <Group gap="xs">
+                  <Badge variant="light" color="blue" size="xs" leftSection={<Package size={10} />}>{store._count.products} prod.</Badge>
+                  <Badge variant="light" color="violet" size="xs" leftSection={<LayoutGrid size={10} />}>{store._count.categories} cat.</Badge>
+                </Group>
+              </div>
+
+              <div className="flex justify-between items-center pt-2 gap-2">
+                {/* Botón para ver catálogo público */}
+                <Button 
+                  variant="light" 
+                  color="teal" 
+                  size="xs" 
+                  radius="md" 
+                  leftSection={<Globe size={14} />}
+                  onClick={() => window.open(`/s/${store.slug}`, '_blank')}
+                  className="flex-1"
+                >
+                  Ver Catálogo
+                </Button>
+                
+                <Group gap="xs" className="shrink-0">
+                  <ActionIcon 
+                    variant="light" 
+                    color="blue" 
+                    onClick={() => setEditingStore(store)}
+                    size="md"
+                    radius="md"
+                  >
+                    <Edit3 size={14} />
+                  </ActionIcon>
+                  <ActionIcon 
+                    variant="light" 
+                    color="red" 
+                    onClick={() => handleDelete(store)}
+                    size="md"
+                    radius="md"
+                  >
+                    <Trash2 size={14} />
+                  </ActionIcon>
+                </Group>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
 
       <StoreFormModal 
         opened={showAddModal} 
