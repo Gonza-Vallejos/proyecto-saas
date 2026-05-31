@@ -5,7 +5,7 @@ import {
   ActionIcon, Tooltip, SimpleGrid, Paper, Modal, TextInput, 
   PasswordInput, Select, Switch, Box, Divider 
 } from '@mantine/core';
-import { DatePicker } from '@mantine/dates';
+
 import { api } from '../../utils/api';
 import Swal from 'sweetalert2';
 
@@ -36,6 +36,10 @@ export default function StoreManagement() {
   // Modals
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingStore, setEditingStore] = useState<any>(null);
+
+  // New subscription management fields (placed before handlers for proper scope)
+  const [subscriptionExpiration, setSubscriptionExpiration] = useState<string>('');
+  const [isDisabled, setIsDisabled] = useState(false);
 
   const fetchStores = async () => {
     try {
@@ -364,6 +368,10 @@ export default function StoreManagement() {
         onClose={() => setShowAddModal(false)} 
         onSubmit={handleCreate} 
         title="Configurar Nueva Tienda"
+        subscriptionExpiration={subscriptionExpiration}
+        setSubscriptionExpiration={setSubscriptionExpiration}
+        isDisabled={isDisabled}
+        setIsDisabled={setIsDisabled}
       />
 
       <StoreFormModal 
@@ -372,19 +380,21 @@ export default function StoreManagement() {
         onSubmit={handleUpdate} 
         store={editingStore}
         title="Editar Configuración Maestra"
+        subscriptionExpiration={subscriptionExpiration}
+        setSubscriptionExpiration={setSubscriptionExpiration}
+        isDisabled={isDisabled}
+        setIsDisabled={setIsDisabled}
       />
     </div>
   );
 }
 
-function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
+function StoreFormModal({ opened, onClose, onSubmit, store, title, subscriptionExpiration, setSubscriptionExpiration, isDisabled, setIsDisabled }: any) {
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [ownerEmail, setOwnerEmail] = useState('');
   const [ownerPassword, setOwnerPassword] = useState('');
-  const [subscriptionExpiration, setSubscriptionExpiration] = useState<string>('');
-  const [isDisabled, setIsDisabled] = useState(false);
   const [businessType, setBusinessType] = useState('retail');
   const [hasStockControl, setHasStockControl] = useState(false);
   const [hasPayments, setHasPayments] = useState(false);
@@ -404,8 +414,14 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
       setSlug(store.slug || '');
       setOwnerName(store.users?.[0]?.name || '');
       setOwnerEmail(store.users?.[0]?.email || '');
-      setSubscriptionExpiration(store.subscriptionExpiration || '');
-      setIsDisabled(store.disabled || false);
+      // Initialize fields when editing a store
+      if (store) {
+        setSubscriptionExpiration(store.subscriptionExpiration || '');
+        setIsDisabled(store.disabled || false);
+      } else {
+        setSubscriptionExpiration('');
+        setIsDisabled(false);
+      }
       setBusinessType(store.businessType || 'retail');
       setHasStockControl(store.hasStockControl || false);
       setHasPayments(store.hasPayments || false);
@@ -448,12 +464,12 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
         <SimpleGrid cols={2}>
           <TextInput label="Nombre de la Tienda" value={name} onChange={e => setName(e.target.value)} required />
           <TextInput label="Slug (URL)" value={slug} onChange={e => setSlug(e.target.value)} required placeholder="ej: mi-tienda" />
-          <DatePicker
+          <TextInput
+            type="date"
             label="Fecha de vencimiento de suscripción"
             placeholder="Selecciona una fecha"
-            value={subscriptionExpiration ? new Date(subscriptionExpiration) : null}
-            onChange={date => setSubscriptionExpiration(date ? date.toISOString() : '')}
-            clearable
+            value={subscriptionExpiration ? subscriptionExpiration.split('T')[0] : ''}
+            onChange={e => setSubscriptionExpiration(e.target.value ? new Date(e.target.value).toISOString() : '')}
           />
           <Switch
             label="Deshabilitar tienda"
