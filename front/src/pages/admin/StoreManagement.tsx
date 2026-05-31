@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Plus, Edit3, User, Globe, Store, BarChart3, Database, Package, LayoutGrid, Trash2, RefreshCw } from 'lucide-react';
+import { Plus, Edit3, User, Globe, Store, BarChart3, Database, Package, LayoutGrid, Trash2, RefreshCw, X } from 'lucide-react';
 import { 
   Title, Text, Button, Card, Group, Stack, Badge, Table, 
   ActionIcon, Tooltip, SimpleGrid, Paper, Modal, TextInput, 
   PasswordInput, Select, Switch, Box, Divider 
 } from '@mantine/core';
+import { DatePicker } from '@mantine/dates';
 import { api } from '../../utils/api';
 import Swal from 'sweetalert2';
 
@@ -62,7 +63,11 @@ export default function StoreManagement() {
         Swal.fire('Error', 'El slug solo puede tener minúsculas, números y guiones (ej: mi-tienda).', 'error');
         return;
       }
-      await api.post('/stores', values);
+      await api.post('/stores', {
+        ...values,
+        subscriptionExpiration,
+        disabled: isDisabled,
+      });
       setShowAddModal(false);
       fetchStores();
       Swal.fire('¡Éxito!', 'Tienda creada correctamente.', 'success');
@@ -73,7 +78,11 @@ export default function StoreManagement() {
 
   const handleUpdate = async (values: any) => {
     try {
-      await api.patch(`/stores/${editingStore.id}`, values);
+      await api.patch(`/stores/${editingStore.id}`, {
+        ...values,
+        subscriptionExpiration,
+        disabled: isDisabled,
+      });
       setEditingStore(null);
       fetchStores();
       Swal.fire('Actualizado', 'La tienda ha sido modificada.', 'success');
@@ -229,6 +238,28 @@ export default function StoreManagement() {
                            }
                          }}><RefreshCw size={18} /></ActionIcon>
                        </Tooltip>
+                       <Tooltip label="Deshabilitar Tienda">
+                          <ActionIcon variant="light" color="red" onClick={async () => {
+                            const confirm = await Swal.fire({
+                              title: 'Confirmar',
+                              text: '¿Desactivar esta tienda? perderá acceso al POS y al catálogo.',
+                              icon: 'warning',
+                              showCancelButton: true,
+                              confirmButtonColor: '#ef4444',
+                              cancelButtonColor: '#64748b',
+                              confirmButtonText: 'Sí, desactivar',
+                            });
+                            if (confirm.isConfirmed) {
+                              try {
+                                await api.patch(`/stores/${store.id}`, { disabled: true });
+                                Swal.fire('Éxito', 'Tienda deshabilitada.', 'success');
+                                fetchStores();
+                              } catch (e: any) {
+                                Swal.fire('Error', e.message || 'No se pudo desactivar', 'error');
+                              }
+                            }
+                          }}><X size={18} /></ActionIcon>
+                        </Tooltip>
                        <Tooltip label="Eliminar Tienda">
                          <ActionIcon variant="light" color="red" onClick={() => handleDelete(store)}><Trash2 size={18} /></ActionIcon>
                        </Tooltip>
@@ -352,6 +383,8 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
   const [ownerName, setOwnerName] = useState('');
   const [ownerEmail, setOwnerEmail] = useState('');
   const [ownerPassword, setOwnerPassword] = useState('');
+  const [subscriptionExpiration, setSubscriptionExpiration] = useState<string>('');
+  const [isDisabled, setIsDisabled] = useState(false);
   const [businessType, setBusinessType] = useState('retail');
   const [hasStockControl, setHasStockControl] = useState(false);
   const [hasPayments, setHasPayments] = useState(false);
@@ -371,6 +404,8 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
       setSlug(store.slug || '');
       setOwnerName(store.users?.[0]?.name || '');
       setOwnerEmail(store.users?.[0]?.email || '');
+      setSubscriptionExpiration(store.subscriptionExpiration || '');
+      setIsDisabled(store.disabled || false);
       setBusinessType(store.businessType || 'retail');
       setHasStockControl(store.hasStockControl || false);
       setHasPayments(store.hasPayments || false);
@@ -390,6 +425,8 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
       setOwnerName('');
       setOwnerEmail('');
       setOwnerPassword('');
+      setSubscriptionExpiration('');
+      setIsDisabled(false);
       setBusinessType('retail');
       setHasStockControl(false);
       setHasPayments(false);
@@ -411,6 +448,18 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title }: any) {
         <SimpleGrid cols={2}>
           <TextInput label="Nombre de la Tienda" value={name} onChange={e => setName(e.target.value)} required />
           <TextInput label="Slug (URL)" value={slug} onChange={e => setSlug(e.target.value)} required placeholder="ej: mi-tienda" />
+          <DatePicker
+            label="Fecha de vencimiento de suscripción"
+            placeholder="Selecciona una fecha"
+            value={subscriptionExpiration ? new Date(subscriptionExpiration) : null}
+            onChange={date => setSubscriptionExpiration(date ? date.toISOString() : '')}
+            clearable
+          />
+          <Switch
+            label="Deshabilitar tienda"
+            checked={isDisabled}
+            onChange={e => setIsDisabled(e.currentTarget.checked)}
+          />
         </SimpleGrid>
 
         <Stack gap={4} p="md" className="admin-muted-stack">
