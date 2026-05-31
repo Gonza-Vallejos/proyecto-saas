@@ -43,6 +43,11 @@ export default function AdminLayout() {
     }
   }, [storeSlug]);
 
+  useEffect(() => {
+    // Cerrar el Drawer móvil automáticamente cuando cambie la ruta/página
+    setMobileNavOpen(false);
+  }, [location.pathname]);
+
   const fetchProfile = async (token: string) => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/auth/profile`, {
@@ -280,8 +285,8 @@ export default function AdminLayout() {
             </ActionIcon>
 
             {user.role === 'STORE_ADMIN' && storeData && (
-              <Badge variant="dot" color="blue" size="lg" radius="sm">
-                TIENDA ACTIVA: {storeData.name.toUpperCase()}
+              <Badge variant="dot" color="blue" size="lg" radius="sm" className="max-sm:px-2.5 max-sm:text-[10px]">
+                <span className="hidden sm:inline">TIENDA ACTIVA: </span>{storeData.name.toUpperCase()}
               </Badge>
             )}
             {user.role === 'SUPERADMIN' && (
@@ -312,16 +317,19 @@ export default function AdminLayout() {
             <Menu shadow="md" width={220} position="bottom-end">
               <Menu.Target>
                 <Group gap="sm" className="admin-header-profile">
-                   <Stack gap={0} align="flex-end" className="desktop-only">
-                     <Text size="sm" fw={700} c="#0f172a">{user.name || 'Admin User'}</Text>
-                     <Text size="xs" c="dimmed">{user.email}</Text>
-                   </Stack>
+                   {/* Envolvemos en un div nativo con clases Tailwind para garantizar que se oculte en móviles */}
+                   <div className="hidden md:block">
+                     <Stack gap={0} align="flex-end">
+                       <Text size="sm" fw={700} c="#0f172a" truncate className="max-w-[150px]">{user.name || 'Admin User'}</Text>
+                       <Text size="xs" c="dimmed" truncate className="max-w-[150px]">{user.email}</Text>
+                     </Stack>
+                   </div>
                    <Avatar
                      src={user.role === 'STORE_ADMIN' ? storeData?.logoUrl : null}
                      radius="xl"
                      size="md"
                      color="blue"
-                     className="cursor-pointer"
+                     className="cursor-pointer hover:opacity-85 transition-opacity"
                    >
                      {user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
                    </Avatar>
