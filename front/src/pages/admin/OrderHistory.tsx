@@ -237,90 +237,92 @@ export default function OrderHistory() {
       </SimpleGrid>
 
       {/* Vista de Tabla (para Tablets y Computadoras) - Oculta en celulares */}
-      <Card className="hidden md:block" withBorder radius="md" p={0}>
-        <ScrollArea>
-           <Table verticalSpacing="md" highlightOnHover>
-            <Table.Thead bg="gray.0">
-              <Table.Tr>
-                <Table.Th className="!pl-6">Fecha</Table.Th>
-                <Table.Th>Canal</Table.Th>
-                <Table.Th>Cliente / Mesa</Table.Th>
-                <Table.Th>Productos</Table.Th>
-                <Table.Th>Total</Table.Th>
-                <Table.Th>Estado</Table.Th>
-                <Table.Th ta="center">Acciones</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {loading ? (
+      <div className="hidden md:block">
+        <Card withBorder radius="md" p={0}>
+          <ScrollArea>
+             <Table verticalSpacing="md" highlightOnHover>
+              <Table.Thead bg="gray.0">
                 <Table.Tr>
-                   <Table.Td colSpan={7} ta="center" py="xl">Obteniendo registros...</Table.Td>
+                  <Table.Th className="!pl-6">Fecha</Table.Th>
+                  <Table.Th>Canal</Table.Th>
+                  <Table.Th>Cliente / Mesa</Table.Th>
+                  <Table.Th>Productos</Table.Th>
+                  <Table.Th>Total</Table.Th>
+                  <Table.Th>Estado</Table.Th>
+                  <Table.Th ta="center">Acciones</Table.Th>
                 </Table.Tr>
-              ) : orders.length === 0 ? (
-                <Table.Tr>
-                   <Table.Td colSpan={7} ta="center" py="xl">No se encontraron pedidos en este periodo.</Table.Td>
-                </Table.Tr>
-              ) : orders.map(order => (
-                <Table.Tr key={order.id}>
-                  <Table.Td className="!pl-6">
-                    <Stack gap={0}>
-                      <Text size="sm" fw={600}>
-                        {new Date(order.createdAt).toLocaleDateString('es-AR')}
-                      </Text>
-                      <Text size="xs" color="dimmed">
-                        {new Date(order.createdAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}hs
-                      </Text>
-                    </Stack>
-                  </Table.Td>
-                  <Table.Td>{getOriginIcon(order.origin)}</Table.Td>
-                  <Table.Td>
-                    {order.origin === 'POS' ? (
+              </Table.Thead>
+              <Table.Tbody>
+                {loading ? (
+                  <Table.Tr>
+                     <Table.Td colSpan={7} ta="center" py="xl">Obteniendo registros...</Table.Td>
+                  </Table.Tr>
+                ) : orders.length === 0 ? (
+                  <Table.Tr>
+                     <Table.Td colSpan={7} ta="center" py="xl">No se encontraron pedidos en este periodo.</Table.Td>
+                  </Table.Tr>
+                ) : orders.map(order => (
+                  <Table.Tr key={order.id}>
+                    <Table.Td className="!pl-6">
                       <Stack gap={0}>
-                        <Text size="sm" fw={700} color="indigo.9">Venta Mostrador</Text>
+                        <Text size="sm" fw={600}>
+                          {new Date(order.createdAt).toLocaleDateString('es-AR')}
+                        </Text>
                         <Text size="xs" color="dimmed">
-                          Vendió: {order.seller?.name || order.seller?.email || 'Desconocido'}
+                          {new Date(order.createdAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}hs
                         </Text>
                       </Stack>
-                    ) : (
-                      <Stack gap={0}>
-                        <Text size="sm" fw={500}>
-                          {order.customerName || 'Cliente Online'}
-                        </Text>
-                        {order.seller && (
-                          <Text size="xs" color="teal.7">
-                            Cobrado por: {order.seller.name || order.seller.email}
+                    </Table.Td>
+                    <Table.Td>{getOriginIcon(order.origin)}</Table.Td>
+                    <Table.Td>
+                      {order.origin === 'POS' ? (
+                        <Stack gap={0}>
+                          <Text size="sm" fw={700} color="indigo.9">Venta Mostrador</Text>
+                          <Text size="xs" color="dimmed">
+                            Vendió: {order.seller?.name || order.seller?.email || 'Desconocido'}
                           </Text>
-                        )}
-                      </Stack>
-                    )}
-                  </Table.Td>
-                  <Table.Td>
-                    <Tooltip label={order.items.map(i => `${i.quantity}x ${i.product?.name}`).join(', ')}>
-                      <Text size="sm">{order.items.length} ítem(s)</Text>
-                    </Tooltip>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text fw={700} size="sm">$ {order.total.toLocaleString()}</Text>
-                  </Table.Td>
-                  <Table.Td>{getStatusBadge(order.status)}</Table.Td>
-                  <Table.Td ta="center">
-                     <ActionIcon 
-                       variant="light" 
-                       color="blue" 
-                       onClick={() => {
-                         setSelectedOrder(order);
-                         setOrderModalOpen(true);
-                       }}
-                     >
-                       <Eye size={16} />
-                     </ActionIcon>
-                  </Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
-        </ScrollArea>
-      </Card>
+                        </Stack>
+                      ) : (
+                        <Stack gap={0}>
+                          <Text size="sm" fw={500}>
+                            {order.customerName || 'Cliente Online'}
+                          </Text>
+                          {order.seller && (
+                            <Text size="xs" color="teal.7">
+                              Cobrado por: {order.seller.name || order.seller.email}
+                            </Text>
+                          )}
+                        </Stack>
+                      )}
+                    </Table.Td>
+                    <Table.Td>
+                      <Tooltip label={order.items.map(i => `${i.quantity}x ${i.product?.name}`).join(', ')}>
+                        <Text size="sm">{order.items.length} ítem(s)</Text>
+                      </Tooltip>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text fw={700} size="sm">$ {order.total.toLocaleString()}</Text>
+                    </Table.Td>
+                    <Table.Td>{getStatusBadge(order.status)}</Table.Td>
+                    <Table.Td ta="center">
+                       <ActionIcon 
+                         variant="light" 
+                         color="blue" 
+                         onClick={() => {
+                           setSelectedOrder(order);
+                           setOrderModalOpen(true);
+                         }}
+                       >
+                         <Eye size={16} />
+                       </ActionIcon>
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
+          </ScrollArea>
+        </Card>
+      </div>
 
       {/* Vista de Tarjetas (para Celulares) - Oculta en pantallas medianas y grandes */}
       <div className="block md:hidden space-y-4">

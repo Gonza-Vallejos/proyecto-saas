@@ -155,78 +155,80 @@ export default function StoreManagement() {
       </SimpleGrid>
 
       {/* Vista de Tabla (para Tablets y Computadoras) - Oculta en celulares */}
-      <Card className="hidden md:block" withBorder radius="md" p={0} shadow="sm">
-        <Table verticalSpacing="md" highlightOnHover>
-          <Table.Thead className="bg-slate-50">
-            <Table.Tr>
-              <Table.Th className="!pl-6">Tienda</Table.Th>
-              <Table.Th>Dueño Responsable</Table.Th>
-              <Table.Th>Rubro / SaaS</Table.Th>
-              <Table.Th>Estadísticas</Table.Th>
-              <Table.Th className="text-center">Acciones</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {stores.map(store => (
-              <Table.Tr key={store.id}>
-                <Table.Td className="!pl-6">
-                  <Stack gap={0}>
-                    <Text fw={700} size="sm">{store.name}</Text>
-                    <Group gap={4} wrap="nowrap">
-                      <Globe size={12} color="#94a3b8" />
-                      <Text size="xs" color="dimmed">{store.slug}</Text>
-                    </Group>
-                  </Stack>
-                </Table.Td>
-                <Table.Td>
-                  <Stack gap={0}>
-                    <Text size="sm" fw={600}>{store.users[0]?.name || 'N/A'}</Text>
-                    <Text size="xs" color="dimmed">{store.users[0]?.email || 'N/A'}</Text>
-                  </Stack>
-                </Table.Td>
-                <Table.Td>
-                  <Group gap="xs">
-                    <Badge variant="light" color="gray" size="xs">{store.businessType}</Badge>
-                    {store.hasCart && <Badge color="blue" size="xs" variant="outline">Carrito</Badge>}
-                    {store.hasStockControl && <Badge color="orange" size="xs" variant="outline">Stock</Badge>}
-                    {store.hasPayments && <Badge color="green" size="xs" variant="outline">Pagos</Badge>}
-                    {store.isCatalogOnly && <Badge color="violet" size="xs" variant="outline">Sólo Catálogo</Badge>}
-                    {store.hasConnectivity && <Badge color="cyan" size="xs" variant="outline">WiFi</Badge>}
-                    {store.hasOrderManagement && <Badge color="pink" size="xs" variant="outline">Gastro Pro</Badge>}
-                    {store.hasWhatsAppOrders && <Badge color="teal" size="xs" variant="outline">Pedidos WA</Badge>}
-                    {store.hasPOS && <Badge color="indigo" size="xs" variant="outline">Punto Venta</Badge>}
-                    {store.hasMercadoPago && <Badge color="blue" size="xs" variant="outline">MP Online</Badge>}
-                  </Group>
-                </Table.Td>
-                <Table.Td>
-                  <Tooltip label="Productos / Categorías">
-                    <Group gap="xs">
-                      <Badge variant="light" color="blue" leftSection={<Package size={10} />}>{store._count.products}</Badge>
-                      <Badge variant="light" color="violet" leftSection={<LayoutGrid size={10} />}>{store._count.categories}</Badge>
-                    </Group>
-                  </Tooltip>
-                </Table.Td>
-                <Table.Td className="text-center">
-                  <Group justify="center" gap="sm">
-                     <Tooltip label="Ver Catálogo Público">
-                       <ActionIcon variant="light" color="teal" onClick={() => window.open(`/s/${store.slug}`, '_blank')}><Globe size={18} /></ActionIcon>
-                     </Tooltip>
-                     <Tooltip label="Ver Estadísticas Detalladas">
-                       <ActionIcon variant="subtle" color="blue"><BarChart3 size={18} /></ActionIcon>
-                     </Tooltip>
-                     <Tooltip label="Configuración Maestra">
-                       <ActionIcon variant="light" color="blue" onClick={() => setEditingStore(store)}><Edit3 size={18} /></ActionIcon>
-                     </Tooltip>
-                     <Tooltip label="Eliminar Tienda">
-                       <ActionIcon variant="light" color="red" onClick={() => handleDelete(store)}><Trash2 size={18} /></ActionIcon>
-                     </Tooltip>
-                  </Group>
-                </Table.Td>
+      <div className="hidden md:block">
+        <Card withBorder radius="md" p={0} shadow="sm">
+          <Table verticalSpacing="md" highlightOnHover>
+            <Table.Thead className="bg-slate-50">
+              <Table.Tr>
+                <Table.Th className="!pl-6">Tienda</Table.Th>
+                <Table.Th>Dueño Responsable</Table.Th>
+                <Table.Th>Rubro / SaaS</Table.Th>
+                <Table.Th>Estadísticas</Table.Th>
+                <Table.Th className="text-center">Acciones</Table.Th>
               </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
-      </Card>
+            </Table.Thead>
+            <Table.Tbody>
+              {stores.map(store => (
+                <Table.Tr key={store.id}>
+                  <Table.Td className="!pl-6">
+                    <Stack gap={0}>
+                      <Text fw={700} size="sm">{store.name}</Text>
+                      <Group gap={4} wrap="nowrap">
+                        <Globe size={12} color="#94a3b8" />
+                        <Text size="xs" color="dimmed">{store.slug}</Text>
+                      </Group>
+                    </Stack>
+                  </Table.Td>
+                  <Table.Td>
+                    <Stack gap={0}>
+                      <Text size="sm" fw={600}>{store.users[0]?.name || 'N/A'}</Text>
+                      <Text size="xs" color="dimmed">{store.users[0]?.email || 'N/A'}</Text>
+                    </Stack>
+                  </Table.Td>
+                  <Table.Td>
+                    <Group gap="xs">
+                      <Badge variant="light" color="gray" size="xs">{store.businessType}</Badge>
+                      {store.hasCart && <Badge color="blue" size="xs" variant="outline">Carrito</Badge>}
+                      {store.hasStockControl && <Badge color="orange" size="xs" variant="outline">Stock</Badge>}
+                      {store.hasPayments && <Badge color="green" size="xs" variant="outline">Pagos</Badge>}
+                      {store.isCatalogOnly && <Badge color="violet" size="xs" variant="outline">Sólo Catálogo</Badge>}
+                      {store.hasConnectivity && <Badge color="cyan" size="xs" variant="outline">WiFi</Badge>}
+                      {store.hasOrderManagement && <Badge color="pink" size="xs" variant="outline">Gastro Pro</Badge>}
+                      {store.hasWhatsAppOrders && <Badge color="teal" size="xs" variant="outline">Pedidos WA</Badge>}
+                      {store.hasPOS && <Badge color="indigo" size="xs" variant="outline">Punto Venta</Badge>}
+                      {store.hasMercadoPago && <Badge color="blue" size="xs" variant="outline">MP Online</Badge>}
+                    </Group>
+                  </Table.Td>
+                  <Table.Td>
+                    <Tooltip label="Productos / Categorías">
+                      <Group gap="xs">
+                        <Badge variant="light" color="blue" leftSection={<Package size={10} />}>{store._count.products}</Badge>
+                        <Badge variant="light" color="violet" leftSection={<LayoutGrid size={10} />}>{store._count.categories}</Badge>
+                      </Group>
+                    </Tooltip>
+                  </Table.Td>
+                  <Table.Td className="text-center">
+                    <Group justify="center" gap="sm">
+                       <Tooltip label="Ver Catálogo Público">
+                         <ActionIcon variant="light" color="teal" onClick={() => window.open(`/s/${store.slug}`, '_blank')}><Globe size={18} /></ActionIcon>
+                       </Tooltip>
+                       <Tooltip label="Ver Estadísticas Detalladas">
+                         <ActionIcon variant="subtle" color="blue"><BarChart3 size={18} /></ActionIcon>
+                       </Tooltip>
+                       <Tooltip label="Configuración Maestra">
+                         <ActionIcon variant="light" color="blue" onClick={() => setEditingStore(store)}><Edit3 size={18} /></ActionIcon>
+                       </Tooltip>
+                       <Tooltip label="Eliminar Tienda">
+                         <ActionIcon variant="light" color="red" onClick={() => handleDelete(store)}><Trash2 size={18} /></ActionIcon>
+                       </Tooltip>
+                    </Group>
+                  </Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        </Card>
+      </div>
 
       {/* Vista de Tarjetas (para Celulares) - Oculta en pantallas medianas y grandes */}
       <div className="block md:hidden space-y-4">
