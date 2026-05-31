@@ -328,12 +328,20 @@ export default function WhatsAppOrders() {
       </Group>
 
       <Tabs defaultValue="whatsapp" color="teal">
-        <Tabs.List>
-          <Tabs.Tab value="whatsapp" leftSection={<MessageSquare size={16} />}>
-            Pedidos WhatsApp
+        <Tabs.List className="flex flex-row flex-nowrap w-full justify-between gap-1">
+          <Tabs.Tab 
+            value="whatsapp" 
+            leftSection={<MessageSquare size={16} />}
+            className="flex-1 text-center justify-center py-2.5 text-xs md:text-sm font-bold min-w-0"
+          >
+            <span className="hidden xs:inline">Pedidos </span>WhatsApp
           </Tabs.Tab>
-          <Tabs.Tab value="mp" leftSection={<CreditCard size={16} />}>
-            Pedidos Online (Mercado Pago)
+          <Tabs.Tab 
+            value="mp" 
+            leftSection={<CreditCard size={16} />}
+            className="flex-1 text-center justify-center py-2.5 text-xs md:text-sm font-bold min-w-0"
+          >
+            <span className="hidden xs:inline">Pedidos </span>Mercado Pago
           </Tabs.Tab>
         </Tabs.List>
 

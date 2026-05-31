@@ -141,13 +141,12 @@ export default function Categories() {
             <Text fw={700} color={editingId ? 'blue' : 'dark'}>
               {editingId ? 'Editando Categoría' : 'Crear Nueva Categoría'}
             </Text>
-            <Group align="flex-end">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <TextInput 
                 label="Nombre de la categoría"
                 placeholder="Ej. Hamburguesas, Cervezas, Entradas..."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="flex-1"
                 required
                 size="md"
                 radius="md"
@@ -158,14 +157,13 @@ export default function Categories() {
                 data={potentialParents}
                 value={parentId}
                 onChange={(val) => setParentId(val)}
-                className="flex-1"
                 clearable
                 size="md"
                 radius="md"
                 searchable
               />
-            </Group>
-            <Group grow>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
               {editingId && (
                 <Button 
                   variant="light" 
@@ -174,6 +172,7 @@ export default function Categories() {
                   leftSection={<X size={18} />}
                   size="md"
                   radius="md"
+                  className="flex-1"
                 >
                   Cancelar
                 </Button>
@@ -186,16 +185,17 @@ export default function Categories() {
                   color={editingId ? 'blue' : undefined}
                   size="md"
                   radius="md"
+                  className="flex-1"
                 >
                   {editingId ? 'Guardar Cambios' : 'Crear Categoría'}
               </Button>
-            </Group>
+            </div>
           </Stack>
         </form>
       </Card>
 
-      {/* Tabla de Resultados */}
-      <div className="admin-table-shell">
+      {/* Tabla de Resultados (para Tablets y Computadoras) - Oculta en celulares */}
+      <div className="hidden md:block admin-table-shell">
         <table className="admin-table">
           <thead className="admin-table-head">
             <tr>
@@ -284,6 +284,100 @@ export default function Categories() {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Vista de Tarjetas (para Celulares) - Oculta en pantallas medianas y grandes */}
+      <div className="block md:hidden space-y-3">
+        {categories.length === 0 ? (
+          <Card withBorder radius="xl" p="xl" className="text-center py-12 bg-white border-slate-100">
+            <Stack align="center" gap="sm">
+              <AlertCircle size={32} color="#94a3b8" />
+              <Text color="dimmed" size="sm">No tienes categorías creadas todavía.</Text>
+            </Stack>
+          </Card>
+        ) : (
+          [...categories.filter(c => !c.parentId)].map(parent => (
+            <Fragment key={parent.id}>
+              {/* Categoría Principal */}
+              <Card 
+                withBorder 
+                radius="xl" 
+                p="md" 
+                className={`bg-white shadow-sm border-slate-100 ${editingId === parent.id ? 'border-sky-400 bg-sky-50/20' : ''}`}
+              >
+                <Group justify="space-between" align="center" wrap="nowrap">
+                  <Stack gap={2}>
+                    <Text fw={700} color="#0f172a" size="md">{parent.name}</Text>
+                    <Badge color="blue" variant="light" size="xs" radius="sm">Principal</Badge>
+                  </Stack>
+                  
+                  <Group gap="xs">
+                    <ActionIcon 
+                      variant="light" 
+                      color="blue" 
+                      onClick={() => handleEdit(parent)}
+                      size="md"
+                      radius="md"
+                    >
+                      <Pencil size={14} />
+                    </ActionIcon>
+                    <ActionIcon 
+                      variant="light" 
+                      color="red" 
+                      onClick={() => handleDelete(parent.id, parent.name)}
+                      size="md"
+                      radius="md"
+                    >
+                      <Trash2 size={14} />
+                    </ActionIcon>
+                  </Group>
+                </Group>
+              </Card>
+
+              {/* Subcategorías asociadas */}
+              {categories.filter(c => c.parentId === parent.id).map(child => (
+                <Card 
+                  key={child.id}
+                  withBorder 
+                  radius="xl" 
+                  p="md" 
+                  className={`bg-white shadow-sm border-slate-100 ml-8 ${editingId === child.id ? 'border-sky-400 bg-sky-50/20' : ''}`}
+                >
+                  <Group justify="space-between" align="center" wrap="nowrap">
+                    <Group gap="xs" wrap="nowrap">
+                      <ChevronRight size={14} color="#94a3b8" className="shrink-0" />
+                      <Stack gap={2}>
+                        <Text fw={600} color="#475569" size="sm">{child.name}</Text>
+                        <Badge color="gray" variant="outline" size="xs" radius="sm">Subcategoría</Badge>
+                      </Stack>
+                    </Group>
+                    
+                    <Group gap="xs">
+                      <ActionIcon 
+                        variant="light" 
+                        color="blue" 
+                        onClick={() => handleEdit(child)}
+                        size="md"
+                        radius="md"
+                      >
+                        <Pencil size={14} />
+                      </ActionIcon>
+                      <ActionIcon 
+                        variant="light" 
+                        color="red" 
+                        onClick={() => handleDelete(child.id, child.name)}
+                        size="md"
+                        radius="md"
+                      >
+                        <Trash2 size={14} />
+                      </ActionIcon>
+                    </Group>
+                  </Group>
+                </Card>
+              ))}
+            </Fragment>
+          ))
+        )}
       </div>
     </Box>
   );
