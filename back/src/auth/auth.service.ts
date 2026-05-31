@@ -1,8 +1,9 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
-import { LoginDto, RegisterSuperadminDto, UpdateProfileDto } from './auth.dto';
+import { LoginDto, RegisterSuperadminDto, UpdateProfileDto, LoginGoogleDto } from './auth.dto';
 import * as bcrypt from 'bcrypt';
+import { OAuth2Client } from 'google-auth-library';
 
 @Injectable()
 export class AuthService {
@@ -40,6 +41,10 @@ export class AuthService {
     });
     if (!user) throw new UnauthorizedException('Credenciales inválidas');
 
+    if (!user.password) {
+      throw new UnauthorizedException('Esta cuenta requiere inicio de sesión con Google');
+    }
+
     const isValid = await bcrypt.compare(dto.password, user.password);
     if (!isValid) throw new UnauthorizedException('Credenciales inválidas');
 
@@ -50,6 +55,49 @@ export class AuthService {
       role: user.role, 
       storeId: user.storeId,
       name: user.name 
+    };
+    return {
+      access_token: this.jwtService.sign(payload),
+      slug: user.store?.slug || (user.role === 'SUPERADMIN' ? 'admin' : null)
+    };
+  }
+
+  async loginGoogle(dto: LoginGoogleDto) {
+    let email: string;
+    let name: string | undefined;
+
+    try {
+      const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+      const ticket = await client.verifyIdToken({
+        idToken: dto.token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+      if (!payload || !payload.email) {
+        throw new UnauthorizedException('Token de Google inválido');
+      }
+      email = payload.email;
+      name = payload.name;
+    } catch (error) {
+      throw new UnauthorizedException('Error al verificar el token de Google');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      include: { store: true }
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('El correo electrónico no está registrado en el sistema.');
+    }
+
+    // Generar el Token
+    const payload = { 
+      sub: user.id, 
+      email: user.email, 
+      role: user.role, 
+      storeId: user.storeId,
+      name: user.name || name 
     };
     return {
       access_token: this.jwtService.sign(payload),

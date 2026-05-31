@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Get, UseGuards, Request, Patch } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterSuperadminDto, UpdateProfileDto } from './auth.dto';
+import { LoginDto, RegisterSuperadminDto, UpdateProfileDto, LoginGoogleDto } from './auth.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { Throttle } from '@nestjs/throttler';
 
@@ -12,6 +12,12 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   async login(@Body() body: LoginDto) {
     return this.authService.login(body);
+  }
+
+  @Post('google')
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  async loginGoogle(@Body() body: LoginGoogleDto) {
+    return this.authService.loginGoogle(body);
   }
 
   @Post('register-superadmin')

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { KeyRound, Mail, Eye, EyeOff } from 'lucide-react';
 import { api } from '../utils/api';
@@ -10,6 +10,69 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleGoogleLogin = async (response: any) => {
+    setError('');
+    setLoading(true);
+
+    try {
+      const data = await api.post('/auth/google', { token: response.credential });
+
+      const slug = data.slug;
+
+      if (slug) {
+        localStorage.setItem(`token_${slug}`, data.access_token);
+        localStorage.setItem('last_active_slug', slug);
+      }
+
+      localStorage.setItem('token', data.access_token);
+
+      const base64Url = data.access_token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(window.atob(base64));
+      if (payload.role === 'SUPERADMIN') {
+        navigate('/admin/master');
+      } else {
+        navigate(`/admin/${slug}`);
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error al iniciar sesión con Google');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const initGoogle = () => {
+      const google = (window as any).google;
+      if (google) {
+        google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          callback: handleGoogleLogin,
+        });
+        google.accounts.id.renderButton(
+          document.getElementById('google-signin-button'),
+          {
+            theme: 'outline',
+            size: 'large',
+            width: '100%',
+            text: 'signin_with',
+            shape: 'rectangular',
+          }
+        );
+      }
+    };
+
+    const interval = setInterval(() => {
+      const google = (window as any).google;
+      if (google) {
+        initGoogle();
+        clearInterval(interval);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,6 +171,22 @@ export default function Login() {
             {loading ? 'Cargando...' : 'Iniciar Sesión'}
           </button>
         </form>
+
+        <div className="relative my-6 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-200"></div>
+          </div>
+          <span className="relative bg-white px-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            o continúa con
+          </span>
+        </div>
+
+        <div className="flex justify-center">
+          <div 
+            id="google-signin-button" 
+            className="w-full min-h-[44px] transition-all duration-200 hover:scale-[1.01]"
+          ></div>
+        </div>
       </div>
     </div>
   );

@@ -11,7 +11,7 @@ datasource db {
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
-  password  String   // Recuerda encriptar siempre en Back
+  password  String?  // Recuerda encriptar siempre en Back (Opcional para Google OAuth)
   name      String?  // Nombre real del usuario (ej: Raúl Ivanes)
   role      String   @default("CUSTOMER") // SUPERADMIN, STORE_ADMIN, CUSTOMER
   
