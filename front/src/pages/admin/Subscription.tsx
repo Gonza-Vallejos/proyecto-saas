@@ -1,6 +1,6 @@
 // Módulo de Suscripción SaaS para el Comercio - Facturación de la Plataforma
 import { useEffect, useState } from 'react';
-import { Title, Text, Card, Group, Stack, Badge, Button, Paper, ThemeIcon, Box } from '@mantine/core';
+import { Title, Text, Card, Group, Stack, Badge, Button, Paper, ThemeIcon, Box, Divider, SimpleGrid } from '@mantine/core';
 import { CreditCard, Calendar, CheckCircle2, AlertTriangle, ShieldCheck, HelpCircle } from 'lucide-react';
 import { api } from '../../utils/api';
 import Swal from 'sweetalert2';
