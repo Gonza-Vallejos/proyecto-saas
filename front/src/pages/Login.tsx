@@ -50,14 +50,20 @@ export default function Login() {
           client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
           callback: handleGoogleLogin,
         });
+
+        // Calcular dinámicamente el ancho adecuado según la pantalla del dispositivo
+        const screenWidth = window.innerWidth;
+        // En móviles restamos padding, en pantallas mayores limitamos a 350px para una estética perfecta
+        const buttonWidth = screenWidth < 450 ? Math.max(screenWidth - 80, 240) : 350;
+
         google.accounts.id.renderButton(
           document.getElementById('google-signin-button'),
           {
             theme: 'outline',
             size: 'large',
-            width: '100%',
+            width: buttonWidth.toString(),
             text: 'signin_with',
-            shape: 'rectangular',
+            shape: 'pill', // Redondeado premium
           }
         );
       }
@@ -107,29 +113,44 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100">
-      <div className="w-[90%] max-w-md rounded-2xl bg-white p-[clamp(1.5rem,5vw,3rem)] shadow-xl">
-        <h2 className="mb-8 text-center text-[clamp(1.5rem,5vw,1.8rem)] font-bold text-slate-900">
-          Portal Administrativo
-        </h2>
+    <div className="relative flex min-h-screen items-center justify-center bg-slate-50 overflow-hidden px-4">
+      {/* Círculos fluidos decorativos en background para un acabado súper premium */}
+      <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-gradient-to-br from-sky-400/20 to-indigo-500/10 blur-3xl pointer-events-none"></div>
+      <div className="absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full bg-gradient-to-tr from-violet-400/10 to-sky-400/20 blur-3xl pointer-events-none"></div>
+      
+      {/* Tarjeta con Glassmorphism y bordes suaves */}
+      <div className="relative w-[100%] max-w-[430px] rounded-[28px] bg-white/70 backdrop-blur-md p-8 md:p-10 shadow-[0_20px_50px_rgba(8,112,184,0.06)] border border-white/60">
+        
+        {/* Cabecera de la tarjeta */}
+        <div className="mb-8 text-center">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-sky-400 to-blue-500 text-white shadow-md shadow-sky-500/25 mb-4">
+            <KeyRound size={22} className="animate-pulse" />
+          </div>
+          <h2 className="text-3xl font-extrabold tracking-tight text-slate-800 leading-none">
+            Portal Administrativo
+          </h2>
+          <p className="mt-2.5 text-sm text-slate-500 font-medium">
+            Ingresa a tu panel de gestión
+          </p>
+        </div>
 
         {error && (
-          <div className="mb-4 rounded-lg border border-red-100 bg-red-50 p-4 text-sm text-red-500">
+          <div className="mb-5 rounded-xl border border-red-100 bg-red-50/70 p-4 text-sm text-red-500 font-medium backdrop-blur-sm">
             {error}
           </div>
         )}
 
         <form onSubmit={handleLogin} className="flex flex-col gap-5">
           <div>
-            <label className="mb-2 block font-medium text-slate-600">Correo Electrónico</label>
-            <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-3">
-              <Mail size={18} className="mr-2 shrink-0 text-slate-400" />
+            <label className="mb-2 block text-sm font-semibold text-slate-700">Correo Electrónico</label>
+            <div className="flex items-center rounded-2xl border border-slate-200/80 bg-white/60 p-3.5 transition-all duration-300 focus-within:border-sky-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-sky-100/50">
+              <Mail size={18} className="mr-3 shrink-0 text-slate-400 transition-colors duration-200" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="off"
-                className="w-full border-none bg-transparent text-base outline-none"
+                className="w-full border-none bg-transparent text-base text-slate-800 placeholder-slate-400 outline-none"
                 placeholder="admin@demostore.com"
                 required
               />
@@ -137,27 +158,27 @@ export default function Login() {
           </div>
 
           <div>
-            <label className="mb-2 block font-medium text-slate-600">Contraseña</label>
-            <div className="relative flex items-center rounded-lg border border-slate-200 bg-slate-50 p-3">
-              <KeyRound size={18} className="mr-2 shrink-0 text-slate-400" />
+            <label className="mb-2 block text-sm font-semibold text-slate-700">Contraseña</label>
+            <div className="relative flex items-center rounded-2xl border border-slate-200/80 bg-white/60 p-3.5 transition-all duration-300 focus-within:border-sky-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-sky-100/50">
+              <KeyRound size={18} className="mr-3 shrink-0 text-slate-400 transition-colors duration-200" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border-none bg-transparent pr-10 text-base outline-none"
+                className="w-full border-none bg-transparent pr-10 text-base text-slate-800 placeholder-slate-400 outline-none"
                 placeholder="••••••••"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 flex cursor-pointer items-center border-none bg-transparent p-0"
+                className="absolute right-3.5 flex cursor-pointer items-center border-none bg-transparent p-0 transition-transform active:scale-95"
                 aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
                 {showPassword ? (
-                  <EyeOff size={18} className="text-slate-500" />
+                  <EyeOff size={18} className="text-slate-400 hover:text-slate-600 transition-colors" />
                 ) : (
-                  <Eye size={18} className="text-slate-500" />
+                  <Eye size={18} className="text-slate-400 hover:text-slate-600 transition-colors" />
                 )}
               </button>
             </div>
@@ -166,25 +187,36 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-4 cursor-pointer rounded-lg border-none bg-sky-500 px-4 py-4 text-lg font-semibold text-white transition-all hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-2 cursor-pointer rounded-2xl border-none bg-gradient-to-r from-sky-500 via-sky-600 to-blue-600 px-4 py-4 text-base font-bold text-white transition-all duration-300 hover:from-sky-600 hover:to-blue-700 shadow-md shadow-sky-500/20 hover:shadow-lg hover:shadow-sky-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 flex items-center justify-center min-h-[52px]"
           >
-            {loading ? 'Cargando...' : 'Iniciar Sesión'}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Iniciando sesión...
+              </span>
+            ) : (
+              'Iniciar Sesión'
+            )}
           </button>
         </form>
 
-        <div className="relative my-6 flex items-center justify-center">
+        <div className="relative my-7 flex items-center justify-center">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-200"></div>
+            <div className="w-full border-t border-slate-200/80"></div>
           </div>
-          <span className="relative bg-white px-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <span className="relative bg-white/70 backdrop-blur-md px-4 text-xs font-bold uppercase tracking-widest text-slate-400">
             o continúa con
           </span>
         </div>
 
-        <div className="flex justify-center">
+        {/* Contenedor del botón de Google perfectamente centrado */}
+        <div className="flex w-full justify-center">
           <div 
             id="google-signin-button" 
-            className="w-full min-h-[44px] transition-all duration-200 hover:scale-[1.01]"
+            className="flex w-full justify-center min-h-[44px] transition-all duration-300 hover:scale-[1.01]"
           ></div>
         </div>
       </div>
