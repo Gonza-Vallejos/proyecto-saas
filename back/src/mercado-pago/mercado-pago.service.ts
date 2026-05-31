@@ -94,6 +94,97 @@ export class MercadoPagoService {
     };
   }
 
+  async createSubscriptionPreference(storeId: string, returnUrl: string) {
+    const store = await this.prisma.store.findUnique({ where: { id: storeId } });
+    if (!store) throw new BadRequestException('Tienda no encontrada');
+
+    // Obtener credenciales globales del Superadmin desde SystemSetting
+    const accessTokenSetting = await this.prisma.systemSetting.findUnique({
+      where: { key: 'superadmin_mp_access_token' }
+    });
+    
+    if (!accessTokenSetting?.value) {
+      throw new BadRequestException('El administrador de la plataforma no ha configurado Mercado Pago aún');
+    }
+
+    const price = store.subscriptionPrice || 10000;
+
+    const client = new MercadoPagoConfig({ accessToken: accessTokenSetting.value });
+    const preference = new Preference(client);
+
+    let backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+    if (backendUrl.endsWith('/')) backendUrl = backendUrl.slice(0, -1);
+
+    const body: any = {
+      items: [
+        {
+          id: `sub_${store.id}`,
+          title: `Renovación de Suscripción SaaS - ${store.name}`,
+          quantity: 1,
+          unit_price: Number(price)
+        }
+      ],
+      back_urls: {
+        success: `${returnUrl}?payment=success`,
+        failure: `${returnUrl}?payment=failure`,
+        pending: `${returnUrl}?payment=pending`
+      },
+      auto_return: 'approved',
+      external_reference: `subscription:${store.id}`,
+      // El webhook de suscripción apunta con isSubscription=true y storeId=platform
+      notification_url: `${backendUrl}/mercado-pago/webhook?storeId=platform&isSubscription=true`
+    };
+
+    const response = await preference.create({ body });
+    return {
+      init_point: response.init_point,
+      id: response.id
+    };
+  }
+
+  async processSubscriptionWebhook(paymentId: string) {
+    try {
+      const accessTokenSetting = await this.prisma.systemSetting.findUnique({
+        where: { key: 'superadmin_mp_access_token' }
+      });
+      if (!accessTokenSetting?.value) return;
+
+      const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+        headers: {
+          'Authorization': `Bearer ${accessTokenSetting.value}`
+        }
+      });
+      const payment = await response.json();
+
+      if (payment.status === 'approved' && payment.external_reference) {
+        const ref: string = payment.external_reference; // "subscription:<storeId>"
+        if (ref.startsWith('subscription:')) {
+          const storeId = ref.split(':')[1];
+          
+          const store = await this.prisma.store.findUnique({ where: { id: storeId } });
+          if (!store) return;
+
+          let baseDate = new Date();
+          if (store.subscriptionExpiresAt && store.subscriptionExpiresAt > new Date()) {
+            baseDate = new Date(store.subscriptionExpiresAt);
+          }
+          const nextExpiry = new Date(baseDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+          await this.prisma.store.update({
+            where: { id: storeId },
+            data: {
+              subscriptionStatus: 'ACTIVE',
+              subscriptionExpiresAt: nextExpiry
+            }
+          });
+          this.logger.log(`Suscripción de tienda ${store.name} (${storeId}) renovada con éxito hasta ${nextExpiry.toISOString()}`);
+        }
+      }
+    } catch (e: any) {
+      this.logger.error(`Error procesando webhook de suscripción para pago ${paymentId}`, e.message);
+    }
+  }
+
   async processWebhook(type: string, dataId: string, storeId: string) {
     if (type !== 'payment') return;
 
@@ -117,7 +208,6 @@ export class MercadoPagoService {
           data: { paymentStatus: 'PAID' }
         });
         this.logger.log(`Pedido ${orderId} pagado exitosamente vía MP`);
-        // Opcional: Emitir WebSocket para Kitchen/Waiter aquí (el EventsGateway puede manejarlo si conectamos OrdersService)
       }
     } catch (e: any) {
       this.logger.error(`Error procesando webhook de MP para store ${storeId}`, e.message);

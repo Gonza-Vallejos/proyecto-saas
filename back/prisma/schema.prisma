@@ -52,6 +52,11 @@ model Store {
   hasMercadoPago   Boolean @default(false)    // Módulo: Integración con Mercado Pago
   allowCatalogPayments Boolean @default(true)     // Permitir cobrar en catálogo web
   
+  // Suscripción SaaS
+  subscriptionStatus    String    @default("ACTIVE") // ACTIVE, PENDING_PAYMENT, EXPIRED, TRIAL
+  subscriptionExpiresAt DateTime?
+  subscriptionPrice     Float     @default(10000)
+  
   // Integraciones
   mercadoPagoAccessToken String?
   mercadoPagoPublicKey   String?
@@ -250,4 +255,12 @@ model CashRegister {
   
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+}
+
+model SystemSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Edit3, User, Globe, Store, BarChart3, Database, Package, LayoutGrid, Trash2 } from 'lucide-react';
+import { Plus, Edit3, User, Globe, Store, BarChart3, Database, Package, LayoutGrid, Trash2, Settings, X } from 'lucide-react';
 import { 
   Title, Text, Button, Card, Group, Stack, Badge, Table, 
   ActionIcon, Tooltip, SimpleGrid, Paper, Modal, TextInput, 
@@ -36,6 +36,13 @@ export default function StoreManagement() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingStore, setEditingStore] = useState<any>(null);
 
+  // SaaS Subscription settings states
+  const [superadminMpAccessToken, setSuperadminMpAccessToken] = useState('');
+  const [superadminMpPublicKey, setSuperadminMpPublicKey] = useState('');
+  const [defaultSubscriptionPrice, setDefaultSubscriptionPrice] = useState(10000);
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [showSettingsCard, setShowSettingsCard] = useState(false);
+
   const fetchStores = async () => {
     try {
       const data = await api.get('/stores');
@@ -47,9 +54,44 @@ export default function StoreManagement() {
     }
   };
 
+  const fetchSettings = async () => {
+    try {
+      const data = await api.get('/stores/master/system-settings');
+      setSuperadminMpAccessToken(data.superadminMpAccessToken || '');
+      setSuperadminMpPublicKey(data.superadminMpPublicKey || '');
+      setDefaultSubscriptionPrice(data.defaultSubscriptionPrice || 10000);
+    } catch (e) {
+      console.error('Error fetching system settings', e);
+    }
+  };
+
   useEffect(() => {
     fetchStores();
+    fetchSettings();
   }, []);
+
+  const handleSaveSettings = async () => {
+    setSavingSettings(true);
+    try {
+      await api.patch('/stores/master/system-settings', {
+        superadminMpAccessToken,
+        superadminMpPublicKey,
+        defaultSubscriptionPrice: Number(defaultSubscriptionPrice)
+      });
+      Swal.fire({
+        title: '¡Guardado!',
+        text: 'Configuración de plataforma guardada correctamente.',
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false
+      });
+      setShowSettingsCard(false);
+    } catch (e: any) {
+      Swal.fire('Error', e.message || 'Error al guardar configuración', 'error');
+    } finally {
+      setSavingSettings(false);
+    }
+  };
 
   const handleCreate = async (values: any) => {
     try {
@@ -112,10 +154,87 @@ export default function StoreManagement() {
           <Title order={1}>Gestión Maestra de Tiendas</Title>
           <Text color="dimmed">Administra todos los inquilinos de la plataforma y sus configuraciones SaaS.</Text>
         </div>
-        <Button leftSection={<Plus size={18} />} onClick={() => setShowAddModal(true)} size="md" radius="md">
-          Crear Nueva Tienda
-        </Button>
+        <Group>
+          <Button 
+            variant="light" 
+            color="indigo" 
+            leftSection={<Settings size={18} />} 
+            onClick={() => setShowSettingsCard(!showSettingsCard)} 
+            size="md" 
+            radius="md"
+          >
+            {showSettingsCard ? 'Ocultar Config. SaaS' : 'Configurar SaaS / MP'}
+          </Button>
+          <Button leftSection={<Plus size={18} />} onClick={() => setShowAddModal(true)} size="md" radius="md">
+            Crear Nueva Tienda
+          </Button>
+        </Group>
       </Group>
+
+      {/* Card de Configuración SaaS y Mercado Pago de la Plataforma */}
+      {showSettingsCard && (
+        <Card withBorder radius="xl" p="xl" shadow="md" mb="2.5rem" style={{ borderLeft: '5px solid var(--mantine-color-indigo-6)' }} className="bg-white">
+          <Stack gap="md">
+            <Group justify="space-between">
+              <Box>
+                <Text fw={800} size="lg" color="#1e1b4b">Configuración de Cobros SaaS (Mercado Pago de la Plataforma)</Text>
+                <Text size="xs" color="dimmed">Introduce tus llaves de Mercado Pago para recibir de forma automatizada los pagos de suscripción de todos tus inquilinos de la plataforma.</Text>
+              </Box>
+              <ActionIcon variant="light" color="gray" radius="xl" onClick={() => setShowSettingsCard(false)}><X size={16} /></ActionIcon>
+            </Group>
+            
+            <Divider />
+
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+              <TextInput
+                label="Access Token de la Plataforma"
+                placeholder="APP_USR-..."
+                value={superadminMpAccessToken}
+                onChange={(e) => setSuperadminMpAccessToken(e.target.value)}
+                required
+                type="password"
+                size="md"
+                radius="md"
+              />
+              <TextInput
+                label="Public Key de la Plataforma"
+                placeholder="APP_USR-..."
+                value={superadminMpPublicKey}
+                onChange={(e) => setSuperadminMpPublicKey(e.target.value)}
+                required
+                size="md"
+                radius="md"
+              />
+            </SimpleGrid>
+
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+              <TextInput
+                label="Monto de Suscripción Mensual Base ($ ARS)"
+                placeholder="10000"
+                type="number"
+                value={defaultSubscriptionPrice}
+                onChange={(e) => setDefaultSubscriptionPrice(Number(e.target.value))}
+                required
+                size="md"
+                radius="md"
+              />
+              <Box className="flex items-end">
+                <Button 
+                  fullWidth 
+                  color="indigo" 
+                  onClick={handleSaveSettings} 
+                  loading={savingSettings}
+                  size="md"
+                  radius="md"
+                  className="h-[42px]"
+                >
+                  Guardar Configuración SaaS
+                </Button>
+              </Box>
+            </SimpleGrid>
+          </Stack>
+        </Card>
+      )}
 
       {/* Resumen de estadísticas rápidas */}
       <SimpleGrid cols={{ base: 1, sm: 3 }} mb="xl">

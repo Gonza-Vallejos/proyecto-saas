@@ -2,6 +2,7 @@ import { Controller, Post, Body, Get, Param, Patch, Delete, UseGuards, Request, 
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreMasterDto } from './dto/update-store-master.dto';
 import { UpdateStoreAppearanceDto } from './dto/update-appearance.dto';
+import { UpdateSystemSettingsDto } from './dto/system-settings.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { StoresService } from './stores.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -34,6 +35,20 @@ export class StoresController {
   @Post()
   async createStore(@Body() body: CreateStoreDto) {
     return this.storesService.create(body);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @SetMetadata('roles', ['SUPERADMIN'])
+  @Get('master/system-settings')
+  async getSystemSettings() {
+    return this.storesService.getSystemSettings();
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @SetMetadata('roles', ['SUPERADMIN'])
+  @Patch('master/system-settings')
+  async updateSystemSettings(@Body() body: UpdateSystemSettingsDto) {
+    return this.storesService.updateSystemSettings(body);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

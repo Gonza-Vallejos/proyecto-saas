@@ -3,11 +3,54 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreMasterDto } from './dto/update-store-master.dto';
 import { UpdateStoreAppearanceDto } from './dto/update-appearance.dto';
+import { UpdateSystemSettingsDto } from './dto/system-settings.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class StoresService {
   constructor(private prisma: PrismaService) {}
+
+  async getSystemSettings() {
+    const keys = ['superadmin_mp_access_token', 'superadmin_mp_public_key', 'saas_subscription_price'];
+    const settings = await this.prisma.systemSetting.findMany({
+      where: { key: { in: keys } }
+    });
+
+    const config: any = {};
+    settings.forEach(s => {
+      config[s.key] = s.value;
+    });
+
+    return {
+      superadminMpAccessToken: config.superadmin_mp_access_token || '',
+      superadminMpPublicKey: config.superadmin_mp_public_key || '',
+      defaultSubscriptionPrice: config.saas_subscription_price ? Number(config.saas_subscription_price) : 10000
+    };
+  }
+
+  async updateSystemSettings(data: UpdateSystemSettingsDto) {
+    const updates: { key: string; value: string }[] = [];
+    
+    if (data.superadminMpAccessToken !== undefined) {
+      updates.push({ key: 'superadmin_mp_access_token', value: data.superadminMpAccessToken });
+    }
+    if (data.superadminMpPublicKey !== undefined) {
+      updates.push({ key: 'superadmin_mp_public_key', value: data.superadminMpPublicKey });
+    }
+    if (data.defaultSubscriptionPrice !== undefined) {
+      updates.push({ key: 'saas_subscription_price', value: String(data.defaultSubscriptionPrice) });
+    }
+
+    for (const update of updates) {
+      await this.prisma.systemSetting.upsert({
+        where: { key: update.key },
+        update: { value: update.value },
+        create: { key: update.key, value: update.value }
+      });
+    }
+
+    return { message: 'Configuración de plataforma guardada con éxito.' };
+  }
 
   async create(data: CreateStoreDto) {
     const existingStore = await this.prisma.store.findUnique({ where: { slug: data.slug } });

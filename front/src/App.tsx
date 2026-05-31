@@ -14,6 +14,8 @@ import OrderHistory from './pages/admin/OrderHistory';
 import StaffManagement from './pages/admin/StaffManagement';
 import PointOfSale from './pages/admin/PointOfSale';
 import CashRegistersHistory from './pages/admin/CashRegistersHistory';
+// SaaS Billing Panel page
+import Subscription from './pages/admin/Subscription';
 import Register from './pages/Register';
 import NotFound from './pages/NotFound';
 
@@ -85,6 +87,7 @@ function App() {
           <Route path="staff" element={<StaffManagement />} />
           <Route path="pos" element={<PointOfSale />} />
           <Route path="cash-registers" element={<CashRegistersHistory />} />
+          <Route path="subscription" element={<Subscription />} />
         </Route>
 
         {/* Redirección inteligente de /admin */}

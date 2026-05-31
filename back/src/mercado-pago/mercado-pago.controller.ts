@@ -37,6 +37,14 @@ export class MercadoPagoController {
     return this.mpService.createPreference(req.user.storeId, body.items, body.returnUrl, body.orderId);
   }
 
+  // Generar Preferencia de Pago de Suscripción SaaS (Comercios)
+  @Post('subscription-preference')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @SetMetadata('roles', ['STORE_ADMIN', 'SUPERADMIN'])
+  async createSubscriptionPreference(@Body() body: { returnUrl: string }, @Req() req: any) {
+    return this.mpService.createSubscriptionPreference(req.user.storeId, body.returnUrl);
+  }
+
   // Generar Preferencia de Pago Público (Catalogo Web)
   @Post('preference/public')
   async createPublicPreference(@Body() body: { storeId: string, items: any[], returnUrl: string, orderId?: string }) {
@@ -51,6 +59,7 @@ export class MercadoPagoController {
     @Query('topic') topic: string,
     @Query('id') id: string,
     @Query('storeId') storeId: string, 
+    @Query('isSubscription') isSubscription: string,
     @Res() res: any
   ) {
     // Retornar 200 OK inmediatamente a Mercado Pago
@@ -59,9 +68,14 @@ export class MercadoPagoController {
     const eventType = type || topic;
     const eventId = dataId || id;
 
-    if ((eventType === 'payment' && eventId && storeId)) {
-      // Procesar en background
-      this.mpService.processWebhook('payment', eventId, storeId);
+    if (eventType === 'payment' && eventId) {
+      if (isSubscription === 'true' || storeId === 'platform') {
+        // Procesar pago de suscripción de la plataforma
+        this.mpService.processSubscriptionWebhook(eventId);
+      } else if (storeId) {
+        // Procesar venta regular de un comercio
+        this.mpService.processWebhook('payment', eventId, storeId);
+      }
     }
   }
 }
