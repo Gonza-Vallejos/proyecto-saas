@@ -436,7 +436,7 @@ function StoreFormModal({ opened, onClose, onSubmit, store, title, subscriptionE
       setOwnerEmail('');
       setOwnerPassword('');
       setSubscriptionExpiration('');
-      setIsDisabled(false);
+
       setBusinessType('retail');
       setHasStockControl(false);
       setHasPayments(false);
