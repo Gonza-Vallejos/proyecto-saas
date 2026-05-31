@@ -4,11 +4,12 @@ import {
   Title, Text, Card, Group, Stack, Badge, 
   SimpleGrid, Paper, Table, ActionIcon, 
   TextInput, Select, ScrollArea, Tooltip,
-  Tabs, Modal, Divider
+  Tabs, Modal, Divider, Loader, Button
 } from '@mantine/core';
 import { 
   History, Calendar, Eye, 
-  ShoppingBag, MonitorSmartphone, CreditCard
+  ShoppingBag, MonitorSmartphone, CreditCard,
+  Boxes
 } from 'lucide-react';
 import { api } from '../../utils/api';
 
@@ -235,7 +236,8 @@ export default function OrderHistory() {
         </Paper>
       </SimpleGrid>
 
-      <Card withBorder radius="md" p={0}>
+      {/* Vista de Tabla (para Tablets y Computadoras) - Oculta en celulares */}
+      <Card className="hidden md:block" withBorder radius="md" p={0}>
         <ScrollArea>
            <Table verticalSpacing="md" highlightOnHover>
             <Table.Thead bg="gray.0">
@@ -319,6 +321,103 @@ export default function OrderHistory() {
           </Table>
         </ScrollArea>
       </Card>
+
+      {/* Vista de Tarjetas (para Celulares) - Oculta en pantallas medianas y grandes */}
+      <div className="block md:hidden space-y-4">
+        {loading ? (
+          <div className="flex justify-center p-12">
+            <Loader size="lg" />
+          </div>
+        ) : orders.length === 0 ? (
+          <Card withBorder radius="xl" p="xl" className="text-center py-12 bg-white border-slate-100">
+            <Stack align="center" gap="sm">
+              <Boxes size={48} color="#cbd5e1" strokeWidth={1.5} />
+              <Text fw={600} color="dimmed">No se encontraron pedidos en este periodo.</Text>
+            </Stack>
+          </Card>
+        ) : (
+          orders.map(order => (
+            <Card key={order.id} withBorder radius="xl" p="md" className="bg-white shadow-sm border-slate-100">
+              <Group justify="space-between" mb="xs" align="center">
+                <Stack gap={2}>
+                  <Text size="sm" fw={700} color="#1e293b">
+                    {new Date(order.createdAt).toLocaleDateString('es-AR')}
+                  </Text>
+                  <Text size="xs" color="dimmed">
+                    {new Date(order.createdAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}hs
+                  </Text>
+                </Stack>
+                {getStatusBadge(order.status)}
+              </Group>
+
+              <div className="mt-3 space-y-2 border-t border-slate-50 pt-2">
+                <div className="flex justify-between items-center border-b border-slate-50 pb-2">
+                  <Text size="xs" color="dimmed" fw={600}>Canal:</Text>
+                  <Group gap={5}>
+                    {getOriginIcon(order.origin)}
+                    <Text size="xs" fw={700} color="slate.7" className="capitalize">
+                      {order.origin.toLowerCase()}
+                    </Text>
+                  </Group>
+                </div>
+
+                <div className="flex justify-between items-start border-b border-slate-50 pb-2">
+                  <Text size="xs" color="dimmed" fw={600}>Cliente / Detalle:</Text>
+                  <div className="text-right">
+                    {order.origin === 'POS' ? (
+                      <Stack gap={0} align="flex-end">
+                        <Text size="sm" fw={700} color="indigo.9">Venta Mostrador</Text>
+                        <Text size="10px" color="dimmed">
+                          Cajero: {order.seller?.name || 'Desconocido'}
+                        </Text>
+                      </Stack>
+                    ) : (
+                      <Stack gap={0} align="flex-end">
+                        <Text size="sm" fw={700} color="slate.8">
+                          {order.customerName || 'Cliente Online'}
+                        </Text>
+                        {order.seller && (
+                          <Text size="10px" color="teal.7">
+                            Cobró: {order.seller.name || order.seller.email}
+                          </Text>
+                        )}
+                      </Stack>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center border-b border-slate-50 pb-2">
+                  <Text size="xs" color="dimmed" fw={600}>Productos:</Text>
+                  <Text size="sm" fw={600} color="slate.7">{order.items.length} ítem(s)</Text>
+                </div>
+
+                <div className="flex justify-between items-center pt-1">
+                  <div>
+                    <Text size="xs" color="dimmed" fw={600}>Total cobrado:</Text>
+                    <Text size="md" fw={900} color="teal.8">
+                      $ {order.total.toLocaleString()}
+                    </Text>
+                  </div>
+                  
+                  <Button 
+                    variant="light" 
+                    color="blue" 
+                    size="xs" 
+                    radius="md" 
+                    leftSection={<Eye size={14} />}
+                    onClick={() => {
+                      setSelectedOrder(order);
+                      setOrderModalOpen(true);
+                    }}
+                  >
+                    Detalle
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ))
+        )}
+      </div>
 
       {/* Modal de Detalle de Venta */}
       <Modal
