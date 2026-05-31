@@ -148,6 +148,9 @@ export default function AdminLayout() {
       <AdminNavLink to="/admin/master" active={isActive('/admin/master')}>
         <Store size={18} /> Gestión de Tiendas
       </AdminNavLink>
+      <AdminNavLink to="/admin/master/billing" active={isActive('/admin/master/billing')}>
+        <CreditCard size={18} /> Cobros SaaS
+      </AdminNavLink>
     </>
   ) : user.role === 'CASHIER' ? (
     <>

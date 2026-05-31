@@ -154,87 +154,10 @@ export default function StoreManagement() {
           <Title order={1}>Gestión Maestra de Tiendas</Title>
           <Text color="dimmed">Administra todos los inquilinos de la plataforma y sus configuraciones SaaS.</Text>
         </div>
-        <Group>
-          <Button 
-            variant="light" 
-            color="indigo" 
-            leftSection={<Settings size={18} />} 
-            onClick={() => setShowSettingsCard(!showSettingsCard)} 
-            size="md" 
-            radius="md"
-          >
-            {showSettingsCard ? 'Ocultar Config. SaaS' : 'Configurar SaaS / MP'}
-          </Button>
-          <Button leftSection={<Plus size={18} />} onClick={() => setShowAddModal(true)} size="md" radius="md">
-            Crear Nueva Tienda
-          </Button>
-        </Group>
+        <Button leftSection={<Plus size={18} />} onClick={() => setShowAddModal(true)} size="md" radius="md">
+          Crear Nueva Tienda
+        </Button>
       </Group>
-
-      {/* Card de Configuración SaaS y Mercado Pago de la Plataforma */}
-      {showSettingsCard && (
-        <Card withBorder radius="xl" p="xl" shadow="md" mb="2.5rem" style={{ borderLeft: '5px solid var(--mantine-color-indigo-6)' }} className="bg-white">
-          <Stack gap="md">
-            <Group justify="space-between">
-              <Box>
-                <Text fw={800} size="lg" color="#1e1b4b">Configuración de Cobros SaaS (Mercado Pago de la Plataforma)</Text>
-                <Text size="xs" color="dimmed">Introduce tus llaves de Mercado Pago para recibir de forma automatizada los pagos de suscripción de todos tus inquilinos de la plataforma.</Text>
-              </Box>
-              <ActionIcon variant="light" color="gray" radius="xl" onClick={() => setShowSettingsCard(false)}><X size={16} /></ActionIcon>
-            </Group>
-            
-            <Divider />
-
-            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-              <TextInput
-                label="Access Token de la Plataforma"
-                placeholder="APP_USR-..."
-                value={superadminMpAccessToken}
-                onChange={(e) => setSuperadminMpAccessToken(e.target.value)}
-                required
-                type="password"
-                size="md"
-                radius="md"
-              />
-              <TextInput
-                label="Public Key de la Plataforma"
-                placeholder="APP_USR-..."
-                value={superadminMpPublicKey}
-                onChange={(e) => setSuperadminMpPublicKey(e.target.value)}
-                required
-                size="md"
-                radius="md"
-              />
-            </SimpleGrid>
-
-            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-              <TextInput
-                label="Monto de Suscripción Mensual Base ($ ARS)"
-                placeholder="10000"
-                type="number"
-                value={defaultSubscriptionPrice}
-                onChange={(e) => setDefaultSubscriptionPrice(Number(e.target.value))}
-                required
-                size="md"
-                radius="md"
-              />
-              <Box className="flex items-end">
-                <Button 
-                  fullWidth 
-                  color="indigo" 
-                  onClick={handleSaveSettings} 
-                  loading={savingSettings}
-                  size="md"
-                  radius="md"
-                  className="h-[42px]"
-                >
-                  Guardar Configuración SaaS
-                </Button>
-              </Box>
-            </SimpleGrid>
-          </Stack>
-        </Card>
-      )}
 
       {/* Resumen de estadísticas rápidas */}
       <SimpleGrid cols={{ base: 1, sm: 3 }} mb="xl">

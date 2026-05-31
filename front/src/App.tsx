@@ -16,6 +16,7 @@ import PointOfSale from './pages/admin/PointOfSale';
 import CashRegistersHistory from './pages/admin/CashRegistersHistory';
 // SaaS Billing Panel page
 import Subscription from './pages/admin/Subscription';
+import SassBilling from './pages/admin/SassBilling';
 import Register from './pages/Register';
 import NotFound from './pages/NotFound';
 
@@ -25,17 +26,17 @@ import { api } from './utils/api';
 // Componente para decidir qué mostrar en el índice del /admin según el rol
 const AdminIndex = () => {
   const { user } = useOutletContext<{ user: { role: string } }>();
-  
+
   if (!user) return null;
-  
+
   if (user.role === 'SUPERADMIN') {
     return <StoreManagement />;
   }
-  
+
   if (user.role === 'CASHIER') {
     return <Navigate to="pos" replace />;
   }
-  
+
   return <Products />;
 };
 
@@ -44,7 +45,7 @@ function App() {
     // Ping backend periódicamente para mantener Render despierto si hay pestañas abiertas
     const pingBackend = async () => {
       try {
-        await api.get('/auth/profile').catch(() => {});
+        await api.get('/auth/profile').catch(() => { });
       } catch (e) {
         // Ignorar errores
       }
@@ -70,8 +71,9 @@ function App() {
 
         {/* Panel Maestro para SuperAdmin */}
         <Route path="/admin/master" element={<AdminLayout />}>
-           <Route index element={<StoreManagement />} />
-           <Route path="staff" element={<StaffManagement />} />
+          <Route index element={<StoreManagement />} />
+          <Route path="staff" element={<StaffManagement />} />
+          <Route path="billing" element={<SassBilling />} />
         </Route>
 
         {/* Panel de Tienda Específica */}
