@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Plus, Trash2, Edit3, Boxes, Search, Filter, X, Barcode, Package } from 'lucide-react';
-import { Modal, Button, TextInput, NumberInput, Select, MultiSelect, Textarea, Group, ActionIcon, Tooltip, Switch, Badge, Text, Stack, Box, Title, Card, Transition, TagsInput } from '@mantine/core';
+import { Modal, Button, TextInput, NumberInput, Select, MultiSelect, Textarea, Group, ActionIcon, Tooltip, Switch, Badge, Text, Stack, Box, Title, Card, Transition, TagsInput, SegmentedControl } from '@mantine/core';
 import FileUploader from '../../components/FileUploader';
 import { api } from '../../utils/api';
 import Swal from 'sweetalert2';
@@ -407,6 +407,9 @@ export default function Products() {
 function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, products, product, storeInfo, title }: any) {
   const [name, setName] = useState('');
   const [price, setPrice] = useState<number | string>(0);
+  const [priceMode, setPriceMode] = useState<'direct' | 'margin'>('direct');
+  const [costPrice, setCostPrice] = useState<number | string>(0);
+  const [marginPercent, setMarginPercent] = useState<number | string>(0);
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [categoryId, setCategoryId] = useState<string | null>(null);
@@ -497,16 +500,51 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
         </Group>
         
         <Group grow align="flex-start">
-          <NumberInput 
-            label="Precio de Venta" 
-            value={price} 
-            onChange={val => setPrice(val)} 
-            prefix="$" 
-            decimalScale={2} 
-            required 
+          <SegmentedControl
+            data={[
+              { label: 'Precio directo', value: 'direct' },
+              { label: 'Costo + %', value: 'margin' },
+            ]}
+            value={priceMode}
+            onChange={(val) => setPriceMode(val as 'direct' | 'margin')}
             radius="md"
-            hideControls
+            fullWidth
           />
+          {priceMode === 'direct' ? (
+            <NumberInput
+              label="Precio de Venta"
+              value={price}
+              onChange={val => setPrice(val)}
+              prefix="$"
+              decimalScale={2}
+              required
+              radius="md"
+              hideControls
+            />
+          ) : (
+            <Group grow>
+              <NumberInput
+                label="Precio de costo"
+                value={costPrice}
+                onChange={val => setCostPrice(val)}
+                prefix="$"
+                decimalScale={2}
+                required
+                radius="md"
+                hideControls
+              />
+              <NumberInput
+                label="% de ganancia"
+                value={marginPercent}
+                onChange={val => setMarginPercent(val)}
+                suffix="%"
+                decimalScale={2}
+                required
+                radius="md"
+                hideControls
+              />
+            </Group>
+          )}
           <Select 
             label="Categoría" 
             placeholder="Seleccionar..."
@@ -674,7 +712,10 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
           <Button 
             size="md" 
             radius="md" 
-            onClick={() => onSubmit({ name, price, description, imageUrl, categoryId, modifierGroupIds, trackStock, stock, barcode, isBundle, bundleItems, notes, flavor })}
+            onClick={() => {
+                const finalPrice = priceMode === 'direct' ? Number(price) : Number(costPrice) * (1 + Number(marginPercent) / 100);
+                onSubmit({ name, price: finalPrice, description, imageUrl, categoryId, modifierGroupIds, trackStock, stock, barcode, isBundle, bundleItems, notes, flavor });
+              }}
             className="px-8"
           >
             {product ? 'Guardar Cambios' : 'Crear Producto'}
