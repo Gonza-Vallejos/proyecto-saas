@@ -497,19 +497,40 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
             radius="md"
             leftSection={<Barcode size={16} />}
           />
+          <Select 
+            label="Categoría" 
+            placeholder="Seleccionar..."
+            data={categories
+              .filter((c: any) => !c.parentId)
+              .flatMap((parent: any) => [
+                { value: parent.id, label: parent.name },
+                ...categories
+                  .filter((child: any) => child.parentId === parent.id)
+                  .map((child: any) => ({ value: child.id, label: `↳ ${child.name}` }))
+              ])
+            } 
+            value={categoryId} 
+            onChange={(val) => setCategoryId(val)} 
+            clearable 
+            radius="md"
+            searchable
+          />
         </Group>
         
-        <Group grow align="flex-start">
-          <SegmentedControl
-            data={[
-              { label: 'Precio directo', value: 'direct' },
-              { label: 'Costo + %', value: 'margin' },
-            ]}
-            value={priceMode}
-            onChange={(val) => setPriceMode(val as 'direct' | 'margin')}
-            radius="md"
-            fullWidth
-          />
+        <Group grow align="flex-end">
+          <Box>
+            <Text fw={500} size="sm" mb={4}>Modo de Precio</Text>
+            <SegmentedControl
+              data={[
+                { label: 'Precio directo', value: 'direct' },
+                { label: 'Costo + %', value: 'margin' },
+              ]}
+              value={priceMode}
+              onChange={(val) => setPriceMode(val as 'direct' | 'margin')}
+              radius="md"
+              fullWidth
+            />
+          </Box>
           {priceMode === 'direct' ? (
             <NumberInput
               label="Precio de Venta"
@@ -545,24 +566,6 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
               />
             </Group>
           )}
-          <Select 
-            label="Categoría" 
-            placeholder="Seleccionar..."
-            data={categories
-              .filter((c: any) => !c.parentId)
-              .flatMap((parent: any) => [
-                { value: parent.id, label: parent.name },
-                ...categories
-                  .filter((child: any) => child.parentId === parent.id)
-                  .map((child: any) => ({ value: child.id, label: `↳ ${child.name}` }))
-              ])
-            } 
-            value={categoryId} 
-            onChange={(val) => setCategoryId(val)} 
-            clearable 
-            radius="md"
-            searchable
-          />
         </Group>
 
         <Box>
