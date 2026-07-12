@@ -651,10 +651,10 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
                         label: p.name,
                         group: p.category?.name || 'Sin Categoría'
                       }))}
-                    value={item.productId}
+                    value={item.productId || null}
                     onChange={(val) => {
                       const newItems = [...bundleItems];
-                      newItems[index].productId = val || '';
+                      newItems[index] = { ...newItems[index], productId: val || '' };
                       setBundleItems(newItems);
                     }}
                     radius="md"
@@ -665,7 +665,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
                     value={item.quantity}
                     onChange={(val) => {
                       const newItems = [...bundleItems];
-                      newItems[index].quantity = Number(val) || 1;
+                      newItems[index] = { ...newItems[index], quantity: Number(val) || 1 };
                       setBundleItems(newItems);
                     }}
                     min={1}
