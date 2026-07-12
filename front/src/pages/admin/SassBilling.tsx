@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Title, Text, Card, Group, Stack, Button, TextInput, SimpleGrid, ThemeIcon, Divider, Box } from '@mantine/core';
+import { Title, Text, Card, Group, Stack, Button, TextInput, NumberInput, SimpleGrid, ThemeIcon, Divider, Box } from '@mantine/core';
 import { CreditCard, KeyRound, Settings, Coins } from 'lucide-react';
 import { api } from '../../utils/api';
 import Swal from 'sweetalert2';
@@ -111,12 +111,16 @@ export default function SassBilling() {
           </Group>
 
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-            <TextInput
+            <NumberInput
               label="Monto de Suscripción Mensual ($ ARS)"
               placeholder="10000"
-              type="number"
               value={defaultSubscriptionPrice}
-              onChange={(e) => setDefaultSubscriptionPrice(Number(e.target.value))}
+              onChange={(val) => setDefaultSubscriptionPrice(Number(val) || 0)}
+              prefix="$ "
+              decimalScale={2}
+              thousandSeparator="."
+              decimalSeparator=","
+              hideControls
               required
               size="md"
               radius="md"

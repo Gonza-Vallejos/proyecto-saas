@@ -995,10 +995,18 @@ export default function Catalog() {
                 const hours = JSON.parse(store.businessHours);
                 const weekDays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
                 const firstDay = hours[weekDays[0]];
+                // Helper to render blocks or simple open/close
+                const formatHours = (config: any) => {
+                  if (!config.isOpen) return 'Cerrado';
+                  if (config.blocks && config.blocks.length > 0) {
+                    return config.blocks.map((b: any) => `${b.open} - ${b.close}`).join(', ');
+                  }
+                  return `${config.open} - ${config.close}`;
+                };
+
                 const allSame = weekDays.every(day =>
                   hours[day].isOpen === firstDay.isOpen &&
-                  hours[day].open === firstDay.open &&
-                  hours[day].close === firstDay.close
+                  formatHours(hours[day]) === formatHours(firstDay)
                 );
 
                 const renderRow = (label: string, config: any) => (
@@ -1007,8 +1015,8 @@ export default function Catalog() {
                       <Box className="preview-footer-dot" />
                       <Text size="xs" fw={700} c={footerTextColor} className="min-w-[70px]">{label}:</Text>
                     </Group>
-                    <Text size="xs" c={footerTextColor} className="opacity-80" fs={config.isOpen ? "normal" : "italic"}>
-                      {config.isOpen ? `${config.open} - ${config.close}` : 'Cerrado'}
+                    <Text size="xs" c={footerTextColor} className="opacity-80 text-right max-w-[180px]" style={{wordBreak: 'break-word'}} fs={config.isOpen ? "normal" : "italic"}>
+                      {formatHours(config)}
                     </Text>
                   </Group>
                 );

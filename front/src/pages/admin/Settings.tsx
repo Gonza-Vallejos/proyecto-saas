@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Settings as SettingsIcon, Phone, MapPin, User as UserIcon, Lock, Mail, Clock, Copy, CreditCard, CheckCircle } from 'lucide-react';
-import { 
-  TextInput, Textarea, Button, Group, Stack, Card, Title, Text, 
-  SimpleGrid, Divider, Box, Paper, PasswordInput, Autocomplete, Loader, Switch, Badge
+import { Settings as SettingsIcon, Phone, MapPin, User as UserIcon, Lock, Mail, Clock, Copy, CreditCard, CheckCircle, Trash2 } from 'lucide-react';
+import {
+  TextInput, Textarea, Button, Group, Stack, Card, Title, Text,
+  SimpleGrid, Divider, Box, Paper, PasswordInput, Autocomplete, Loader, Switch, Badge, ActionIcon
 } from '@mantine/core';
 import { api } from '../../utils/api';
 import Swal from 'sweetalert2';
@@ -98,10 +98,20 @@ export default function Settings() {
       setHasMercadoPago(storeData.hasMercadoPago || false);
       setIsMercadoPagoLinked(!!storeData.mercadoPagoAccessToken);
       setAllowCatalogPayments(storeData.allowCatalogPayments !== false);
-      
+
       if (storeData.businessHours) {
         try {
-          setBusinessHours(JSON.parse(storeData.businessHours));
+          const parsed = JSON.parse(storeData.businessHours);
+          Object.keys(parsed).forEach(day => {
+            if (parsed[day].isOpen === undefined) parsed[day].isOpen = false;
+            if (!parsed[day].blocks) {
+              parsed[day].blocks = [{
+                open: parsed[day].open || '09:00',
+                close: parsed[day].close || '20:00'
+              }];
+            }
+          });
+          setBusinessHours(parsed);
         } catch (e) {
           console.error('Error parsing business hours', e);
         }
@@ -120,18 +130,18 @@ export default function Settings() {
   const handleSaveStore = async () => {
     setSaving(true);
     try {
-      await api.patch('/stores/my-store', { 
-        name: storeName, 
-        description, 
-        phone, 
-        instagram, 
-        facebook, 
-        whatsapp, 
+      await api.patch('/stores/my-store', {
+        name: storeName,
+        description,
+        phone,
+        instagram,
+        facebook,
+        whatsapp,
         address,
         businessHours: JSON.stringify(businessHours),
         allowCatalogPayments
       });
-      
+
       Swal.fire({
         title: 'Tienda Actualizada',
         text: 'La información pública de tu tienda ha sido guardada.',
@@ -170,7 +180,7 @@ export default function Settings() {
 
   const handleLinkMercadoPago = () => {
     // Usar variable de entorno, si no existe usamos un hardcoded por el momento (sólo pruebas)
-    const clientId = import.meta.env.VITE_MP_CLIENT_ID || '6472016692830263';
+    const clientId = import.meta.env.VITE_MP_CLIENT_ID;
     let backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
     if (backendUrl.endsWith('/')) backendUrl = backendUrl.slice(0, -1);
     const redirectUri = `${backendUrl}/mercado-pago/callback`;
@@ -202,21 +212,21 @@ export default function Settings() {
               </Group>
               <Button size="xs" onClick={handleSaveStore} loading={saving}>Guardar</Button>
             </Group>
-            
+
             <Stack gap="md">
               <TextInput label="Nombre Comercial" value={storeName} onChange={e => setStoreName(e.target.value)} required />
-              <Textarea 
-                label="Descripción de la Tienda" 
+              <Textarea
+                label="Descripción de la Tienda"
                 placeholder="Ej: Calidad y servicio excepcional en cada bocado..."
                 description={`${description.length}/200 caracteres (Breve resumen que aparece en el pie de página)`}
-                value={description} 
-                onChange={e => setDescription(e.target.value)} 
-                minRows={3} 
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                minRows={3}
                 maxLength={200}
               />
-              
+
               <Divider label="Canales de Contacto" labelPosition="center" my="sm" />
-              
+
               <SimpleGrid cols={2}>
                 <TextInput label="WhatsApp" value={whatsapp} onChange={e => setWhatsapp(e.target.value)} leftSection={<Phone size={14} />} />
                 <TextInput label="Teléfono" value={phone} onChange={e => setPhone(e.target.value)} leftSection={<Phone size={14} />} />
@@ -243,10 +253,10 @@ export default function Settings() {
                 </Box>
                 <Title order={4}>Horarios de Atención</Title>
               </Group>
-              <Button 
-                variant="light" 
-                color="orange" 
-                size="xs" 
+              <Button
+                variant="light"
+                color="orange"
+                size="xs"
                 leftSection={<Copy size={14} />}
                 onClick={() => {
                   const firstDay = businessHours['Lunes'];
@@ -263,44 +273,65 @@ export default function Settings() {
 
             <Stack gap="xs">
               {Object.entries(businessHours).map(([day, config]: [string, any]) => (
-                <Group key={day} justify="space-between" className="admin-row-divider">
-                  <Group gap="md" className="admin-day-label">
-                    <Switch 
-                      checked={config.isOpen} 
+                <Group key={day} justify="space-between" align="flex-start" className="admin-row-divider py-2">
+                  <Group gap="md" className="admin-day-label mt-1">
+                    <Switch
+                      checked={config.isOpen}
                       onChange={(e) => setBusinessHours({
                         ...businessHours,
                         [day]: { ...config, isOpen: e.currentTarget.checked }
-                      })} 
+                      })}
                     />
                     <Text size="sm" fw={config.isOpen ? 600 : 400} color={config.isOpen ? 'black' : 'dimmed'}>{day}</Text>
                   </Group>
 
                   {config.isOpen ? (
-                    <Group gap="xs">
-                      <TextInput 
-                        size="xs" 
-                        type="time" 
-                        value={config.open} 
-                        onChange={(e) => setBusinessHours({
-                          ...businessHours,
-                          [day]: { ...config, open: e.target.value }
-                        })}
-                        className="admin-time-input"
-                      />
-                      <Text size="xs" color="dimmed">a</Text>
-                      <TextInput 
-                        size="xs" 
-                        type="time" 
-                        value={config.close} 
-                        onChange={(e) => setBusinessHours({
-                          ...businessHours,
-                          [day]: { ...config, close: e.target.value }
-                        })}
-                        className="admin-time-input"
-                      />
-                    </Group>
+                    <Stack gap="xs">
+                      {config.blocks?.map((block: any, idx: number) => (
+                        <Group gap="xs" key={idx}>
+                          <TextInput
+                            size="xs"
+                            type="time"
+                            value={block.open}
+                            onChange={(e) => {
+                              const newBlocks = [...config.blocks];
+                              newBlocks[idx].open = e.target.value;
+                              setBusinessHours({ ...businessHours, [day]: { ...config, blocks: newBlocks } });
+                            }}
+                            className="admin-time-input w-24"
+                          />
+                          <Text size="xs" color="dimmed">a</Text>
+                          <TextInput
+                            size="xs"
+                            type="time"
+                            value={block.close}
+                            onChange={(e) => {
+                              const newBlocks = [...config.blocks];
+                              newBlocks[idx].close = e.target.value;
+                              setBusinessHours({ ...businessHours, [day]: { ...config, blocks: newBlocks } });
+                            }}
+                            className="admin-time-input w-24"
+                          />
+                          {config.blocks.length > 1 && (
+                            <ActionIcon color="red" variant="subtle" size="sm" onClick={() => {
+                              const newBlocks = config.blocks.filter((_: any, i: number) => i !== idx);
+                              setBusinessHours({ ...businessHours, [day]: { ...config, blocks: newBlocks } });
+                            }}>
+                              <Trash2 size={14} />
+                            </ActionIcon>
+                          )}
+                        </Group>
+                      ))}
+                      <Button variant="subtle" size="compact-xs" color="blue" onClick={() => {
+                        const currentBlocks = config.blocks || [];
+                        const newBlocks = [...currentBlocks, { open: '16:00', close: '20:00' }];
+                        setBusinessHours({ ...businessHours, [day]: { ...config, blocks: newBlocks } });
+                      }}>
+                        + Añadir horario
+                      </Button>
+                    </Stack>
                   ) : (
-                    <Text size="xs" color="dimmed" fs="italic">Cerrado</Text>
+                    <Text size="xs" color="dimmed" fs="italic" className="mt-1">Cerrado</Text>
                   )}
                 </Group>
               ))}
@@ -320,29 +351,29 @@ export default function Settings() {
               </Group>
               <Button color="green" size="xs" onClick={handleUpdateProfile} loading={updatingProfile}>Actualizar Perfil</Button>
             </Group>
-            
+
             <Stack gap="md">
-              <TextInput 
-                label="Nombre como Dueño" 
-                placeholder="Raúl Ivanes" 
-                value={userName} 
-                onChange={e => setUserName(e.target.value)} 
+              <TextInput
+                label="Nombre como Dueño"
+                placeholder="Raúl Ivanes"
+                value={userName}
+                onChange={e => setUserName(e.target.value)}
                 leftSection={<UserIcon size={14} />}
               />
-              <TextInput 
-                label="Email de Acceso" 
-                value={userEmail} 
-                onChange={e => setUserEmail(e.target.value)} 
+              <TextInput
+                label="Email de Acceso"
+                value={userEmail}
+                onChange={e => setUserEmail(e.target.value)}
                 leftSection={<Mail size={14} />}
               />
-              <PasswordInput 
-                label="Nueva Contraseña" 
-                placeholder="Dejar en blanco para no cambiar" 
-                value={newPassword} 
-                onChange={e => setNewPassword(e.target.value)} 
+              <PasswordInput
+                label="Nueva Contraseña"
+                placeholder="Dejar en blanco para no cambiar"
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
                 leftSection={<Lock size={14} />}
               />
-              
+
               <Paper withBorder p="md" bg="gray.0" radius="md" mt="sm">
                 <Text size="xs" color="dimmed" fw={500}>
                   ⚠️ Al cambiar tu nombre o email, la información se actualizará de inmediato en los registros del SuperAdmin y en tu cabecera de panel.
@@ -362,12 +393,12 @@ export default function Settings() {
                   <Title order={4}>Integración Mercado Pago</Title>
                 </Group>
               </Group>
-              
+
               <Stack gap="md">
                 <Text size="sm" color="dimmed">
                   Vincula tu cuenta de Mercado Pago de forma segura (OAuth) para recibir el dinero de tus ventas online y en mostrador directamente en tu cuenta.
                 </Text>
-                
+
                 <Paper withBorder p="md" radius="md" className="admin-panel-muted">
                   <div>
                     <Text fw={700}>Estado de Vinculación</Text>
@@ -377,8 +408,8 @@ export default function Settings() {
                       <Text size="xs" color="dimmed">Actualmente no hay ninguna cuenta vinculada.</Text>
                     )}
                   </div>
-                  <Button 
-                    color={isMercadoPagoLinked ? "gray" : "blue"} 
+                  <Button
+                    color={isMercadoPagoLinked ? "gray" : "blue"}
                     variant={isMercadoPagoLinked ? "outline" : "filled"}
                     onClick={handleLinkMercadoPago}
                   >
