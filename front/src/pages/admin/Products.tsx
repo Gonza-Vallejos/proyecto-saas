@@ -648,8 +648,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
                       .filter((p: any) => p.id !== product?.id && !p.isBundle)
                       .map((p: any) => ({ 
                         value: p.id, 
-                        label: p.name,
-                        group: p.category?.name || 'Sin Categoría'
+                        label: p.name
                       }))}
                     value={item.productId || null}
                     onChange={(val) => {
