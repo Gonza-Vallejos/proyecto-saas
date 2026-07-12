@@ -193,7 +193,7 @@ export class OrdersService {
   async updateStatus(id: string, storeId: string, status: string) {
     const order = await this.prisma.order.findFirst({ 
       where: { id, storeId },
-      include: { items: { include: { product: true } } }
+      include: { items: { include: { product: { include: { bundleItems: true } } } } }
     });
     if (!order) throw new BadRequestException('Pedido no encontrado');
 
@@ -209,13 +209,22 @@ export class OrdersService {
 
       if (shouldDeductStock && order.origin !== 'WHATSAPP') {
         for (const item of order.items) {
-          if (item.product && item.productId && item.product.trackStock) {
-            await tx.product.update({
-              where: { id: item.productId },
-              data: {
-                stock: { decrement: item.quantity }
+          if (item.product && item.productId) {
+            if (item.product.isBundle && item.product.bundleItems?.length > 0) {
+              for (const bundleItem of item.product.bundleItems) {
+                await tx.product.update({
+                  where: { id: bundleItem.productId },
+                  data: { stock: { decrement: item.quantity * bundleItem.quantity } }
+                });
               }
-            });
+            } else if (item.product.trackStock) {
+              await tx.product.update({
+                where: { id: item.productId },
+                data: {
+                  stock: { decrement: item.quantity }
+                }
+              });
+            }
           }
         }
       }
@@ -224,19 +233,28 @@ export class OrdersService {
       const shouldRestoreStock = status === 'CANCELLED' && order.status !== 'CANCELLED';
       if (shouldRestoreStock) {
         // Se reintegra si:
-        // 1. Era WhatsApp o POS (descontó al inicio)
+        // 1. Era WhatsApp, POS o CATALOG (descontó al inicio)
         // 2. Era pedido pero ya estaba en estado READY (descontó al pasar a READY)
-        const wasAlreadyDeducted = order.origin === 'WHATSAPP' || order.origin === 'POS' || order.status === 'READY';
+        const wasAlreadyDeducted = order.origin === 'WHATSAPP' || order.origin === 'POS' || order.origin === 'CATALOG' || order.status === 'READY';
         
         if (wasAlreadyDeducted) {
           for (const item of order.items) {
-            if (item.product && item.productId && item.product.trackStock) {
-              await tx.product.update({
-                where: { id: item.productId },
-                data: {
-                  stock: { increment: item.quantity }
+            if (item.product && item.productId) {
+              if (item.product.isBundle && item.product.bundleItems?.length > 0) {
+                for (const bundleItem of item.product.bundleItems) {
+                  await tx.product.update({
+                    where: { id: bundleItem.productId },
+                    data: { stock: { increment: item.quantity * bundleItem.quantity } }
+                  });
                 }
-              });
+              } else if (item.product.trackStock) {
+                await tx.product.update({
+                  where: { id: item.productId },
+                  data: {
+                    stock: { increment: item.quantity }
+                  }
+                });
+              }
             }
           }
         }
