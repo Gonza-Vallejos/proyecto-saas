@@ -3,6 +3,7 @@ import { Plus, Trash2, Edit3, Boxes, Search, Filter, X, Barcode, Package } from 
 import { Modal, Button, TextInput, NumberInput, Select, MultiSelect, Textarea, Group, ActionIcon, Tooltip, Switch, Badge, Text, Stack, Box, Title, Card, Transition, TagsInput, SegmentedControl } from '@mantine/core';
 import FileUploader from '../../components/FileUploader';
 import { api } from '../../utils/api';
+import { formatCurrency } from '../../utils/formatters';
 import Swal from 'sweetalert2';
 
 interface Category {
@@ -276,7 +277,7 @@ export default function Products() {
                   <td className="admin-td">
                     <Badge variant="light" color="blue" radius="md">{p.category?.name || 'Sin Categoría'}</Badge>
                   </td>
-                  <td className="admin-td text-base font-extrabold text-slate-900">${p.price.toFixed(2)}</td>
+                  <td className="admin-td text-base font-extrabold text-slate-900">{formatCurrency(p.price)}</td>
                   <td className="admin-td text-right">
                     <Group justify="flex-end" gap="xs">
                       <Tooltip label="Editar">
@@ -335,7 +336,7 @@ export default function Products() {
                   </Stack>
                 </Group>
 
-                <Text className="text-base font-extrabold text-slate-900 shrink-0">${p.price.toFixed(2)}</Text>
+                <Text className="text-base font-extrabold text-slate-900 shrink-0">{formatCurrency(p.price)}</Text>
               </Group>
 
               {/* Información de Stock y Acciones */}
@@ -536,8 +537,10 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
               label="Precio de Venta"
               value={price}
               onChange={val => setPrice(val)}
-              prefix="$"
+              prefix="$ "
               decimalScale={2}
+              thousandSeparator="."
+              decimalSeparator=","
               required
               radius="md"
               hideControls
@@ -548,8 +551,10 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
                 label="Precio de costo"
                 value={costPrice}
                 onChange={val => setCostPrice(val)}
-                prefix="$"
+                prefix="$ "
                 decimalScale={2}
+                thousandSeparator="."
+                decimalSeparator=","
                 required
                 radius="md"
                 hideControls

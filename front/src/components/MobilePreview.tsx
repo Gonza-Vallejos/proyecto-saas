@@ -6,6 +6,7 @@ import WhatsAppPng from '../assets/whatsapp.png';
 import UbicacionPng from '../assets/ubicacion.png';
 import StoreThemeRoot from './StoreThemeRoot';
 import { cn } from '../lib/cn';
+import { formatCurrency } from '../utils/formatters';
 
 interface PreviewProps {
   name: string;
@@ -222,7 +223,7 @@ function RenderPreviewCard({
           </Text>
           <Group gap={5} justify="center">
             <Text size="sm" fw={900} c={primary}>
-              ${product.price.toFixed(2)}
+              {formatCurrency(product.price)}
             </Text>
             <Badge color={secondary} size="xs" variant="light">
               Oferta
@@ -249,7 +250,7 @@ function RenderPreviewCard({
             </Text>
             <Group gap={5}>
               <Text size="xs" c={primary} fw={900}>
-                ${product.price.toFixed(2)}
+                {formatCurrency(product.price)}
               </Text>
               <Badge color={secondary} size="10px" radius="xs" variant="light">
                 INFO
