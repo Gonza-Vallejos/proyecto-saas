@@ -465,7 +465,7 @@ body {
   }
 
   .admin-sidebar {
-    @apply z-[100] hidden w-[260px] flex-col border-r border-slate-200 bg-white md:flex;
+    @apply sticky top-0 h-screen z-[100] hidden w-[260px] flex-col border-r border-slate-200 bg-white md:flex;
   }
 
   .admin-sidebar-brand {
