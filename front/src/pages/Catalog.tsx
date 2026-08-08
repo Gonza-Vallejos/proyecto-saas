@@ -386,6 +386,7 @@ export default function Catalog() {
       const data: Store = await res.json();
 
       setStore(data);
+      document.title = data.name || 'Catálogo';
 
       // Cargar la fuente de Google Fonts dinámicamente
       if (data.fontFamily && data.fontFamily !== 'Inter') {
