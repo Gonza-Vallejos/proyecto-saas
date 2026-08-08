@@ -29,6 +29,7 @@ const SassBilling = lazy(() => import('./pages/admin/SassBilling'));
 // Simple spinner for lazy loading fallback
 import Spinner from './components/Spinner';
 import { api } from './utils/api';
+import InstallPWA from './components/InstallPWA';
 // Componente para decidir qué mostrar en el índice del /admin según el rol
 const AdminIndex = () => {
   const { user } = useOutletContext<{ user: { role: string } }>();
@@ -106,6 +107,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
+      <InstallPWA />
     </BrowserRouter>
   );
 }
