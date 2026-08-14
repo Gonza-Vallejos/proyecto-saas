@@ -80,6 +80,7 @@ export class StoresService {
         primaryColor: data.primaryColor || '#0ea5e9',
         textColor: data.textColor || '#1e293b',
         iconColor: data.iconColor || '#64748b',
+        subscriptionExpiresAt: data.subscriptionExpiration ? new Date(data.subscriptionExpiration) : null,
         users: {
           create: {
             email: data.ownerEmail,
@@ -184,6 +185,10 @@ export class StoresService {
       hasPOS: data.hasPOS,
       hasMercadoPago: data.hasMercadoPago,
     };
+
+    if (data.subscriptionExpiration !== undefined) {
+      updateData.subscriptionExpiresAt = data.subscriptionExpiration ? new Date(data.subscriptionExpiration) : null;
+    }
 
     // Validación crítica: No permitir cambiar control de stock si ya hay productos
     if (data.hasStockControl !== undefined) {

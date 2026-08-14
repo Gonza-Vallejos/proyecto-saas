@@ -82,6 +82,10 @@ export class CreateStoreDto {
 
   @IsString()
   @IsOptional()
+  subscriptionExpiration?: string;
+
+  @IsString()
+  @IsOptional()
   mercadoPagoAccessToken?: string;
 
   @IsString()

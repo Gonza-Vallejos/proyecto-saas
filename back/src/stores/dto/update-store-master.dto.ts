@@ -77,4 +77,8 @@ export class UpdateStoreMasterDto {
   @IsString()
   @IsOptional()
   mercadoPagoPublicKey?: string;
+
+  @IsString()
+  @IsOptional()
+  subscriptionExpiration?: string;
 }
