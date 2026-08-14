@@ -8,7 +8,7 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class StoresService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async getSystemSettings() {
     const keys = ['superadmin_mp_access_token', 'superadmin_mp_public_key', 'saas_subscription_price'];
@@ -30,7 +30,7 @@ export class StoresService {
 
   async updateSystemSettings(data: UpdateSystemSettingsDto) {
     const updates: { key: string; value: string }[] = [];
-    
+
     if (data.superadminMpAccessToken !== undefined) {
       updates.push({ key: 'superadmin_mp_access_token', value: data.superadminMpAccessToken });
     }
@@ -104,8 +104,9 @@ export class StoresService {
       where: { slug },
       include: {
         products: {
+          where: { isActive: true },
           orderBy: { createdAt: 'desc' },
-          include: { 
+          include: {
             category: true,
             modifierGroups: {
               include: {
@@ -166,7 +167,7 @@ export class StoresService {
     }
 
     const productsCount = await this.prisma.product.count({ where: { storeId: id } });
-    
+
     const updateData: any = {
       name: data.name,
       slug: data.slug,
@@ -209,7 +210,7 @@ export class StoresService {
       if (data.ownerEmail) userUpdate.email = data.ownerEmail;
       if (data.ownerName) userUpdate.name = data.ownerName;
       if (data.ownerPassword) userUpdate.password = await bcrypt.hash(data.ownerPassword, 10);
-      
+
       await this.prisma.user.update({
         where: { id: owner.id },
         data: userUpdate
@@ -245,12 +246,12 @@ export class StoresService {
           where: { role: 'STORE_ADMIN' },
           select: { email: true, name: true }
         },
-        _count: { 
-          select: { 
-            products: true, 
+        _count: {
+          select: {
+            products: true,
             users: true,
-            categories: true 
-          } 
+            categories: true
+          }
         }
       },
       orderBy: { createdAt: 'desc' }

@@ -27,6 +27,7 @@ interface Product {
   bundleItems?: any[];
   notes?: string[];
   flavor?: string;
+  isActive?: boolean;
 }
 
 export default function Products() {
@@ -254,6 +255,7 @@ export default function Products() {
                       <Group gap="xs">
                         <Text fw={700} size="sm" color="#1e293b">{p.name}</Text>
                         {p.isBundle && <Badge color="green" size="xs" variant="filled">PROMO</Badge>}
+                        {p.isActive === false && <Badge color="red" size="xs" variant="filled">INACTIVO</Badge>}
                       </Group>
                       {p.description && <Text size="xs" color="dimmed" lineClamp={1} className="max-w-[300px]">{p.description}</Text>}
                       {p.barcode && <Group gap="xs"><Barcode size={12} color="#94a3b8" /><Text size="xs" color="dimmed">{p.barcode}</Text></Group>}
@@ -325,6 +327,7 @@ export default function Products() {
                     <Group gap="xs" wrap="wrap">
                       <Text fw={700} size="sm" color="#1e293b" lineClamp={2}>{p.name}</Text>
                       {p.isBundle && <Badge color="green" size="xs" variant="filled">PROMO</Badge>}
+                      {p.isActive === false && <Badge color="red" size="xs" variant="filled">INACTIVO</Badge>}
                     </Group>
                     <Badge variant="light" color="blue" radius="md" size="xs" className="w-fit">{p.category?.name || 'Sin Categoría'}</Badge>
                     {p.barcode && (
@@ -422,6 +425,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
   const [bundleItems, setBundleItems] = useState<{ productId: string, quantity: number }[]>([]);
   const [notes, setNotes] = useState<string[]>([]);
   const [flavor, setFlavor] = useState('');
+  const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
     if (product) {
@@ -438,6 +442,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
       setBundleItems(product.bundleItems?.map((bi: any) => ({ productId: bi.productId, quantity: bi.quantity })) || []);
       setNotes(product.notes || []);
       setFlavor(product.flavor || '');
+      setIsActive(product.isActive !== false);
     } else {
       setName('');
       setPrice(0);
@@ -452,6 +457,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
       setBundleItems([]);
       setNotes([]);
       setFlavor('');
+      setIsActive(true);
     }
   }, [product, opened]);
 
@@ -598,6 +604,20 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
           />
         )}
         
+        <Box p="md" className="admin-form-section">
+          <Group justify="space-between">
+            <Stack gap={0}>
+              <Text fw={700} size="sm">Visible en Catálogo</Text>
+              <Text size="xs" color="dimmed">Apágalo para ocultar el producto del catálogo público</Text>
+            </Stack>
+            <Switch 
+              checked={isActive} 
+              onChange={(e) => setIsActive(e.currentTarget.checked)} 
+              color="blue"
+            />
+          </Group>
+        </Box>
+
         {storeInfo?.hasStockControl && (
           <Box p="md" className="admin-form-section">
             <Group justify="space-between" mb="xs">
@@ -721,7 +741,7 @@ function ProductFormModal({ opened, onClose, onSubmit, categories, modifiers, pr
             radius="md" 
             onClick={() => {
                 const finalPrice = priceMode === 'direct' ? Number(price) : Number(costPrice) * (1 + Number(marginPercent) / 100);
-                onSubmit({ name, price: finalPrice, description, imageUrl, categoryId, modifierGroupIds, trackStock, stock, barcode, isBundle, bundleItems, notes, flavor });
+                onSubmit({ name, price: finalPrice, description, imageUrl, categoryId, modifierGroupIds, trackStock, stock, barcode, isBundle, bundleItems, notes, flavor, isActive });
               }}
             className="px-8"
           >

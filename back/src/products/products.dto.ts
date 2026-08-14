@@ -53,6 +53,10 @@ export class CreateProductDto {
   @IsString({ message: 'El sabor debe ser un texto.' })
   @IsOptional()
   flavor?: string;
+
+  @IsBoolean({ message: 'Indica si el producto está activo en el catálogo.' })
+  @IsOptional()
+  isActive?: boolean;
 }
 
 export class UpdateProductDto {
@@ -110,4 +114,8 @@ export class UpdateProductDto {
   @IsString({ message: 'El sabor debe ser un texto.' })
   @IsOptional()
   flavor?: string;
+
+  @IsBoolean({ message: 'Indica si el producto está activo en el catálogo.' })
+  @IsOptional()
+  isActive?: boolean;
 }

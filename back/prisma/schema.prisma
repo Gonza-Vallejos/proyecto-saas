@@ -126,10 +126,13 @@ model Product {
   // Relacion con modificadores
   modifierGroups ProductModifierGroup[]
 
-  // Relacion - Aislamiento del data por tienda
+  // Aislamiento del data por tienda
   storeId     String
   store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
   
+  // Estado activo/inactivo (para ocultar en catálogo)
+  isActive    Boolean  @default(true)
+
   // Relación con ítems de pedido
   orderItems  OrderItem[]
 

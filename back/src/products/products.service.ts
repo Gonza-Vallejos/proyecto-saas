@@ -4,11 +4,11 @@ import { CreateProductDto, UpdateProductDto } from './products.dto';
 
 @Injectable()
 export class ProductsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(storeId: string, data: CreateProductDto) {
     if (!storeId) throw new ForbiddenException('Tu cuenta no está enlazada a una tienda');
-    
+
     return this.prisma.product.create({
       data: {
         name: data.name,
@@ -23,18 +23,19 @@ export class ProductsService {
         isBundle: data.isBundle || false,
         notes: data.notes || [],
         flavor: data.flavor || null,
-        bundleItems: data.bundleItems && data.bundleItems.length > 0 
+        isActive: data.isActive !== undefined ? data.isActive : true,
+        bundleItems: data.bundleItems && data.bundleItems.length > 0
           ? {
-              create: data.bundleItems.map(bi => ({
-                productId: bi.productId,
-                quantity: bi.quantity
-              }))
-            }
+            create: data.bundleItems.map(bi => ({
+              productId: bi.productId,
+              quantity: bi.quantity
+            }))
+          }
           : undefined,
-        modifierGroups: data.modifierGroupIds && data.modifierGroupIds.length > 0 
+        modifierGroups: data.modifierGroupIds && data.modifierGroupIds.length > 0
           ? {
-              create: data.modifierGroupIds.map(id => ({ modifierGroupId: id }))
-            }
+            create: data.modifierGroupIds.map(id => ({ modifierGroupId: id }))
+          }
           : undefined
       },
     });
@@ -95,24 +96,25 @@ export class ProductsService {
           barcode: data.barcode || null,
           isBundle: data.isBundle,
           notes: data.notes,
-          flavor: data.flavor
+          flavor: data.flavor,
+          isActive: data.isActive,
         }
       });
-      
+
       // Ítems de la Promo
       if (data.bundleItems !== undefined) {
         await this.prisma.bundleItem.deleteMany({ where: { bundleId: productId } });
         if (data.bundleItems.length > 0) {
-           await this.prisma.bundleItem.createMany({
-             data: data.bundleItems.map(bi => ({
-               bundleId: productId,
-               productId: bi.productId,
-               quantity: bi.quantity
-             }))
-           });
+          await this.prisma.bundleItem.createMany({
+            data: data.bundleItems.map(bi => ({
+              bundleId: productId,
+              productId: bi.productId,
+              quantity: bi.quantity
+            }))
+          });
         }
       }
-      
+
       // Actualizar relaciones de modificadores si fueron pasadas en la request
       if (data.modifierGroupIds !== undefined) {
         // 1. Borrar asociaciones viejas

@@ -7,18 +7,13 @@ export default function InstallPWA() {
 
   useEffect(() => {
     const handler = (e: any) => {
-      // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
-      // Stash the event so it can be triggered later.
       setDeferredPrompt(e);
-      // Update UI notify the user they can install the PWA
       setIsVisible(true);
     };
 
     window.addEventListener('beforeinstallprompt', handler);
 
-    // Si ya está instalada o estamos en iOS (donde no funciona),
-    // podríamos agregar lógica adicional aquí.
 
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
@@ -27,11 +22,9 @@ export default function InstallPWA() {
     if (!deferredPrompt) return;
     // Show the install prompt
     deferredPrompt.prompt();
-    // Wait for the user to respond to the prompt
     const { outcome } = await deferredPrompt.userChoice;
-    // We've used the prompt, and can't use it again, throw it away
     setDeferredPrompt(null);
-    // Hide the button if they accepted
+
     if (outcome === 'accepted') {
       setIsVisible(false);
     }
