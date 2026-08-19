@@ -37,10 +37,11 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return { event: 'joined', data: room };
   }
 
-  notifyStoreOrdersUpdate(storeId: string) {
+  notifyStoreOrdersUpdate(storeId: string, payload?: any) {
     const room = `store_${storeId}`;
     this.server.to(room).emit('ordersUpdated', {
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      ...payload,
     });
   }
 }

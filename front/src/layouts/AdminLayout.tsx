@@ -3,6 +3,8 @@ import { Outlet, Navigate, useNavigate, useLocation, useParams } from 'react-rou
 import { Store, Package, LogOut, Settings, ExternalLink, LayoutGrid, LayoutDashboard, Palette, Bell, User, KeyRound, Menu as MenuIcon, QrCode, Sandwich, UserCog, MessageSquare, History, MonitorSmartphone, Archive, CreditCard } from 'lucide-react';
 import { Avatar, Text, Group, Badge, Indicator, Tooltip, Stack, ActionIcon, Menu, Modal, TextInput, PasswordInput, Button, Drawer, Divider } from '@mantine/core';
 import { api } from '../utils/api';
+import { socket } from '../utils/socket';
+import { notifications } from '@mantine/notifications';
 import Swal from 'sweetalert2';
 import AdminNavLink from '../components/AdminNavLink';
 
@@ -18,7 +20,9 @@ export default function AdminLayout() {
   const { storeSlug } = useParams();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [storeData, setStoreData] = useState<{ slug: string, logoUrl?: string, name: string, hasModifiers?: boolean, hasOrderManagement?: boolean, hasWhatsAppOrders?: boolean, hasPOS?: boolean } | null>(null);
+  const [storeData, setStoreData] = useState<{ id?: string, slug: string, logoUrl?: string, name: string, hasModifiers?: boolean, hasOrderManagement?: boolean, hasWhatsAppOrders?: boolean, hasPOS?: boolean } | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [recentNotifications, setRecentNotifications] = useState<{ id: number, text: string, time: string }[]>([]);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const navigate = useNavigate();
@@ -42,6 +46,61 @@ export default function AdminLayout() {
       setIsAuthenticated(false);
     }
   }, [storeSlug]);
+
+  const playNotificationSound = () => {
+    try {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(1760, audioCtx.currentTime + 0.1);
+      
+      gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.05);
+      gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
+      
+      oscillator.start(audioCtx.currentTime);
+      oscillator.stop(audioCtx.currentTime + 0.2);
+    } catch (e) {
+      console.log('Audio no soportado', e);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.storeId) {
+      socket.connect();
+      socket.emit('joinStore', user.storeId);
+
+      const handleUpdate = (payload: any) => {
+        if (payload?.action === 'NEW_ORDER') {
+          playNotificationSound();
+          notifications.show({
+            title: '¡Nuevo Pedido Recibido!',
+            message: `Ingresó un pedido de ${payload.customerName} por $${payload.total.toLocaleString()}`,
+            color: 'teal',
+            autoClose: 10000,
+          });
+          setUnreadCount(prev => prev + 1);
+          setRecentNotifications(prev => [{
+            id: Date.now(),
+            text: `Pedido: ${payload.customerName} ($${payload.total.toLocaleString()})`,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }, ...prev].slice(0, 5));
+        }
+      };
+
+      socket.on('ordersUpdated', handleUpdate);
+
+      return () => {
+        socket.off('ordersUpdated', handleUpdate);
+      };
+    }
+  }, [user?.storeId]);
 
   useEffect(() => {
     // Cerrar el Drawer móvil automáticamente cuando cambie la ruta/página
@@ -318,11 +377,31 @@ export default function AdminLayout() {
               </Tooltip>
             )}
 
-            <Indicator inline size={12} offset={7} position="top-end" color="red" withBorder>
-              <ActionIcon variant="transparent" color="gray" size="lg">
-                <Bell size={20} />
-              </ActionIcon>
-            </Indicator>
+            <Menu shadow="md" width={300} position="bottom-end" onOpen={() => setUnreadCount(0)}>
+              <Menu.Target>
+                <Indicator inline size={12} offset={7} position="top-end" color="red" withBorder disabled={unreadCount === 0} label={unreadCount}>
+                  <ActionIcon variant="transparent" color="gray" size="lg">
+                    <Bell size={20} />
+                  </ActionIcon>
+                </Indicator>
+              </Menu.Target>
+
+              <Menu.Dropdown>
+                <Menu.Label>Notificaciones Recientes</Menu.Label>
+                {recentNotifications.length === 0 ? (
+                  <Menu.Item disabled>No hay notificaciones</Menu.Item>
+                ) : (
+                  recentNotifications.map(notif => (
+                    <Menu.Item key={notif.id} onClick={() => navigate(`${adminPrefix}/orders-online`)}>
+                      <Group justify="space-between" wrap="nowrap">
+                        <Text size="sm" truncate>{notif.text}</Text>
+                        <Text size="xs" c="dimmed" className="whitespace-nowrap">{notif.time}</Text>
+                      </Group>
+                    </Menu.Item>
+                  ))
+                )}
+              </Menu.Dropdown>
+            </Menu>
 
             <Menu shadow="md" width={220} position="bottom-end">
               <Menu.Target>

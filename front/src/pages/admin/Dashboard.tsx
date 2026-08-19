@@ -109,10 +109,10 @@ export default function Dashboard() {
         {/* Total Revenue */}
         <Grid.Col span={{ base: 12, sm: 6 }}>
           <Card shadow="sm" padding="lg" radius="md" withBorder className="border-slate-100 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <DollarSign size={80} />
+            <div className="absolute -bottom-4 -right-4 p-4 opacity-10 pointer-events-none">
+              <DollarSign size={110} />
             </div>
-            <Group justify="space-between" mt="md" mb="xs">
+            <Group justify="space-between" mt="xs" mb="xs">
               <Text fw={600} c="dimmed" size="sm">INGRESOS TOTALES</Text>
               <div className="bg-emerald-100 text-emerald-700 p-2 rounded-full">
                 <TrendingUp size={18} />
@@ -130,10 +130,10 @@ export default function Dashboard() {
         {/* Total Orders */}
         <Grid.Col span={{ base: 12, sm: 6 }}>
           <Card shadow="sm" padding="lg" radius="md" withBorder className="border-slate-100 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <ShoppingBag size={80} />
+            <div className="absolute -bottom-4 -right-4 p-4 opacity-10 pointer-events-none">
+              <ShoppingBag size={110} />
             </div>
-            <Group justify="space-between" mt="md" mb="xs">
+            <Group justify="space-between" mt="xs" mb="xs">
               <Text fw={600} c="dimmed" size="sm">PEDIDOS TOTALES</Text>
               <div className="bg-blue-100 text-blue-700 p-2 rounded-full">
                 <Package size={18} />

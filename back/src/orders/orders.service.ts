@@ -101,7 +101,11 @@ export class OrdersService {
       return order;
     });
 
-    this.eventsGateway.notifyStoreOrdersUpdate(storeId);
+    this.eventsGateway.notifyStoreOrdersUpdate(storeId, {
+      action: 'NEW_ORDER',
+      customerName: result.customerName || 'Cliente Externo',
+      total: result.total,
+    });
     return result;
   }
 
