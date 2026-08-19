@@ -11,6 +11,7 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 import AdminLayout from './layouts/AdminLayout';
 
 // Lazy‑load admin sections
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
 const Products = lazy(() => import('./pages/admin/Products'));
 const Settings = lazy(() => import('./pages/admin/Settings'));
 const Categories = lazy(() => import('./pages/admin/Categories'));
@@ -44,7 +45,7 @@ const AdminIndex = () => {
     return <Navigate to="pos" replace />;
   }
 
-  return <Products />;
+  return <Dashboard />;
 };
 
 function App() {
@@ -87,6 +88,7 @@ function App() {
           {/* Panel de Tienda Específica */}
           <Route path="/admin/:storeSlug" element={<AdminLayout />}>
             <Route index element={<AdminIndex />} />
+            <Route path="products" element={<Products />} />
             <Route path="categories" element={<Categories />} />
             <Route path="appearance" element={<Appearance />} />
             <Route path="settings" element={<Settings />} />

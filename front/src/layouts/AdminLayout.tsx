@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
-import { Store, Package, LogOut, Settings, ExternalLink, LayoutGrid, Palette, Bell, User, KeyRound, Menu as MenuIcon, QrCode, Sandwich, UserCog, MessageSquare, History, MonitorSmartphone, Archive, CreditCard } from 'lucide-react';
+import { Store, Package, LogOut, Settings, ExternalLink, LayoutGrid, LayoutDashboard, Palette, Bell, User, KeyRound, Menu as MenuIcon, QrCode, Sandwich, UserCog, MessageSquare, History, MonitorSmartphone, Archive, CreditCard } from 'lucide-react';
 import { Avatar, Text, Group, Badge, Indicator, Tooltip, Stack, ActionIcon, Menu, Modal, TextInput, PasswordInput, Button, Drawer, Divider } from '@mantine/core';
 import { api } from '../utils/api';
 import Swal from 'sweetalert2';
@@ -176,6 +176,9 @@ export default function AdminLayout() {
         </>
       )}
       <AdminNavLink to={adminPrefix} active={isActive(adminPrefix)}>
+        <LayoutDashboard size={18} /> Panel General
+      </AdminNavLink>
+      <AdminNavLink to={`${adminPrefix}/products`} active={isActive(`${adminPrefix}/products`)}>
         <Package size={18} /> Mis Productos
       </AdminNavLink>
       <AdminNavLink to={`${adminPrefix}/categories`} active={isActive(`${adminPrefix}/categories`)}>
