@@ -98,6 +98,7 @@ export class ProductsService {
           notes: data.notes,
           flavor: data.flavor,
           isActive: data.isActive,
+
         }
       });
 
