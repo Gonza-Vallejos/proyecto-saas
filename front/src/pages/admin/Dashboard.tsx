@@ -105,7 +105,7 @@ export default function Dashboard() {
         />
       </Group>
 
-      <Grid gutter="lg">
+      <Grid>
         {/* Total Revenue */}
         <Grid.Col span={{ base: 12, sm: 6 }}>
           <Card shadow="sm" padding="lg" radius="md" withBorder className="border-slate-100 relative overflow-hidden">
